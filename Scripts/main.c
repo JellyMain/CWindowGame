@@ -24,7 +24,7 @@ int EventFilter(void *userdata, SDL_Event *event)
 			for (int i = 0; i < g_app->windowsList->size; i++)
 			{
 				Window *window = g_app->windowsList->elements[i];
-				UpdateWindow(window);
+				UpdateWindow(g_app, window);
 			}
 		}
 	}
@@ -107,7 +107,7 @@ int main()
 		for (int i = 0; i < app->windowsList->size; i++)
 		{
 			Window *window = app->windowsList->elements[i];
-			UpdateWindow(window);
+			UpdateWindow(app, window);
 		}
 
 		ProcessInput();

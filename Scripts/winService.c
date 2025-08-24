@@ -67,6 +67,7 @@ bool CreateWinText(App *app, int fontSize, Window *winWindow)
 void CreateWinScreen(App *app, int fontSize)
 {
 	Window *winWindow = CreateGameWindowWithRenderer((Vector2){600, 600}, (Vector2){600, 600}, WINDOW_SCREEN_SPACE,
+	                                                 FIXED_SIZE,
 	                                                 "WinWindow");
 	AddToList(app->windowsList, winWindow);
 

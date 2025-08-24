@@ -3,6 +3,7 @@
 #include "Headers/draw.h"
 #include "Headers/input.h"
 #include "Headers/structs.h"
+#include "Utils/MathUtils.h"
 #define MOVE_SPEED 5
 
 
@@ -12,16 +13,12 @@ bool IsPositionInBounds(App *app, Entity *entity, Vector2 position)
 	{
 		Window *window = app->windowsList->elements[i];
 
-		int windowLeft = window->windowPosition.x - entity->size.x / 2;
-		int windowTop = window->windowPosition.y - entity->size.y / 2;
+		Vector2 boundsMin = {window->windowPosition.x, window->windowPosition.y};
+		Vector2 boundsMax = {
+			window->windowPosition.x + window->windowSize.x, window->windowPosition.y + window->windowSize.y
+		};
 
-		int windowRight = window->windowPosition.x + window->windowSize.x - entity->size.x / 2;
-		int windowBottom = window->windowPosition.y + window->windowSize.y - entity->size.y / 2;
-
-		if (position.x >= windowLeft &&
-		    position.x <= windowRight &&
-		    position.y >= windowTop &&
-		    position.y <= windowBottom)
+		if (IsEntityInBounds(entity, position, boundsMin, boundsMax))
 		{
 			return true;
 		}

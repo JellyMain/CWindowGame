@@ -1,5 +1,7 @@
 ﻿#include <SDL_events.h>
 #include "Headers/input.h"
+
+#include "Headers/app.h"
 #include "Headers/structs.h"
 
 Vector2 GetMoveDirection()
@@ -29,7 +31,7 @@ Vector2 GetMoveDirection()
 }
 
 
-void ProcessInput()
+void ProcessInput(App *app)
 {
 	SDL_Event event;
 	while (SDL_PollEvent(&event))

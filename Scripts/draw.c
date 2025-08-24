@@ -80,7 +80,7 @@ void Render(App *app)
 
 			Vector2 screenPos;
 
-			switch (window->type)
+			switch (window->renderType)
 			{
 				case WINDOW_SCREEN_SPACE:
 					screenPos = entity->worldPosition;

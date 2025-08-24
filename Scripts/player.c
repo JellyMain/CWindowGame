@@ -7,14 +7,14 @@
 #define MOVE_SPEED 5
 
 
-bool IsPositionInBounds(App *app, Entity *entity, Vector2 position)
+bool IsPositionInBounds(App *app, Entity *entity, Vector2Int position)
 {
 	for (int i = 0; i < app->windowsList->size; i++)
 	{
 		Window *window = app->windowsList->elements[i];
 
-		Vector2 boundsMin = {window->windowPosition.x, window->windowPosition.y};
-		Vector2 boundsMax = {
+		Vector2Int boundsMin = {window->windowPosition.x, window->windowPosition.y};
+		Vector2Int boundsMax = {
 			window->windowPosition.x + window->windowSize.x, window->windowPosition.y + window->windowSize.y
 		};
 
@@ -28,13 +28,13 @@ bool IsPositionInBounds(App *app, Entity *entity, Vector2 position)
 }
 
 
-Entity *CreatePlayer(App *app, Vector2 position, Vector2 scale)
+Entity *CreatePlayer(App *app, Vector2Int position, Vector2Int scale)
 {
 	Entity *player = malloc(sizeof(Entity));
 
 	player->texturesList = CreateList(0);
 
-	Vector2 playerSize = {0};
+	Vector2Int playerSize = {0};
 
 	for (int i = 0; i < app->windowsList->size; i++)
 	{
@@ -59,14 +59,14 @@ Entity *CreatePlayer(App *app, Vector2 position, Vector2 scale)
 
 void MovePlayer(App *app, Entity *player)
 {
-	Vector2 direction = GetMoveDirection();
+	Vector2Int direction = GetMoveDirection();
 
 	if (direction.x == 0 && direction.y == 0)
 	{
 		return;
 	}
 
-	Vector2 nextFramePosition = {
+	Vector2Int nextFramePosition = {
 		player->worldPosition.x + direction.x * MOVE_SPEED, player->worldPosition.y + direction.y * MOVE_SPEED
 	};
 

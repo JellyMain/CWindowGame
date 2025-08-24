@@ -1,4 +1,4 @@
 ﻿#pragma once
 #include "../Headers/structs.h"
 
-Vector2 WorldToScreen(Vector2 worldPosition, Vector2 viewportOffset);
+Vector2Int WorldToScreen(Vector2Int worldPosition, Vector2Int viewportOffset);

@@ -2,7 +2,7 @@
 #include "app.h"
 #include "structs.h"
 
-Entity *CreateLevelTarget(App *app, Vector2 position, Vector2 scale);
+Entity *CreateLevelTarget(App *app, Vector2Int position, Vector2Int scale);
 
 bool HasReachedLevelTarget(Entity *player, Entity *levelTarget);
 

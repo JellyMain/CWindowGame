@@ -6,16 +6,20 @@ typedef struct
 {
 	int x;
 	int y;
-} Vector2;
+} Vector2Int;
 
 
 typedef struct
 {
-	Vector2 worldPosition;
-	Vector2 scale;
-	Vector2 size;
+	float x;
+	float y;
+} Vector2Float;
+
+
+typedef struct
+{
+	Vector2Int worldPosition;
+	Vector2Int scale;
+	Vector2Int size;
 	List *texturesList;
 } Entity;
-
-
-

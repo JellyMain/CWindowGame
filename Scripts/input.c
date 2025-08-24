@@ -4,9 +4,9 @@
 #include "Headers/app.h"
 #include "Headers/structs.h"
 
-Vector2 GetMoveDirection()
+Vector2Int GetMoveDirection()
 {
-	Vector2 input = {0, 0};
+	Vector2Int input = {0, 0};
 
 	const Uint8 *keyState = SDL_GetKeyboardState(NULL);
 

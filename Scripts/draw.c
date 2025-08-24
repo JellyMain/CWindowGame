@@ -36,17 +36,15 @@ SDL_Texture *LoadTexture(char *fileName, SDL_Renderer *renderer)
 }
 
 
-void Blit(SDL_Renderer *renderer, SDL_Texture *texture, Vector2 position, Vector2 scale)
+void Blit(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position, Entity *entity)
 {
 	SDL_Rect rect;
 
 	rect.x = position.x;
 	rect.y = position.y;
 
-	SDL_QueryTexture(texture, NULL, NULL, &rect.w, &rect.h);
-
-	rect.w *= scale.x;
-	rect.h *= scale.y;
+	rect.w = entity->size.x;
+	rect.h = entity->size.y;
 
 	SDL_RenderCopy(renderer, texture, NULL, &rect);
 }
@@ -78,7 +76,7 @@ void Render(App *app)
 		{
 			Entity *entity = app->drawList->elements[j];
 
-			Vector2 screenPos;
+			Vector2Int screenPos;
 
 			switch (window->renderType)
 			{
@@ -97,7 +95,7 @@ void Render(App *app)
 			}
 
 			SDL_Texture *entityTexture = entity->texturesList->elements[i];
-			Blit(renderer, entityTexture, screenPos, entity->scale);
+			Blit(renderer, entityTexture, screenPos, entity);
 		}
 
 		PresentScene(renderer);

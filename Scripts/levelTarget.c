@@ -6,13 +6,13 @@
 #include "Headers/window.h"
 
 
-Entity *CreateLevelTarget(App *app, Vector2 position, Vector2 scale)
+Entity *CreateLevelTarget(App *app, Vector2Int position, Vector2Int scale)
 {
 	Entity *levelTarget = malloc(sizeof(Entity));
 
 	levelTarget->texturesList = CreateList(0);
 
-	Vector2 levelTargetSize = {0};
+	Vector2Int levelTargetSize = {0};
 
 	for (int i = 0; i < app->windowsList->size; i++)
 	{

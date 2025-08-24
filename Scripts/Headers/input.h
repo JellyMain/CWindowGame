@@ -2,6 +2,6 @@
 #include "structs.h"
 #include "window.h"
 
-Vector2 GetMoveDirection();
+Vector2Int GetMoveDirection();
 
 void ProcessInput();

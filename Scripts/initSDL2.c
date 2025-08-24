@@ -19,13 +19,13 @@ int InitSDL2(App *outApp)
 	}
 
 
-	Window *windowA = CreateGameWindowWithRenderer((Vector2){300, 100}, (Vector2){300, 300}, WINDOW_WORLD_SPACE,
+	Window *windowA = CreateGameWindowWithRenderer((Vector2Int){300, 100}, (Vector2Int){300, 300}, WINDOW_WORLD_SPACE,
 	                                               SCALE_WITH_RESIZE,
 	                                               "WindowA");
-	Window *windowB = CreateGameWindowWithRenderer((Vector2){100, 100}, (Vector2){300, 300}, WINDOW_WORLD_SPACE,
+	Window *windowB = CreateGameWindowWithRenderer((Vector2Int){100, 100}, (Vector2Int){300, 300}, WINDOW_WORLD_SPACE,
 	                                               FIXED_SIZE,
 	                                               "WindowB");
-	Window *windowC = CreateGameWindowWithRenderer((Vector2){500, 300}, (Vector2){300, 300}, WINDOW_WORLD_SPACE,
+	Window *windowC = CreateGameWindowWithRenderer((Vector2Int){500, 300}, (Vector2Int){300, 300}, WINDOW_WORLD_SPACE,
 	                                               FIXED_SIZE,
 	                                               "WindowC");
 

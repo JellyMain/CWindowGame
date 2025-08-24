@@ -5,7 +5,7 @@
 #include "Utils/MathUtils.h"
 
 
-Window *CreateGameWindowWithRenderer(Vector2 position, Vector2 size, WindowRenderType renderType, WindowType windowType,
+Window *CreateGameWindowWithRenderer(Vector2Int position, Vector2Int size, WindowRenderType renderType, WindowType windowType,
                                      char *title)
 {
 	SDL_Window *sdlWindow = SDL_CreateWindow(title, position.x, position.y, size.x, size.y,
@@ -36,8 +36,8 @@ void UpdateWindow(App *app, Window *window)
 	{
 		Entity *entity = app->drawList->elements[i];
 
-		Vector2 minBounds = {window->windowPosition.x, window->windowPosition.y};
-		Vector2 maxBounds = {
+		Vector2Int minBounds = {window->windowPosition.x, window->windowPosition.y};
+		Vector2Int maxBounds = {
 			window->windowPosition.x + window->windowSize.x, window->windowPosition.y + window->windowSize.y
 		};
 
@@ -47,14 +47,17 @@ void UpdateWindow(App *app, Window *window)
 		}
 	}
 
+
 	SDL_GetWindowPosition(window->sdlWindow, &window->windowPosition.x, &window->windowPosition.y);
 	window->viewportOffset = window->windowPosition;
 
 
 	SDL_GetWindowSize(window->sdlWindow, &window->windowSize.x, &window->windowSize.y);
 
-	Vector2 resizePercentDelta = GetPercentageChangeVector2((Vector2){window->lastFrameSize.x, window->lastFrameSize.y},
-	                                                        (Vector2){window->windowSize.x, window->windowSize.y});
+	Vector2Int resizePercentDelta = GetPercentageChangeVector2((Vector2Int){window->lastFrameSize.x, window->lastFrameSize.y},
+	                                                        (Vector2Int){window->windowSize.x, window->windowSize.y});
+
+	resizePercentDelta = ClampVector2(resizePercentDelta, (Vector2Int){1, 1}, (Vector2Int){100, 100});
 
 	window->lastFrameSize = window->windowSize;
 
@@ -63,10 +66,11 @@ void UpdateWindow(App *app, Window *window)
 		for (int i = 0; i < window->entitiesInWindowList->size; i++)
 		{
 			Entity *entity = window->entitiesInWindowList->elements[i];
-			entity->size.x *= resizePercentDelta.x / 100;
-			entity->size.y *= resizePercentDelta.y / 100;
 
-			printf("Resize: %d %d\n", resizePercentDelta.x, resizePercentDelta.y);
+			entity->size.x = entity->size.x * (100 + resizePercentDelta.x) / 100;
+			entity->size.y = entity->size.y * (100 + resizePercentDelta.y) / 100;
+
+			printf("%d %d\n", entity->size.x, entity->size.y);
 		}
 	}
 }

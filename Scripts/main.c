@@ -93,8 +93,8 @@ int main()
 		return 1;
 	}
 
-	Entity *player = CreatePlayer(app, (Vector2){100, 100}, (Vector2){2, 2});
-	Entity *levelTarget = CreateLevelTarget(app, (Vector2){500, 500}, (Vector2){2, 2});
+	Entity *player = CreatePlayer(app, (Vector2Int){100, 100}, (Vector2Int){2, 2});
+	Entity *levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Int){2, 2});
 
 	g_app = app;
 

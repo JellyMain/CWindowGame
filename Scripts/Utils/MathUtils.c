@@ -30,9 +30,9 @@ int ClampInt(int value, int min, int max)
 }
 
 
-Vector2 ClampVector2(Vector2 value, Vector2 min, Vector2 max)
+Vector2Int ClampVector2(Vector2Int value, Vector2Int min, Vector2Int max)
 {
-	Vector2 result = value;
+	Vector2Int result = value;
 
 	if (value.x < min.x)
 	{
@@ -57,7 +57,7 @@ Vector2 ClampVector2(Vector2 value, Vector2 min, Vector2 max)
 }
 
 
-bool IsEntityInBounds(Entity *entity, Vector2 position, Vector2 boundsMin, Vector2 boundsMax)
+bool IsEntityInBounds(Entity *entity, Vector2Int position, Vector2Int boundsMin, Vector2Int boundsMax)
 {
 	int entityLeft = position.x - entity->size.x / 2;
 	int entityTop = position.y - entity->size.y / 2;
@@ -80,9 +80,9 @@ int GetPercentageChange(int oldValue, int newValue)
 	return (newValue - oldValue) * 100 / oldValue;
 }
 
-Vector2 GetPercentageChangeVector2(Vector2 oldValue, Vector2 newValue)
+Vector2Int GetPercentageChangeVector2(Vector2Int oldValue, Vector2Int newValue)
 {
-	Vector2 result;
+	Vector2Int result;
 	result.x = GetPercentageChange(oldValue.x, newValue.x);
 	result.y = GetPercentageChange(oldValue.y, newValue.y);
 	return result;

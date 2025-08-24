@@ -10,7 +10,7 @@ bool CreateWinText(App *app, int fontSize, Window *winWindow)
 	Entity *winText = malloc(sizeof(Entity));
 
 	winText->texturesList = CreateList(0);
-	winText->scale = (Vector2){1, 1};
+	winText->scale = (Vector2Int){1, 1};
 
 	TTF_Font *font = TTF_OpenFont("D:/CWindowGame/Assets/Merchant Copy.ttf", fontSize);
 	if (!font)
@@ -48,13 +48,13 @@ bool CreateWinText(App *app, int fontSize, Window *winWindow)
 	int textWidth = textSurface->w;
 	int textHeight = textSurface->h;
 
-	winText->worldPosition = (Vector2){
+	winText->worldPosition = (Vector2Int){
 		(winWindow->windowSize.x - textWidth) / 2,
 		(winWindow->windowSize.y - textHeight) / 2
 	};
 
 
-	winText->size = (Vector2){textWidth, textHeight};
+	winText->size = (Vector2Int){textWidth, textHeight};
 
 	SDL_FreeSurface(textSurface);
 
@@ -66,7 +66,7 @@ bool CreateWinText(App *app, int fontSize, Window *winWindow)
 
 void CreateWinScreen(App *app, int fontSize)
 {
-	Window *winWindow = CreateGameWindowWithRenderer((Vector2){600, 600}, (Vector2){600, 600}, WINDOW_SCREEN_SPACE,
+	Window *winWindow = CreateGameWindowWithRenderer((Vector2Int){600, 600}, (Vector2Int){600, 600}, WINDOW_SCREEN_SPACE,
 	                                                 FIXED_SIZE,
 	                                                 "WinWindow");
 	AddToList(app->windowsList, winWindow);

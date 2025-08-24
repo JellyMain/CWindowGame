@@ -21,17 +21,17 @@ typedef enum
 typedef struct
 {
 	SDL_Window *sdlWindow;
-	Vector2 windowPosition;
-	Vector2 windowSize;
-	Vector2 viewportOffset;
-	Vector2 lastFrameSize;
+	Vector2Int windowPosition;
+	Vector2Int windowSize;
+	Vector2Int viewportOffset;
+	Vector2Int lastFrameSize;
 	SDL_Renderer *renderer;
 	WindowRenderType renderType;
 	WindowType windowType;
 	List *entitiesInWindowList;
 } Window;
 
-Window *CreateGameWindowWithRenderer(Vector2 position, Vector2 size, WindowRenderType renderType, WindowType windowType,
+Window *CreateGameWindowWithRenderer(Vector2Int position, Vector2Int size, WindowRenderType renderType, WindowType windowType,
                                      char *title);
 
 void UpdateWindow(App *app, Window *window);

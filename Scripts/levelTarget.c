@@ -4,9 +4,10 @@
 #include "Headers/draw.h"
 #include "Headers/structs.h"
 #include "Headers/window.h"
+#include "Utils/MathUtils.h"
 
 
-Entity *CreateLevelTarget(App *app, Vector2Int position, Vector2Int scale)
+Entity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 {
 	Entity *levelTarget = malloc(sizeof(Entity));
 
@@ -22,10 +23,6 @@ Entity *CreateLevelTarget(App *app, Vector2Int position, Vector2Int scale)
 		AddToList(levelTarget->texturesList, texture);
 	}
 
-
-	levelTargetSize.x *= scale.x;
-	levelTargetSize.y *= scale.y;
-
 	levelTarget->worldPosition = position;
 	levelTarget->scale = scale;
 	levelTarget->size = levelTargetSize;
@@ -38,20 +35,15 @@ Entity *CreateLevelTarget(App *app, Vector2Int position, Vector2Int scale)
 
 bool HasReachedLevelTarget(Entity *player, Entity *levelTarget)
 {
-	int playerLeft = player->worldPosition.x;
-	int playerRight = player->worldPosition.x + player->size.x;
-	int playerTop = player->worldPosition.y;
-	int playerBottom = player->worldPosition.y + player->size.y;
+	Vector2Int boundsMin = {
+		levelTarget->worldPosition.x, levelTarget->worldPosition.y
+	};
+	Vector2Int boundsMax = {
+		levelTarget->worldPosition.x + levelTarget->size.x * levelTarget->scale.x,
+		levelTarget->worldPosition.y + levelTarget->size.y * levelTarget->scale.y
+	};
 
-	int targetLeft = levelTarget->worldPosition.x;
-	int targetRight = levelTarget->worldPosition.x + levelTarget->size.x;
-	int targetTop = levelTarget->worldPosition.y;
-	int targetBottom = levelTarget->worldPosition.y + levelTarget->size.y;
-
-	if (playerRight > targetLeft &&
-	    playerLeft < targetRight &&
-	    playerBottom > targetTop &&
-	    playerTop < targetBottom)
+	if (IsEntityInBounds(player, player->worldPosition, boundsMin, boundsMax))
 	{
 		return true;
 	}

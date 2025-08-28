@@ -5,7 +5,7 @@
 #include "structs.h"
 #include "window.h"
 
-Entity *CreatePlayer(App *app, Vector2Int position, Vector2Int scale);
+Entity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale);
 
 void MovePlayer(App *app, Entity *player);
 

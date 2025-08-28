@@ -13,9 +13,12 @@ bool IsPositionInBounds(App *app, Entity *entity, Vector2Int position)
 	{
 		Window *window = app->windowsList->elements[i];
 
-		Vector2Int boundsMin = {window->windowPosition.x, window->windowPosition.y};
+		Vector2Int boundsMin = {
+			window->windowPosition.x , window->windowPosition.y
+		};
 		Vector2Int boundsMax = {
-			window->windowPosition.x + window->windowSize.x, window->windowPosition.y + window->windowSize.y
+			window->windowPosition.x + window->windowSize.x,
+			window->windowPosition.y + window->windowSize.y
 		};
 
 		if (IsEntityInBounds(entity, position, boundsMin, boundsMax))
@@ -28,7 +31,7 @@ bool IsPositionInBounds(App *app, Entity *entity, Vector2Int position)
 }
 
 
-Entity *CreatePlayer(App *app, Vector2Int position, Vector2Int scale)
+Entity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 {
 	Entity *player = malloc(sizeof(Entity));
 
@@ -43,9 +46,6 @@ Entity *CreatePlayer(App *app, Vector2Int position, Vector2Int scale)
 		SDL_QueryTexture(texture, NULL, NULL, &playerSize.x, &playerSize.y);
 		AddToList(player->texturesList, texture);
 	}
-
-	playerSize.x *= scale.x;
-	playerSize.y *= scale.y;
 
 	player->worldPosition = position;
 	player->scale = scale;

@@ -5,7 +5,8 @@
 #include "Utils/MathUtils.h"
 
 
-Window *CreateGameWindowWithRenderer(Vector2Int position, Vector2Int size, WindowRenderType renderType, WindowType windowType,
+Window *CreateGameWindowWithRenderer(Vector2Int position, Vector2Int size, WindowRenderType renderType,
+                                     WindowType windowType,
                                      char *title)
 {
 	SDL_Window *sdlWindow = SDL_CreateWindow(title, position.x, position.y, size.x, size.y,
@@ -54,10 +55,10 @@ void UpdateWindow(App *app, Window *window)
 
 	SDL_GetWindowSize(window->sdlWindow, &window->windowSize.x, &window->windowSize.y);
 
-	Vector2Int resizePercentDelta = GetPercentageChangeVector2((Vector2Int){window->lastFrameSize.x, window->lastFrameSize.y},
-	                                                        (Vector2Int){window->windowSize.x, window->windowSize.y});
+	Vector2Float resizePercentDelta = GetPercentageChangeVector2(
+		(Vector2Float){window->lastFrameSize.x, window->lastFrameSize.y},
+		(Vector2Float){window->windowSize.x, window->windowSize.y});
 
-	resizePercentDelta = ClampVector2(resizePercentDelta, (Vector2Int){1, 1}, (Vector2Int){100, 100});
 
 	window->lastFrameSize = window->windowSize;
 
@@ -67,10 +68,15 @@ void UpdateWindow(App *app, Window *window)
 		{
 			Entity *entity = window->entitiesInWindowList->elements[i];
 
-			entity->size.x = entity->size.x * (100 + resizePercentDelta.x) / 100;
-			entity->size.y = entity->size.y * (100 + resizePercentDelta.y) / 100;
+			if (resizePercentDelta.x != 0.0f)
+			{
+				entity->scale.x = entity->scale.x * (1.0f + resizePercentDelta.x / 100.0f);
+			}
 
-			printf("%d %d\n", entity->size.x, entity->size.y);
+			if (resizePercentDelta.y != 0.0f)
+			{
+				entity->scale.y = entity->scale.y * (1.0f + resizePercentDelta.y / 100.0f);
+			}
 		}
 	}
 }

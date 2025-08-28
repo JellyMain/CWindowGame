@@ -43,8 +43,8 @@ void Blit(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position, Ent
 	rect.x = position.x;
 	rect.y = position.y;
 
-	rect.w = entity->size.x;
-	rect.h = entity->size.y;
+	rect.w = entity->size.x * entity->scale.x;
+	rect.h = entity->size.y * entity->scale.y;
 
 	SDL_RenderCopy(renderer, texture, NULL, &rect);
 }

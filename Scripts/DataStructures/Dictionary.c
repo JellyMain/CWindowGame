@@ -8,12 +8,6 @@
 
 void CheckAndResizeDictionary(Dictionary *dict);
 
-typedef struct
-{
-	void *key;
-	void *value;
-} KeyValuePair;
-
 
 Dictionary *CreateDictionary(unsigned int (*hashFunction)(void *key), bool (*keyEquals)(void *key1, void *key2))
 {
@@ -54,6 +48,7 @@ Dictionary *CreateDictionary(unsigned int (*hashFunction)(void *key), bool (*key
 		buckets[i] = bucket;
 	}
 
+	dict->allPairs = CreateList(0);
 	dict->bucketsNumber = DEFAULT_BUCKETS_NUMBER;
 	dict->buckets = buckets;
 	dict->hashFunction = hashFunction;
@@ -108,6 +103,8 @@ bool AddToDictionary(Dictionary *dict, void *key, void *value)
 		CheckAndResizeDictionary(dict);
 	}
 
+	AddToList(dict->allPairs, pair);
+
 	return true;
 }
 
@@ -130,6 +127,8 @@ void DestroyDictionary(Dictionary *dict)
 
 		DestroyList(bucket);
 	}
+
+	DestroyList(dict->allPairs);
 
 	free(dict->buckets);
 	free(dict);
@@ -316,6 +315,76 @@ void *GetFromDictionary(Dictionary *dict, void *key)
 
 	fprintf(stderr, "Key not found\n");
 	return NULL;
+}
+
+
+void RemoveFromDictionary(Dictionary *dict, void *key)
+{
+	if (dict == NULL)
+	{
+		fprintf(stderr, "Dictionary is NULL\n");
+		return;
+	}
+
+	if (key == NULL)
+	{
+		fprintf(stderr, "Key is NULL\n");
+		return;
+	}
+
+	unsigned int hash = dict->hashFunction(key);
+	unsigned int bucketIndex = hash % dict->bucketsNumber;
+
+	List *bucket = dict->buckets[bucketIndex];
+
+	for (int i = 0; i < bucket->size; i++)
+	{
+		KeyValuePair *pair = bucket->elements[i];
+
+		if (dict->keyEquals(pair->key, key))
+		{
+			RemoveFromListAtIndex(bucket, i);
+
+			for (int j = 0; j < dict->allPairs->size; j++)
+			{
+				if (dict->allPairs->elements[j] == pair)
+				{
+					RemoveFromListAtIndex(dict->allPairs, j);
+					break;
+				}
+			}
+
+			free(pair);
+			dict->totalEntries--;
+			return;
+		}
+	}
+
+	fprintf(stderr, "Key not found in dictionary\n");
+}
+
+
+void ClearDictionary(Dictionary *dict)
+{
+	if (dict == NULL)
+	{
+		fprintf(stderr, "Dictionary is NULL\n");
+		return;
+	}
+
+	for (int i = 0; i < dict->allPairs->size; i++)
+	{
+		KeyValuePair *pair = dict->allPairs->elements[i];
+		free(pair);
+	}
+
+	for (int i = 0; i < dict->bucketsNumber; i++)
+	{
+		ClearList(dict->buckets[i]);
+	}
+
+	ClearList(dict->allPairs);
+	dict->totalEntries = 0;
 }
 
 

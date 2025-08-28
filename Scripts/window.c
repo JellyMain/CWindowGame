@@ -5,7 +5,7 @@
 #include "Utils/MathUtils.h"
 
 
-Window *CreateGameWindowWithRenderer(Vector2Int position, Vector2Int size, WindowRenderType renderType,
+Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int size, WindowRenderType renderType,
                                      WindowType windowType,
                                      char *title)
 {
@@ -25,6 +25,10 @@ Window *CreateGameWindowWithRenderer(Vector2Int position, Vector2Int size, Windo
 	outWindow->windowType = windowType;
 	outWindow->lastFrameSize = size;
 	outWindow->entitiesInWindowList = CreateList(0);
+
+	List *drawList = CreateList(0);
+	AddToDictionary(app->drawDictionary, outWindow, drawList);
+
 	return outWindow;
 }
 
@@ -32,10 +36,11 @@ Window *CreateGameWindowWithRenderer(Vector2Int position, Vector2Int size, Windo
 void UpdateWindow(App *app, Window *window)
 {
 	ClearList(window->entitiesInWindowList);
+	List *drawList = GetFromDictionary(app->drawDictionary, window);
 
-	for (int i = 0; i < app->drawList->size; ++i)
+	for (int i = 0; i < drawList->size; i++)
 	{
-		Entity *entity = app->drawList->elements[i];
+		Entity *entity = drawList->elements[i];
 
 		Vector2Int minBounds = {window->windowPosition.x, window->windowPosition.y};
 		Vector2Int maxBounds = {
@@ -79,4 +84,41 @@ void UpdateWindow(App *app, Window *window)
 			}
 		}
 	}
+}
+
+
+unsigned int HashWindow(void *window)
+{
+	if (window == NULL)
+	{
+		return 0;
+	}
+
+	Window *windowPtr = window;
+
+	unsigned int hash = 5381;
+
+	hash = (hash << 5) + hash + (unsigned int) (uintptr_t) windowPtr->sdlWindow;
+
+	hash = (hash << 5) + hash + (unsigned int) windowPtr->renderType;
+	hash = (hash << 5) + hash + (unsigned int) windowPtr->windowType;
+
+	hash = (hash << 5) + hash + (unsigned int) (uintptr_t) windowPtr->renderer;
+
+
+	return hash;
+}
+
+
+bool WindowEquals(void *window1, void *window2)
+{
+	if (window1 == NULL || window2 == NULL)
+	{
+		return false;
+	}
+
+	Window *window1Ptr = window1;
+	Window *window2Ptr = window2;
+
+	return window1Ptr == window2Ptr;
 }

@@ -1,10 +1,11 @@
 ﻿#pragma once
 #include "../DataStructures/Headers/List.h"
+#include "../DataStructures/Headers/Dictionary.h"
 
 typedef struct
 {
-	List *windowsList;
-	List *drawList;
+	List *allEntities;
+	Dictionary *drawDictionary;
 	bool hasWon;
 } App;
 

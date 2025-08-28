@@ -31,7 +31,12 @@ typedef struct
 	List *entitiesInWindowList;
 } Window;
 
-Window *CreateGameWindowWithRenderer(Vector2Int position, Vector2Int size, WindowRenderType renderType, WindowType windowType,
-                                     char *title);
+Window *CreateGameWindowWithRenderer(App *app , Vector2Int position, Vector2Int size, WindowRenderType renderType,
+									 WindowType windowType,
+									 char *title);
 
 void UpdateWindow(App *app, Window *window);
+
+unsigned int HashWindow(void *window);
+
+bool WindowEquals(void *window1, void *window2);

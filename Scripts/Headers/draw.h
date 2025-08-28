@@ -3,12 +3,15 @@
 
 #include "app.h"
 #include "structs.h"
-#include "../DataStructures/Headers/List.h"
+#include "window.h"
+#include "../DataStructures/Headers/Dictionary.h"
 
 SDL_Texture *LoadTexture(char *fileName, SDL_Renderer *renderer);
 
 void Render(App *app);
 
-List *InitDrawList();
+Dictionary *InitDrawDictionary();
 
-void AddToDrawList(List *drawList, Entity *entity);
+void AddToAllDrawLists(App *app, Entity *entity);
+
+void AddToWindowDrawList(App *app, Window *window, Entity *entity);

@@ -19,15 +19,18 @@ int InitSDL2(App *outApp)
 	}
 
 
-	Window *windowA = CreateGameWindowWithRenderer((Vector2Int){300, 100}, (Vector2Int){300, 300}, WINDOW_WORLD_SPACE,
-	                                               SCALE_WITH_RESIZE,
-	                                               "WindowA");
-	Window *windowB = CreateGameWindowWithRenderer((Vector2Int){100, 100}, (Vector2Int){300, 300}, WINDOW_WORLD_SPACE,
-	                                               FIXED_SIZE,
-	                                               "WindowB");
-	Window *windowC = CreateGameWindowWithRenderer((Vector2Int){500, 300}, (Vector2Int){300, 300}, WINDOW_WORLD_SPACE,
-	                                               FIXED_SIZE,
-	                                               "WindowC");
+	CreateGameWindowWithRenderer(outApp, (Vector2Int){300, 100}, (Vector2Int){300, 300},
+	                             WINDOW_WORLD_SPACE,
+	                             SCALE_WITH_RESIZE,
+	                             "WindowA");
+	CreateGameWindowWithRenderer(outApp, (Vector2Int){100, 100}, (Vector2Int){300, 300},
+	                             WINDOW_WORLD_SPACE,
+	                             FIXED_SIZE,
+	                             "WindowB");
+	CreateGameWindowWithRenderer(outApp, (Vector2Int){500, 300}, (Vector2Int){300, 300},
+	                             WINDOW_WORLD_SPACE,
+	                             FIXED_SIZE,
+	                             "WindowC");
 
 
 	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
@@ -39,9 +42,6 @@ int InitSDL2(App *outApp)
 		return -3;
 	}
 
-	AddToList(outApp->windowsList, windowA);
-	AddToList(outApp->windowsList, windowB);
-	AddToList(outApp->windowsList, windowC);
 
 	return 0;
 }

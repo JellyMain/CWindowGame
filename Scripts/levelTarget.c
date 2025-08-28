@@ -15,19 +15,21 @@ Entity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 
 	Vector2Int levelTargetSize = {0};
 
-	for (int i = 0; i < app->windowsList->size; i++)
+	for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
 	{
-		Window *window = app->windowsList->elements[i];
+		KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
+		Window *window = pair->key;
 		SDL_Texture *texture = LoadTexture("D:/CWindowGame/Assets/LevelTarget.png", window->renderer);
 		SDL_QueryTexture(texture, NULL, NULL, &levelTargetSize.x, &levelTargetSize.y);
 		AddToList(levelTarget->texturesList, texture);
 	}
 
+	levelTarget->renderType = SPRITE;
 	levelTarget->worldPosition = position;
 	levelTarget->scale = scale;
 	levelTarget->size = levelTargetSize;
 
-	AddToDrawList(app->drawList, levelTarget);
+	AddToAllDrawLists(app, levelTarget);
 
 	return levelTarget;
 }

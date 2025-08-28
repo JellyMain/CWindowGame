@@ -16,10 +16,17 @@ typedef struct
 } Vector2Float;
 
 
+typedef enum
+{
+	SPRITE,
+	UI
+} EntityRenderType;
+
 typedef struct
 {
 	Vector2Int worldPosition;
 	Vector2Float scale;
 	Vector2Int size;
 	List *texturesList;
+	EntityRenderType renderType;
 } Entity;

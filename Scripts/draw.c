@@ -2,21 +2,39 @@
 #include "Headers/structs.h"
 #include <SDL_image.h>
 
+#include "DataStructures/Headers/Dictionary.h"
 #include "Headers/app.h"
 #include "Headers/window.h"
 #include "Utils/ViewPortUtils.h"
 
 
-List *InitDrawList()
+Dictionary *InitDrawDictionary()
 {
-	List *drawList = CreateList(0);
-	return drawList;
+	//Window - List of entities dictionary
+	Dictionary *drawDictionary = CreateDictionary(HashWindow, WindowEquals);
+	return drawDictionary;
 }
 
 
-void AddToDrawList(List *drawList, Entity *entity)
+void AddToAllDrawLists(App *app, Entity *entity)
 {
+	for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
+	{
+		KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
+		List *drawList = pair->value;
+
+		AddToList(drawList, entity);
+	}
+
+	AddToList(app->allEntities, entity);
+}
+
+
+void AddToWindowDrawList(App *app, Window *window, Entity *entity)
+{
+	List *drawList = GetFromDictionary(app->drawDictionary, window);
 	AddToList(drawList, entity);
+	AddToList(app->allEntities, entity);
 }
 
 
@@ -65,16 +83,18 @@ void PresentScene(SDL_Renderer *renderer)
 
 void Render(App *app)
 {
-	for (int i = 0; i < app->windowsList->size; i++)
+	for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
 	{
-		Window *window = app->windowsList->elements[i];
+		KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
+		Window *window = pair->key;
+		List *drawList = pair->value;
 		SDL_Renderer *renderer = window->renderer;
 
 		PrepareScene(renderer);
 
-		for (int j = 0; j < app->drawList->size; j++)
+		for (int j = 0; j < drawList->size; j++)
 		{
-			Entity *entity = app->drawList->elements[j];
+			Entity *entity = drawList->elements[j];
 
 			Vector2Int screenPos;
 
@@ -94,7 +114,17 @@ void Render(App *app)
 					break;
 			}
 
-			SDL_Texture *entityTexture = entity->texturesList->elements[i];
+			SDL_Texture *entityTexture;
+
+			if (entity->renderType == UI)
+			{
+				entityTexture = entity->texturesList->elements[0];
+			}
+			else
+			{
+				entityTexture = entity->texturesList->elements[i];
+			}
+
 			Blit(renderer, entityTexture, screenPos, entity);
 		}
 

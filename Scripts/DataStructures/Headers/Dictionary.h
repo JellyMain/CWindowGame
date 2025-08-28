@@ -4,6 +4,13 @@
 
 typedef struct
 {
+	void *key;
+	void *value;
+} KeyValuePair;
+
+
+typedef struct
+{
 	List **buckets;
 
 	int bucketsNumber;
@@ -13,6 +20,8 @@ typedef struct
 	unsigned int (*hashFunction)(void *key);
 
 	bool (*keyEquals)(void *key1, void *key2);
+
+	List *allPairs;
 } Dictionary;
 
 
@@ -31,3 +40,7 @@ bool DictionaryHasKey(Dictionary *dict, void *key);
 void DestroyDictionary(Dictionary *dict);
 
 void ChangeDictionaryValue(Dictionary *dict, void *key, void *value);
+
+void RemoveFromDictionary(Dictionary *dict, void *key);
+
+void ClearDictionary(Dictionary *dict);

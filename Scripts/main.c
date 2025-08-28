@@ -21,9 +21,10 @@ int EventFilter(void *userdata, SDL_Event *event)
 		{
 			Render(g_app);
 
-			for (int i = 0; i < g_app->windowsList->size; i++)
+			for (int i = 0; i < g_app->drawDictionary->allPairs->size; i++)
 			{
-				Window *window = g_app->windowsList->elements[i];
+				KeyValuePair *pair = g_app->drawDictionary->allPairs->elements[i];
+				Window *window = pair->key;
 				UpdateWindow(g_app, window);
 			}
 		}
@@ -66,21 +67,25 @@ void CleanUpEntity(Entity *entity)
 
 void CleanUpLevel(App *app)
 {
-	for (int i = 0; i < app->drawList->size; i++)
+	for (int i = 0; i < app->allEntities->size; i++)
 	{
-		Entity *entity = app->drawList->elements[i];
-
+		Entity *entity = app->allEntities->elements[i];
 		CleanUpEntity(entity);
 	}
 
-	for (int i = 0; i < app->windowsList->size; i++)
+	ClearList(app->allEntities);
+
+	for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
 	{
-		Window *window = app->windowsList->elements[i];
+		KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
+		Window *window = pair->key;
+		List *drawList = pair->value;
+
+		ClearList(drawList);
 		CleanUpWindow(window);
 	}
 
-	ClearList(app->drawList);
-	ClearList(app->windowsList);
+	ClearDictionary(app->drawDictionary);
 }
 
 
@@ -104,9 +109,10 @@ int main()
 	{
 		Render(app);
 
-		for (int i = 0; i < app->windowsList->size; i++)
+		for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
 		{
-			Window *window = app->windowsList->elements[i];
+			KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
+			Window *window = pair->key;
 			UpdateWindow(app, window);
 		}
 

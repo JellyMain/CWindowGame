@@ -17,7 +17,7 @@ Entity *CreateText(char *text, int fontSize, SDL_Color textColor, App *app, Wind
 	if (!font)
 	{
 		SDL_Log("TTF_OpenFont failed: %s", TTF_GetError());
-		return false;
+		return NULL;
 	}
 
 	SDL_Surface *textSurface = TTF_RenderText_Solid(font, text, textColor);
@@ -25,7 +25,8 @@ Entity *CreateText(char *text, int fontSize, SDL_Color textColor, App *app, Wind
 	if (!textSurface)
 	{
 		SDL_Log("TTF_RenderText_Solid failed: %s", TTF_GetError());
-		return false;
+		TTF_CloseFont(font);
+		return NULL;
 	}
 
 
@@ -37,7 +38,8 @@ Entity *CreateText(char *text, int fontSize, SDL_Color textColor, App *app, Wind
 	{
 		SDL_Log("Unable to create texture from surface: %s", SDL_GetError());
 		SDL_FreeSurface(textSurface);
-		return false;
+		TTF_CloseFont(font);
+		return NULL;
 	}
 
 	int textWidth = textSurface->w;
@@ -48,11 +50,13 @@ Entity *CreateText(char *text, int fontSize, SDL_Color textColor, App *app, Wind
 		(window->windowSize.y - textHeight) / 2
 	};
 
+	textEntity->renderType = UI;
 	textEntity->size = (Vector2Int){textWidth, textHeight};
 
 	SDL_FreeSurface(textSurface);
+	TTF_CloseFont(font);
 
-	AddToDrawList(app->drawList, textEntity);
+	AddToWindowDrawList(app, window, textEntity);
 
 	return textEntity;
 }

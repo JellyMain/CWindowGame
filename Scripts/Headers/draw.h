@@ -12,6 +12,10 @@ void Render(App *app);
 
 Dictionary *InitDrawDictionary();
 
-void AddToAllDrawLists(App *app, Entity *entity);
+void AddToAllGameEntitiesDrawLists(App *app, GameEntity *entity);
 
-void AddToWindowDrawList(App *app, Window *window, Entity *entity);
+void AddToGameEntitiesDrawList(App *app, Window *window, GameEntity *entity);
+
+void AddToUIEntitiesDrawList(App *app, Window *window, UIEntity *entity);
+
+void AddToGizmoEntitiesDrawList(App *app, Window *window, GizmoEntity *gizmoEntity);

@@ -4,6 +4,8 @@
 #include "Headers/app.h"
 #include "Headers/structs.h"
 
+static bool isLeftMouseButtonClicked = false;
+
 Vector2Int GetMoveDirection()
 {
 	Vector2Int input = {0, 0};
@@ -31,19 +33,49 @@ Vector2Int GetMoveDirection()
 }
 
 
-void ProcessInput(App *app)
+void ProcessInput()
 {
+	isLeftMouseButtonClicked = false;
+
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
 		{
 			case SDL_QUIT:
+			{
 				exit(0);
 				break;
+			}
+
+			case SDL_MOUSEBUTTONDOWN:
+			{
+				if (event.button.button == SDL_BUTTON_LEFT)
+				{
+					isLeftMouseButtonClicked = true;
+				}
+				break;
+			}
 
 			default:
 				break;
 		}
 	}
+}
+
+
+bool IsLeftMouseButtonClicked()
+{
+	return isLeftMouseButtonClicked;
+}
+
+
+Vector2Int GetMousePosition()
+{
+	int xPosition;
+	int yPosition;
+
+	SDL_GetMouseState(&xPosition, &yPosition);
+
+	return (Vector2Int){xPosition, yPosition};
 }

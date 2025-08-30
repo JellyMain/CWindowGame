@@ -7,11 +7,11 @@
 #define MOVE_SPEED 5
 
 
-bool IsPositionInBounds(App *app, Entity *entity, Vector2Int position)
+bool IsPositionInBounds(App *app, GameEntity *entity, Vector2Int position)
 {
-	for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
+	for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
 	{
-		KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
+		KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
 		Window *window = pair->key;
 
 		Vector2Int boundsMin = {
@@ -32,35 +32,34 @@ bool IsPositionInBounds(App *app, Entity *entity, Vector2Int position)
 }
 
 
-Entity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
+GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 {
-	Entity *player = malloc(sizeof(Entity));
+	GameEntity *player = malloc(sizeof(GameEntity));
 
 	player->texturesList = CreateList(0);
 
 	Vector2Int playerSize = {0};
 
-	for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
+	for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
 	{
-		KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
+		KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
 		Window *window = pair->key;
 		SDL_Texture *texture = LoadTexture("D:/CWindowGame/Assets/SlimeEnemy.png", window->renderer);
 		SDL_QueryTexture(texture, NULL, NULL, &playerSize.x, &playerSize.y);
 		AddToList(player->texturesList, texture);
 	}
 
-	player->renderType = SPRITE;
 	player->worldPosition = position;
 	player->scale = scale;
 	player->size = playerSize;
 
-	AddToAllDrawLists(app, player);
+	AddToAllGameEntitiesDrawLists(app, player);
 
 	return player;
 }
 
 
-void MovePlayer(App *app, Entity *player)
+void MovePlayer(App *app, GameEntity *player)
 {
 	Vector2Int direction = GetMoveDirection();
 

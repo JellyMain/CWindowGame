@@ -80,17 +80,24 @@ Vector2Float ClampVector2Float(Vector2Float value, Vector2Float min, Vector2Floa
 }
 
 
-bool IsEntityInBounds(Entity *entity, Vector2Int position, Vector2Int boundsMin, Vector2Int boundsMax)
+bool IsEntityInBounds(GameEntity *entity, Vector2Int position, Vector2Int boundsMin, Vector2Int boundsMax)
 {
 	int entityLeft = position.x + entity->size.x / 2 * entity->scale.x;
 	int entityTop = position.y + entity->size.y / 2 * entity->scale.y;
 	int entityRight = position.x + entity->size.x / 2 * entity->scale.x;
-	int entityBottom = position.y + entity->size.y /2 * entity->scale.y;
+	int entityBottom = position.y + entity->size.y / 2 * entity->scale.y;
 
 	return entityLeft >= boundsMin.x &&
 	       entityRight <= boundsMax.x &&
 	       entityTop >= boundsMin.y &&
 	       entityBottom <= boundsMax.y;
+}
+
+
+bool IsPointInBounds(Vector2Int point, Vector2Int boundsMin, Vector2Int boundsMax)
+{
+	return point.x >= boundsMin.x && point.x <= boundsMax.x &&
+	       point.y >= boundsMin.y && point.y <= boundsMax.y;
 }
 
 

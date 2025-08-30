@@ -18,9 +18,13 @@ typedef struct
 
 typedef enum
 {
-	SPRITE,
-	UI
-} EntityRenderType;
+	TEXT,
+	BUTTON,
+	IMAGE,
+	SLIDER,
+	GIZMO
+} UIType;
+
 
 typedef struct
 {
@@ -28,5 +32,26 @@ typedef struct
 	Vector2Float scale;
 	Vector2Int size;
 	List *texturesList;
-	EntityRenderType renderType;
-} Entity;
+} GameEntity;
+
+
+typedef struct UIEntity
+{
+	Vector2Int worldPosition;
+	Vector2Float scale;
+	Vector2Int size;
+	SDL_Texture *texture;
+	UIType uiType;
+	struct UIEntity *parentEntity;
+	List *childEntities;
+
+	void (*OnInteraction)();
+} UIEntity;
+
+
+typedef struct
+{
+	UIEntity *connectedEntity;
+	SDL_Color color;
+	int thickness;
+} GizmoEntity;

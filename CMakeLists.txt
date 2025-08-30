@@ -35,8 +35,8 @@ add_executable(WindowGame Scripts/main.c
         Scripts/winService.c
         Scripts/Headers/winService.h
         Scripts/app.c
-        Scripts/text.c
-        Scripts/Headers/text.h)
+        Scripts/ui.c
+        Scripts/Headers/ui.h)
 
 
 target_link_libraries(WindowGame PRIVATE SDL2::SDL2

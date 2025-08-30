@@ -5,7 +5,7 @@
 #include "structs.h"
 #include "window.h"
 
-Entity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale);
+GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale);
 
-void MovePlayer(App *app, Entity *player);
+void MovePlayer(App *app, GameEntity *player);
 

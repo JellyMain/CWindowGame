@@ -2,6 +2,7 @@
 
 #include "Headers/app.h"
 #include "Headers/input.h"
+#include "Headers/ui.h"
 #include "Utils/MathUtils.h"
 
 
@@ -26,8 +27,15 @@ Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int s
 	outWindow->lastFrameSize = size;
 	outWindow->entitiesInWindowList = CreateList(0);
 
-	List *drawList = CreateList(0);
-	AddToDictionary(app->drawDictionary, outWindow, drawList);
+	List *gameEntitiesDrawList = CreateList(0);
+	List *uiEntitiesDrawList = CreateList(0);
+	List *gizmosEntitiesDrawList = CreateList(0);
+
+	AddToDictionary(app->gameEntitiesDrawDictionary, outWindow, gameEntitiesDrawList);
+	AddToDictionary(app->uiEntitiesDrawDictionary, outWindow, uiEntitiesDrawList);
+	AddToDictionary(app->gizmosEntitiesDrawDictionary, outWindow, gizmosEntitiesDrawList);
+
+	AddAtlasTexture(app->textAtlas, outWindow);
 
 	return outWindow;
 }
@@ -36,11 +44,11 @@ Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int s
 void UpdateWindow(App *app, Window *window)
 {
 	ClearList(window->entitiesInWindowList);
-	List *drawList = GetFromDictionary(app->drawDictionary, window);
+	List *drawList = GetFromDictionary(app->gameEntitiesDrawDictionary, window);
 
 	for (int i = 0; i < drawList->size; i++)
 	{
-		Entity *entity = drawList->elements[i];
+		GameEntity *entity = drawList->elements[i];
 
 		Vector2Int minBounds = {window->windowPosition.x, window->windowPosition.y};
 		Vector2Int maxBounds = {
@@ -71,7 +79,7 @@ void UpdateWindow(App *app, Window *window)
 	{
 		for (int i = 0; i < window->entitiesInWindowList->size; i++)
 		{
-			Entity *entity = window->entitiesInWindowList->elements[i];
+			GameEntity *entity = window->entitiesInWindowList->elements[i];
 
 			if (resizePercentDelta.x != 0.0f)
 			{

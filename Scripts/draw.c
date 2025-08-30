@@ -1,7 +1,7 @@
 ﻿#include "Headers/draw.h"
 #include "Headers/structs.h"
 #include <SDL_image.h>
-
+#include "Headers/ui.h"
 #include "DataStructures/Headers/Dictionary.h"
 #include "Headers/app.h"
 #include "Headers/window.h"
@@ -16,25 +16,41 @@ Dictionary *InitDrawDictionary()
 }
 
 
-void AddToAllDrawLists(App *app, Entity *entity)
+void AddToAllGameEntitiesDrawLists(App *app, GameEntity *entity)
 {
-	for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
+	for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
 	{
-		KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
+		KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
 		List *drawList = pair->value;
 
 		AddToList(drawList, entity);
 	}
 
-	AddToList(app->allEntities, entity);
+	AddToList(app->allGameEntities, entity);
 }
 
 
-void AddToWindowDrawList(App *app, Window *window, Entity *entity)
+void AddToGameEntitiesDrawList(App *app, Window *window, GameEntity *entity)
 {
-	List *drawList = GetFromDictionary(app->drawDictionary, window);
+	List *drawList = GetFromDictionary(app->gameEntitiesDrawDictionary, window);
 	AddToList(drawList, entity);
-	AddToList(app->allEntities, entity);
+	AddToList(app->allGameEntities, entity);
+}
+
+
+void AddToUIEntitiesDrawList(App *app, Window *window, UIEntity *entity)
+{
+	List *drawList = GetFromDictionary(app->uiEntitiesDrawDictionary, window);
+	AddToList(drawList, entity);
+	AddToList(app->allUIEntities, entity);
+}
+
+
+void AddToGizmoEntitiesDrawList(App *app, Window *window, GizmoEntity *gizmoEntity)
+{
+	List *drawList = GetFromDictionary(app->gizmosEntitiesDrawDictionary, window);
+	AddToList(drawList, gizmoEntity);
+	AddToList(app->allGizmosEntities, gizmoEntity);
 }
 
 
@@ -54,7 +70,64 @@ SDL_Texture *LoadTexture(char *fileName, SDL_Renderer *renderer)
 }
 
 
-void Blit(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position, Entity *entity)
+void DrawDynamicText(Window *window, TextAtlas *textAtlas, char *text, Vector2Int position, Vector2Float scale)
+{
+	int currentX = 0;
+	SDL_Texture *atlasTexture = GetFromDictionary(textAtlas->windowTexturesDictionary, window);
+
+	for (int i = 0; text[i] != '\0'; i++)
+	{
+		unsigned char character = (unsigned char) text[i];
+
+		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h > 0)
+		{
+			SDL_Rect srcRect = textAtlas->characterRects[character];
+			SDL_Rect dstRect = {
+				position.x + currentX, position.y, textAtlas->charWidth * scale.x, textAtlas->charHeight * scale.y
+			};
+
+			SDL_RenderCopy(window->renderer, atlasTexture, &srcRect, &dstRect);
+			currentX += textAtlas->charWidth;
+		}
+		else
+		{
+			currentX += textAtlas->charWidth;
+		}
+	}
+}
+
+
+void DrawThickRectBorder(App *app, Window *window, Vector2Int position, Vector2Int size, int thickness)
+{
+	SDL_Rect topRect = {position.x, position.y, size.x, thickness};
+	SDL_RenderFillRect(window->renderer, &topRect);
+
+	SDL_Rect bottomRect = {position.x, position.y + size.y - thickness, size.x, thickness};
+	SDL_RenderFillRect(window->renderer, &bottomRect);
+
+	SDL_Rect leftRect = {position.x, position.y + thickness, thickness, size.y - 2 * thickness};
+	SDL_RenderFillRect(window->renderer, &leftRect);
+
+	SDL_Rect rightRect = {position.x + size.x - thickness, position.y + thickness, thickness, size.y - 2 * thickness};
+	SDL_RenderFillRect(window->renderer, &rightRect);
+}
+
+
+void BlitGameEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position, GameEntity *entity)
+{
+	SDL_Rect rect;
+
+	rect.x = position.x;
+	rect.y = position.y;
+
+	rect.w = entity->size.x * entity->scale.x;
+	rect.h = entity->size.y * entity->scale.y;
+
+	SDL_RenderCopy(renderer, texture, NULL, &rect);
+}
+
+
+void BlitUIEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position, UIEntity *entity)
 {
 	SDL_Rect rect;
 
@@ -83,18 +156,20 @@ void PresentScene(SDL_Renderer *renderer)
 
 void Render(App *app)
 {
-	for (int i = 0; i < app->drawDictionary->allPairs->size; i++)
+	for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
 	{
-		KeyValuePair *pair = app->drawDictionary->allPairs->elements[i];
-		Window *window = pair->key;
-		List *drawList = pair->value;
+		KeyValuePair *gameEntitiesPair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
+		Window *window = gameEntitiesPair->key;
+		List *gameEntitiesDrawList = gameEntitiesPair->value;
+		List *uiEntitiesDrawList = GetFromDictionary(app->uiEntitiesDrawDictionary, window);
+		List *gizmoEntitiesDrawList = GetFromDictionary(app->gizmosEntitiesDrawDictionary, window);
 		SDL_Renderer *renderer = window->renderer;
 
 		PrepareScene(renderer);
 
-		for (int j = 0; j < drawList->size; j++)
+		for (int j = 0; j < gameEntitiesDrawList->size; j++)
 		{
-			Entity *entity = drawList->elements[j];
+			GameEntity *entity = gameEntitiesDrawList->elements[j];
 
 			Vector2Int screenPos;
 
@@ -114,18 +189,54 @@ void Render(App *app)
 					break;
 			}
 
-			SDL_Texture *entityTexture;
+			SDL_Texture *entityTexture = entity->texturesList->elements[i];
 
-			if (entity->renderType == UI)
-			{
-				entityTexture = entity->texturesList->elements[0];
-			}
-			else
-			{
-				entityTexture = entity->texturesList->elements[i];
-			}
+			BlitGameEntity(renderer, entityTexture, screenPos, entity);
+		}
 
-			Blit(renderer, entityTexture, screenPos, entity);
+
+		for (int j = 0; j < uiEntitiesDrawList->size; j++)
+		{
+			UIEntity *entity = uiEntitiesDrawList->elements[j];
+			SDL_Texture *entityTexture = entity->texture;
+			Vector2Int screenPos = entity->worldPosition;
+			BlitUIEntity(renderer, entityTexture, screenPos, entity);
+		}
+
+
+		if (app->showGizmos)
+		{
+			SDL_SetRenderDrawBlendMode(window->renderer, SDL_BLENDMODE_BLEND);
+
+
+			for (int k = 0; k < gizmoEntitiesDrawList->size; k++)
+			{
+				GizmoEntity *gizmoEntity = gizmoEntitiesDrawList->elements[k];
+
+				SDL_SetRenderDrawColor(window->renderer,
+				                       gizmoEntity->color.r,
+				                       gizmoEntity->color.g,
+				                       gizmoEntity->color.b,
+				                       gizmoEntity->color.a);
+
+
+				DrawThickRectBorder(app, window, gizmoEntity->connectedEntity->worldPosition,
+				                    gizmoEntity->connectedEntity->size, gizmoEntity->thickness);
+
+
+				char entityInfo[150];
+				snprintf(entityInfo, sizeof(entityInfo), "x:%d,y:%d w:%d,h%d",
+				         gizmoEntity->connectedEntity->worldPosition.x,
+				         gizmoEntity->connectedEntity->worldPosition.y,
+				         gizmoEntity->connectedEntity->size.x,
+				         gizmoEntity->connectedEntity->size.y);
+
+
+				DrawDynamicText(window, app->textAtlas, entityInfo, (Vector2Int){
+					                gizmoEntity->connectedEntity->worldPosition.x,
+					                gizmoEntity->connectedEntity->worldPosition.y - 10
+				                }, (Vector2Float){1, 1});
+			}
 		}
 
 		PresentScene(renderer);

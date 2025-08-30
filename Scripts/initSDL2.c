@@ -1,6 +1,8 @@
 ﻿#include "Headers/initSDL2.h"
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+
+#include "Headers/ui.h"
 #include "Headers/app.h"
 #include "Headers/window.h"
 
@@ -19,6 +21,18 @@ int InitSDL2(App *outApp)
 	}
 
 
+	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+
+
+	if (TTF_Init() == -1)
+	{
+		SDL_Log("TTF_Init failed: %s", TTF_GetError());
+		return -3;
+	}
+
+
+	outApp->textAtlas = CreateTextAtlas("D:/CWindowGame/Assets/Merchant Copy.ttf", 16);
+
 	CreateGameWindowWithRenderer(outApp, (Vector2Int){300, 100}, (Vector2Int){300, 300},
 	                             WINDOW_WORLD_SPACE,
 	                             SCALE_WITH_RESIZE,
@@ -33,14 +47,7 @@ int InitSDL2(App *outApp)
 	                             "WindowC");
 
 
-	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 
-
-	if (TTF_Init() == -1)
-	{
-		SDL_Log("TTF_Init failed: %s", TTF_GetError());
-		return -3;
-	}
 
 
 	return 0;

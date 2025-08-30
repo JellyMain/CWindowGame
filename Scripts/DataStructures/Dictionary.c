@@ -11,7 +11,7 @@ void CheckAndResizeDictionary(Dictionary *dict);
 
 Dictionary *CreateDictionary(unsigned int (*hashFunction)(void *key), bool (*keyEquals)(void *key1, void *key2))
 {
-	Dictionary *dict = malloc(sizeof(Dictionary));
+	Dictionary *dict = calloc(1, sizeof(Dictionary));
 
 	if (dict == NULL)
 	{
@@ -19,7 +19,7 @@ Dictionary *CreateDictionary(unsigned int (*hashFunction)(void *key), bool (*key
 		return NULL;
 	}
 
-	List **buckets = malloc(sizeof(List) * DEFAULT_BUCKETS_NUMBER);
+	List **buckets = calloc(DEFAULT_BUCKETS_NUMBER, sizeof(List));
 
 	if (buckets == NULL)
 	{
@@ -83,7 +83,7 @@ bool AddToDictionary(Dictionary *dict, void *key, void *value)
 
 	int bucketIndex = hash % dict->bucketsNumber;
 
-	KeyValuePair *pair = malloc(sizeof(KeyValuePair));
+	KeyValuePair *pair = calloc(1, sizeof(KeyValuePair));
 	pair->key = key;
 	pair->value = value;
 	dict->totalEntries++;

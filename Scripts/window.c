@@ -13,7 +13,7 @@ Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int s
 	SDL_Window *sdlWindow = SDL_CreateWindow(title, position.x, position.y, size.x, size.y,
 	                                         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
-	Window *outWindow = malloc(sizeof(Window));
+	Window *outWindow = calloc(1, sizeof(Window));
 
 	SDL_Renderer *renderer = SDL_CreateRenderer(sdlWindow, -1,
 	                                            SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);

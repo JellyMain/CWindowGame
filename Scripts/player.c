@@ -34,7 +34,7 @@ bool IsPositionInBounds(App *app, GameEntity *entity, Vector2Int position)
 
 GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 {
-	GameEntity *player = malloc(sizeof(GameEntity));
+	GameEntity *player = calloc(1, sizeof(GameEntity));
 
 	player->texturesList = CreateList(0);
 

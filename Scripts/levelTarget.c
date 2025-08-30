@@ -9,7 +9,7 @@
 
 GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 {
-	GameEntity *levelTarget = malloc(sizeof(GameEntity));
+	GameEntity *levelTarget = calloc(1, sizeof(GameEntity));
 
 	levelTarget->texturesList = CreateList(0);
 

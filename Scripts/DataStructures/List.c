@@ -10,7 +10,7 @@ List *CreateList(int capacity)
 		capacity = DEFAULT_CAPACITY;
 	}
 
-	List *list = malloc(sizeof(List));
+	List *list = calloc(1, sizeof(List));
 
 	if (list == NULL)
 	{
@@ -18,7 +18,7 @@ List *CreateList(int capacity)
 		return NULL;
 	}
 
-	list->elements = (void **) malloc(sizeof(void *) * capacity);
+	list->elements = (void **) calloc(capacity, sizeof(void *));
 
 	if (list->elements == NULL)
 	{

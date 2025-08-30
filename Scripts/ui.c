@@ -14,9 +14,53 @@
 
 void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness, UIEntity *connectedEntity);
 
+
+void DrawDynamicText(Window *window, TextAtlas *textAtlas, char *text, Vector2Int position, Vector2Float scale)
+{
+	int currentX = 0;
+	SDL_Texture *atlasTexture = GetFromDictionary(textAtlas->windowTexturesDictionary, window);
+
+	for (int i = 0; text[i] != '\0'; i++)
+	{
+		unsigned char character = (unsigned char) text[i];
+
+		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h > 0)
+		{
+			SDL_Rect charRect = textAtlas->characterRects[character];
+			SDL_Rect dstRect = {
+				position.x + currentX, position.y, charRect.w * scale.x, charRect.h * scale.y
+			};
+
+			SDL_RenderCopy(window->renderer, atlasTexture, &charRect, &dstRect);
+			currentX += charRect.w * scale.x;
+		}
+		else
+		{
+			currentX += 1;
+		}
+	}
+}
+
+
+void DrawThickRectBorder(Window *window, Vector2Int position, Vector2Int size, int thickness)
+{
+	SDL_Rect topRect = {position.x, position.y, size.x, thickness};
+	SDL_RenderFillRect(window->renderer, &topRect);
+
+	SDL_Rect bottomRect = {position.x, position.y + size.y - thickness, size.x, thickness};
+	SDL_RenderFillRect(window->renderer, &bottomRect);
+
+	SDL_Rect leftRect = {position.x, position.y + thickness, thickness, size.y - 2 * thickness};
+	SDL_RenderFillRect(window->renderer, &leftRect);
+
+	SDL_Rect rightRect = {position.x + size.x - thickness, position.y + thickness, thickness, size.y - 2 * thickness};
+	SDL_RenderFillRect(window->renderer, &rightRect);
+}
+
+
 TextAtlas *CreateTextAtlas(char *fontPath, int fontSize)
 {
-	TextAtlas *textAtlas = malloc(sizeof(TextAtlas));
+	TextAtlas *textAtlas = calloc(1, sizeof(TextAtlas));
 	memset(textAtlas->characterRects, 0, sizeof(textAtlas->characterRects));
 	textAtlas->windowTexturesDictionary = CreateDictionary(HashWindow, WindowEquals);
 
@@ -34,20 +78,29 @@ TextAtlas *CreateTextAtlas(char *fontPath, int fontSize)
 
 	int numberOfCharacters = strlen(characters);
 
-	int charsPerRow = 8;
-	int numberOfRows = (numberOfCharacters + charsPerRow - 1) / charsPerRow;
-
-	textAtlas->charsPerRow = charsPerRow;
-
 	int charWidth;
 	int charHeight;
+	int charsMaxHeight = 0;
 
-	TTF_SizeText(font, "W", &charWidth, &charHeight);
-	textAtlas->charWidth = charWidth;
-	textAtlas->charHeight = charHeight;
+	int atlasWidth = 0;
+	int atlasHeight = 0;
 
-	int atlasWidth = charWidth * charsPerRow;
-	int atlasHeight = charHeight * numberOfRows;
+	for (int i = 0; i < numberOfCharacters; i++)
+	{
+		char character = characters[i];
+		TTF_SizeText(font, &character, &charWidth, &charHeight);
+		if (charHeight > charsMaxHeight)
+		{
+			charsMaxHeight = charHeight;
+		}
+
+		SDL_Rect characterRect = {atlasWidth, 0, charWidth, charHeight};
+		textAtlas->characterRects[(int) character] = characterRect;
+
+		atlasWidth += charWidth;
+	}
+
+	atlasHeight = charsMaxHeight;
 
 	SDL_Surface *atlasSurface = SDL_CreateRGBSurface(0, atlasWidth, atlasHeight, 32, 0, 0, 0, 0);
 
@@ -64,6 +117,7 @@ TextAtlas *CreateTextAtlas(char *fontPath, int fontSize)
 
 	for (int i = 0; i < numberOfCharacters; i++)
 	{
+		SDL_Rect characterRect = textAtlas->characterRects[(int) characters[i]];
 		char text[2] = {characters[i], '\0'};
 
 		SDL_Surface *characterSurface = TTF_RenderText_Blended(font, text, (SDL_Color){255, 255, 255, 255});
@@ -72,13 +126,6 @@ TextAtlas *CreateTextAtlas(char *fontPath, int fontSize)
 		{
 			continue;
 		}
-
-		int row = i / charsPerRow;
-		int col = i % charsPerRow;
-		int x = col * charWidth;
-		int y = row * charHeight;
-
-		SDL_Rect characterRect = {x, y, charWidth, charHeight};
 
 		SDL_BlitSurface(characterSurface, NULL, atlasSurface, &characterRect);
 
@@ -106,12 +153,12 @@ void AddAtlasTexture(TextAtlas *textAtlas, Window *window)
 UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *app, Window *window, Vector2Int position,
                            Vector2Float scale, UIEntity *parent)
 {
-	UIEntity *textEntity = malloc(sizeof(UIEntity));
+	UIEntity *textEntity = calloc(1, sizeof(UIEntity));
 
 	textEntity->scale = scale;
 	textEntity->parentEntity = parent;
 
-	TTF_Font *font = TTF_OpenFont("D:/CWindowGame/Assets/Merchant Copy.ttf", fontSize);
+	TTF_Font *font = TTF_OpenFont("D:/CWindowGame/Assets/ByteBounce.ttf", fontSize);
 	if (!font)
 	{
 		SDL_Log("TTF_OpenFont failed: %s", TTF_GetError());

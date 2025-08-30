@@ -1,6 +1,8 @@
 ﻿#pragma once
-#include "../DataStructures/Headers/List.h"
 #include <SDL.h>
+#include "../DataStructures/Headers/List.h"
+#include "../DataStructures/Headers/Dictionary.h"
+
 
 typedef struct
 {
@@ -24,6 +26,21 @@ typedef enum
 	SLIDER,
 	GIZMO
 } UIType;
+
+
+typedef enum
+{
+	WINDOW_SCREEN_SPACE,
+	WINDOW_WORLD_SPACE,
+} WindowRenderType;
+
+
+typedef enum
+{
+	RESIZABLE,
+	FIXED_SIZE,
+	SCALE_WITH_RESIZE
+} WindowType;
 
 
 typedef struct
@@ -55,3 +72,39 @@ typedef struct
 	SDL_Color color;
 	int thickness;
 } GizmoEntity;
+
+
+typedef struct
+{
+	SDL_Rect characterRects[256];
+	SDL_Surface *atlasSurface;
+	Dictionary *windowTexturesDictionary;
+} TextAtlas;
+
+
+typedef struct
+{
+	List *allGameEntities;
+	List *allUIEntities;
+	List *allGizmosEntities;
+	Dictionary *gizmosEntitiesDrawDictionary;
+	Dictionary *gameEntitiesDrawDictionary;
+	Dictionary *uiEntitiesDrawDictionary;
+	TextAtlas *textAtlas;
+	bool hasWon;
+	bool showGizmos;
+} App;
+
+
+typedef struct
+{
+	SDL_Window *sdlWindow;
+	Vector2Int windowPosition;
+	Vector2Int windowSize;
+	Vector2Int viewportOffset;
+	Vector2Int lastFrameSize;
+	SDL_Renderer *renderer;
+	WindowRenderType renderType;
+	WindowType windowType;
+	List *entitiesInWindowList;
+} Window;

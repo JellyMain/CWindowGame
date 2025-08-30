@@ -9,6 +9,7 @@
 #include "Headers/structs.h"
 #include "Headers/app.h"
 #include "Headers/input.h"
+#include "Headers/window.h"
 #include "Headers/winService.h"
 
 

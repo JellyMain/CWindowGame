@@ -70,49 +70,6 @@ SDL_Texture *LoadTexture(char *fileName, SDL_Renderer *renderer)
 }
 
 
-void DrawDynamicText(Window *window, TextAtlas *textAtlas, char *text, Vector2Int position, Vector2Float scale)
-{
-	int currentX = 0;
-	SDL_Texture *atlasTexture = GetFromDictionary(textAtlas->windowTexturesDictionary, window);
-
-	for (int i = 0; text[i] != '\0'; i++)
-	{
-		unsigned char character = (unsigned char) text[i];
-
-		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h > 0)
-		{
-			SDL_Rect srcRect = textAtlas->characterRects[character];
-			SDL_Rect dstRect = {
-				position.x + currentX, position.y, textAtlas->charWidth * scale.x, textAtlas->charHeight * scale.y
-			};
-
-			SDL_RenderCopy(window->renderer, atlasTexture, &srcRect, &dstRect);
-			currentX += textAtlas->charWidth;
-		}
-		else
-		{
-			currentX += textAtlas->charWidth;
-		}
-	}
-}
-
-
-void DrawThickRectBorder(App *app, Window *window, Vector2Int position, Vector2Int size, int thickness)
-{
-	SDL_Rect topRect = {position.x, position.y, size.x, thickness};
-	SDL_RenderFillRect(window->renderer, &topRect);
-
-	SDL_Rect bottomRect = {position.x, position.y + size.y - thickness, size.x, thickness};
-	SDL_RenderFillRect(window->renderer, &bottomRect);
-
-	SDL_Rect leftRect = {position.x, position.y + thickness, thickness, size.y - 2 * thickness};
-	SDL_RenderFillRect(window->renderer, &leftRect);
-
-	SDL_Rect rightRect = {position.x + size.x - thickness, position.y + thickness, thickness, size.y - 2 * thickness};
-	SDL_RenderFillRect(window->renderer, &rightRect);
-}
-
-
 void BlitGameEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position, GameEntity *entity)
 {
 	SDL_Rect rect;
@@ -220,7 +177,7 @@ void Render(App *app)
 				                       gizmoEntity->color.a);
 
 
-				DrawThickRectBorder(app, window, gizmoEntity->connectedEntity->worldPosition,
+				DrawThickRectBorder(window, gizmoEntity->connectedEntity->worldPosition,
 				                    gizmoEntity->connectedEntity->size, gizmoEntity->thickness);
 
 

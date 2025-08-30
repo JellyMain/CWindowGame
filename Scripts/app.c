@@ -5,7 +5,7 @@
 
 App *CreateApp(bool showGizmos)
 {
-	App *app = malloc(sizeof(App));
+	App *app = calloc(1, sizeof(App));
 	app->hasWon = false;
 	app->showGizmos = showGizmos;
 	app->gameEntitiesDrawDictionary = InitDrawDictionary();

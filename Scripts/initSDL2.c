@@ -31,7 +31,7 @@ int InitSDL2(App *outApp)
 	}
 
 
-	outApp->textAtlas = CreateTextAtlas("D:/CWindowGame/Assets/Merchant Copy.ttf", 16);
+	outApp->textAtlas = CreateTextAtlas("D:/CWindowGame/Assets/ByteBounce.ttf", 16);
 
 	CreateGameWindowWithRenderer(outApp, (Vector2Int){300, 100}, (Vector2Int){300, 300},
 	                             WINDOW_WORLD_SPACE,
@@ -45,9 +45,6 @@ int InitSDL2(App *outApp)
 	                             WINDOW_WORLD_SPACE,
 	                             FIXED_SIZE,
 	                             "WindowC");
-
-
-
 
 
 	return 0;

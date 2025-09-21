@@ -51,7 +51,7 @@ GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 
 	player->worldPosition = position;
 	player->scale = scale;
-	player->size = playerSize;
+	player->originalSize = playerSize;
 
 	AddToAllGameEntitiesDrawLists(app, player);
 

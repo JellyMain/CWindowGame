@@ -5,8 +5,12 @@
 #include "Headers/app.h"
 #include "Headers/draw.h"
 #include "Headers/window.h"
+#include "Utils/MathUtils.h"
+#include "Utils/Tweener.h"
 
 void OnButtonClicked();
+
+void OnButtonClickedAnimation(App *app, UIEntity *uiEntity);
 
 void CreateWinScreen(App *app, int fontSize)
 {
@@ -29,11 +33,26 @@ void CreateWinScreen(App *app, int fontSize)
 
 	CreateButton(NULL, (Vector2Int){200, 100}, (SDL_Color){255, 255, 255}, "Continue", fontSize,
 	             (SDL_Color){0, 0, 0}, app, winWindow,
-	             continueTextPosition, (Vector2Float){1, 1}, OnButtonClicked,NULL);
+	             continueTextPosition, (Vector2Float){1, 1}, OnButtonClicked, OnButtonClickedAnimation,NULL);
 }
 
 
 void OnButtonClicked()
 {
 	printf("Button clicked\n");
+}
+
+
+void OnButtonClickedAnimation(App *app, UIEntity *uiEntity)
+{
+	TweenData tweenData = {
+		.vector2FloatTween = {
+			.target = &uiEntity->scale,
+			.fromValue = uiEntity->scale,
+			.endValue = {2, 2}
+		}
+	};
+
+
+	CreateTween(app, VECTOR2_FLOAT_TWEEN, tweenData, 2);
 }

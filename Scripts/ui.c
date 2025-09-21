@@ -194,7 +194,7 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 	textEntity->worldPosition = centeredPosition;
 
 	textEntity->uiType = TEXT;
-	textEntity->size = (Vector2Int){textWidth, textHeight};
+	textEntity->originalSize = (Vector2Int){textWidth, textHeight};
 
 	SDL_FreeSurface(textSurface);
 	TTF_CloseFont(font);
@@ -207,15 +207,16 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 
 void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color backgroundColor, char *text, int fontSize,
                   SDL_Color textColor, App *app, Window *window, Vector2Int position, Vector2Float scale,
-                  void (*OnInteraction)(),
+                  void (*OnInteraction)(), void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity),
                   UIEntity *parent)
 {
-	UIEntity *buttonEntity = malloc(sizeof(UIEntity));
+	UIEntity *buttonEntity = calloc(1, sizeof(UIEntity));
 	buttonEntity->scale = scale;
 	buttonEntity->uiType = BUTTON;
 	buttonEntity->childEntities = CreateList(0);
 	buttonEntity->parentEntity = parent;
 	buttonEntity->OnInteraction = OnInteraction;
+	buttonEntity->OnInteractionAnimation = OnInteractionAnimation;
 
 	Vector2Int centeredPosition = (Vector2Int){position.x - size.x / 2, position.y - size.y / 2};
 	buttonEntity->worldPosition = centeredPosition;
@@ -234,7 +235,7 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 		             SDL_MapRGB(buttonSurface->format, backgroundColor.r, backgroundColor.g, backgroundColor.b));
 
 		buttonEntity->texture = SDL_CreateTextureFromSurface(window->renderer, buttonSurface);
-		buttonEntity->size = size;
+		buttonEntity->originalSize = size;
 
 		SDL_FreeSurface(buttonSurface);
 
@@ -253,7 +254,7 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 		int height;
 
 		SDL_QueryTexture(backgroundTexture, NULL, NULL, &width, &height);
-		buttonEntity->size = (Vector2Int){width, height};
+		buttonEntity->originalSize = (Vector2Int){width, height};
 	}
 
 	AddToUIEntitiesDrawList(app, window, buttonEntity);
@@ -270,7 +271,7 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 
 void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness, UIEntity *connectedEntity)
 {
-	GizmoEntity *gizmoEntity = malloc(sizeof(GizmoEntity));
+	GizmoEntity *gizmoEntity = calloc(1, sizeof(GizmoEntity));
 	gizmoEntity->connectedEntity = connectedEntity;
 	gizmoEntity->color = color;
 	gizmoEntity->thickness = thickness;
@@ -293,7 +294,7 @@ void UpdateUIElements(App *app)
 
 				Vector2Int boundsMin = uiEntity->worldPosition;
 				Vector2Int boundsMax = (Vector2Int){
-					uiEntity->worldPosition.x + uiEntity->size.x, uiEntity->worldPosition.y + uiEntity->size.y
+					uiEntity->worldPosition.x + uiEntity->originalSize.x, uiEntity->worldPosition.y + uiEntity->originalSize.y
 				};
 
 				if (IsPointInBounds(mousePosition, boundsMin, boundsMax))
@@ -303,6 +304,10 @@ void UpdateUIElements(App *app)
 						if (uiEntity->OnInteraction != NULL)
 						{
 							uiEntity->OnInteraction();
+						}
+						if (uiEntity->OnInteractionAnimation != NULL)
+						{
+							uiEntity->OnInteractionAnimation(app, uiEntity);
 						}
 					}
 				}

@@ -6,6 +6,28 @@
 
 typedef struct
 {
+	SDL_Rect characterRects[256];
+	SDL_Surface *atlasSurface;
+	Dictionary *windowTexturesDictionary;
+} TextAtlas;
+
+
+typedef struct
+{
+	List *allGameEntities;
+	List *allUIEntities;
+	List *allGizmosEntities;
+	List *allTweeners;
+	Dictionary *gizmosEntitiesDrawDictionary;
+	Dictionary *gameEntitiesDrawDictionary;
+	Dictionary *uiEntitiesDrawDictionary;
+	TextAtlas *textAtlas;
+	bool hasWon;
+	bool showGizmos;
+} App;
+
+typedef struct
+{
 	int x;
 	int y;
 } Vector2Int;
@@ -17,6 +39,12 @@ typedef struct
 	float y;
 } Vector2Float;
 
+
+typedef enum
+{
+	VECTOR2_FLOAT_TWEEN,
+	FLOAT_TWEEN,
+} TweenType;
 
 typedef enum
 {
@@ -47,6 +75,7 @@ typedef struct
 {
 	Vector2Int worldPosition;
 	Vector2Float scale;
+	Vector2Int originalSize;
 	Vector2Int size;
 	List *texturesList;
 } GameEntity;
@@ -56,6 +85,7 @@ typedef struct UIEntity
 {
 	Vector2Int worldPosition;
 	Vector2Float scale;
+	Vector2Int originalSize;
 	Vector2Int size;
 	SDL_Texture *texture;
 	UIType uiType;
@@ -63,6 +93,8 @@ typedef struct UIEntity
 	List *childEntities;
 
 	void (*OnInteraction)();
+
+	void (*OnInteractionAnimation)(App *app, struct UIEntity *uiEntity);
 } UIEntity;
 
 
@@ -72,28 +104,6 @@ typedef struct
 	SDL_Color color;
 	int thickness;
 } GizmoEntity;
-
-
-typedef struct
-{
-	SDL_Rect characterRects[256];
-	SDL_Surface *atlasSurface;
-	Dictionary *windowTexturesDictionary;
-} TextAtlas;
-
-
-typedef struct
-{
-	List *allGameEntities;
-	List *allUIEntities;
-	List *allGizmosEntities;
-	Dictionary *gizmosEntitiesDrawDictionary;
-	Dictionary *gameEntitiesDrawDictionary;
-	Dictionary *uiEntitiesDrawDictionary;
-	TextAtlas *textAtlas;
-	bool hasWon;
-	bool showGizmos;
-} App;
 
 
 typedef struct
@@ -108,3 +118,30 @@ typedef struct
 	WindowType windowType;
 	List *entitiesInWindowList;
 } Window;
+
+
+typedef union
+{
+	struct
+	{
+		Vector2Float *target;
+		Vector2Float fromValue;
+		Vector2Float endValue;
+	} vector2FloatTween;
+
+	struct
+	{
+		float *target;
+		float fromValue;
+		float endValue;
+	} floatTween;
+} TweenData;
+
+
+typedef struct
+{
+	TweenType tweenType;
+	TweenData tweenData;
+	float duration;
+	float elapsedTime;
+} Tween;

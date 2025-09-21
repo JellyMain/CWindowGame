@@ -14,6 +14,7 @@ App *CreateApp(bool showGizmos)
 	app->allGizmosEntities = CreateList(0);
 	app->allUIEntities = CreateList(0);
 	app->allGameEntities = CreateList(0);
+	app->allTweeners = CreateList(0);
 
 	return app;
 }

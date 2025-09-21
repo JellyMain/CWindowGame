@@ -77,8 +77,11 @@ void BlitGameEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int pos
 	rect.x = position.x;
 	rect.y = position.y;
 
-	rect.w = entity->size.x * entity->scale.x;
-	rect.h = entity->size.y * entity->scale.y;
+	entity->size.x = entity->originalSize.x * entity->scale.x;
+	entity->size.y = entity->originalSize.y * entity->scale.y;
+
+	rect.w = entity->size.x;
+	rect.h = entity->size.y;
 
 	SDL_RenderCopy(renderer, texture, NULL, &rect);
 }
@@ -91,8 +94,11 @@ void BlitUIEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int posit
 	rect.x = position.x;
 	rect.y = position.y;
 
-	rect.w = entity->size.x * entity->scale.x;
-	rect.h = entity->size.y * entity->scale.y;
+	entity->size.x = entity->originalSize.x * entity->scale.x;
+	entity->size.y = entity->originalSize.y * entity->scale.y;
+
+	rect.w = entity->size.x;
+	rect.h = entity->size.y;
 
 	SDL_RenderCopy(renderer, texture, NULL, &rect);
 }

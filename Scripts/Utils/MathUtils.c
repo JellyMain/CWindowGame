@@ -82,10 +82,10 @@ Vector2Float ClampVector2Float(Vector2Float value, Vector2Float min, Vector2Floa
 
 bool IsEntityInBounds(GameEntity *entity, Vector2Int position, Vector2Int boundsMin, Vector2Int boundsMax)
 {
-	int entityLeft = position.x + entity->size.x / 2 * entity->scale.x;
-	int entityTop = position.y + entity->size.y / 2 * entity->scale.y;
-	int entityRight = position.x + entity->size.x / 2 * entity->scale.x;
-	int entityBottom = position.y + entity->size.y / 2 * entity->scale.y;
+	int entityLeft = position.x + entity->originalSize.x / 2 * entity->scale.x;
+	int entityTop = position.y + entity->originalSize.y / 2 * entity->scale.y;
+	int entityRight = position.x + entity->originalSize.x / 2 * entity->scale.x;
+	int entityBottom = position.y + entity->originalSize.y / 2 * entity->scale.y;
 
 	return entityLeft >= boundsMin.x &&
 	       entityRight <= boundsMax.x &&
@@ -115,5 +115,19 @@ Vector2Float GetPercentageChangeVector2(Vector2Float oldValue, Vector2Float newV
 	Vector2Float result;
 	result.x = GetPercentageChange(oldValue.x, newValue.x);
 	result.y = GetPercentageChange(oldValue.y, newValue.y);
+	return result;
+}
+
+
+float LerpFloat(float a, float b, float t)
+{
+	return (1 - t) * a + t * b;
+}
+
+Vector2Float LerpVector2Float(Vector2Float a, Vector2Float b, float t)
+{
+	Vector2Float result;
+	result.x = LerpFloat(a.x, b.x, t);
+	result.y = LerpFloat(a.y, b.y, t);
 	return result;
 }

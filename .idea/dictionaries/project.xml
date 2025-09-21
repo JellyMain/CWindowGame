@@ -2,6 +2,8 @@
   <dictionary name="project">
     <words>
       <w>abcdefghijklmnopqrstuvwxyz</w>
+      <w>lerp</w>
+      <w>tweeners</w>
     </words>
   </dictionary>
 </component>

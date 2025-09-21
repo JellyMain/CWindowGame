@@ -26,7 +26,7 @@ GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 
 	levelTarget->worldPosition = position;
 	levelTarget->scale = scale;
-	levelTarget->size = levelTargetSize;
+	levelTarget->originalSize = levelTargetSize;
 
 	AddToAllGameEntitiesDrawLists(app, levelTarget);
 
@@ -40,8 +40,8 @@ bool HasReachedLevelTarget(GameEntity *player, GameEntity *levelTarget)
 		levelTarget->worldPosition.x, levelTarget->worldPosition.y
 	};
 	Vector2Int boundsMax = {
-		levelTarget->worldPosition.x + levelTarget->size.x * levelTarget->scale.x,
-		levelTarget->worldPosition.y + levelTarget->size.y * levelTarget->scale.y
+		levelTarget->worldPosition.x + levelTarget->originalSize.x * levelTarget->scale.x,
+		levelTarget->worldPosition.y + levelTarget->originalSize.y * levelTarget->scale.y
 	};
 
 	if (IsEntityInBounds(player, player->worldPosition, boundsMin, boundsMax))

@@ -17,4 +17,8 @@ float GetPercentageChange(float oldValue, float newValue);
 
 Vector2Float GetPercentageChangeVector2(Vector2Float oldValue, Vector2Float newValue);
 
+float LerpFloat(float a, float b, float t);
 
+Vector2Float LerpVector2Float(Vector2Float a, Vector2Float b, float t);
+
+void TweenVector2Float(Vector2Float *from, Vector2Float to, float duration);

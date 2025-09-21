@@ -11,6 +11,7 @@
 #include "Headers/input.h"
 #include "Headers/window.h"
 #include "Headers/winService.h"
+#include "Utils/Tweener.h"
 
 
 static App *g_app = NULL;
@@ -138,7 +139,6 @@ int main()
 	}
 
 
-
 	GameEntity *player = CreatePlayer(app, (Vector2Int){100, 100}, (Vector2Float){2, 2});
 	GameEntity *levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Float){2, 2});
 
@@ -146,12 +146,21 @@ int main()
 
 	SDL_SetEventFilter(EventFilter, NULL);
 
+	Uint64 lastFrameTime = SDL_GetPerformanceCounter();
+	Uint64 currentFrameTime = 0;
+	float deltaTime = 0.0f;
+
 	while (1)
 	{
+		currentFrameTime = SDL_GetPerformanceCounter();
+		deltaTime = (currentFrameTime - lastFrameTime) / (float) SDL_GetPerformanceFrequency();
+		lastFrameTime = currentFrameTime;
+
 		ProcessInput();
 
 		Render(app);
 
+		UpdateTweeners(app, deltaTime);
 
 		for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
 		{
@@ -161,6 +170,7 @@ int main()
 		}
 
 		UpdateUIElements(app);
+
 
 		ProcessInput();
 

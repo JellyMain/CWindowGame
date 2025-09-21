@@ -11,7 +11,7 @@
 #include "Headers/input.h"
 #include "Headers/window.h"
 #include "Headers/winService.h"
-#include "Utils/Tweener.h"
+#include "Utils/tweener.h"
 
 
 static App *g_app = NULL;
@@ -139,7 +139,7 @@ int main()
 	}
 
 
-	GameEntity *player = CreatePlayer(app, (Vector2Int){100, 100}, (Vector2Float){2, 2});
+	GameEntity *player = CreatePlayer(app, (Vector2Int){300, 300}, (Vector2Float){2, 2});
 	GameEntity *levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Float){2, 2});
 
 	g_app = app;

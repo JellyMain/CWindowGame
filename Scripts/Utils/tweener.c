@@ -1,0 +1,466 @@
+﻿#include "tweener.h"
+
+#include <SDL_timer.h>
+#include "mathUtils.h"
+
+float EaseLinear(float t);
+
+float EaseInSine(float t);
+
+float EaseOutSine(float t);
+
+float EaseInOutSine(float t);
+
+float EaseInQuad(float t);
+
+float EaseOutQuad(float t);
+
+float EaseInOutQuad(float t);
+
+float EaseInCubic(float t);
+
+float EaseOutCubic(float t);
+
+float EaseInOutCubic(float t);
+
+float EaseInQuart(float t);
+
+float EaseOutQuart(float t);
+
+float EaseInOutQuart(float t);
+
+float EaseInQuint(float t);
+
+float EaseOutQuint(float t);
+
+float EaseInOutQuint(float t);
+
+float EaseInExpo(float t);
+
+float EaseOutExpo(float t);
+
+float EaseInOutExpo(float t);
+
+float EaseInCirc(float t);
+
+float EaseOutCirc(float t);
+
+float EaseInOutCirc(float t);
+
+float EaseInBack(float t);
+
+float EaseOutBack(float t);
+
+float EaseInOutBack(float t);
+
+float EaseInElastic(float t);
+
+float EaseOutElastic(float t);
+
+float EaseInOutElastic(float t);
+
+float EaseInBounce(float t);
+
+float EaseOutBounce(float t);
+
+float EaseInOutBounce(float t);
+
+
+void CreateTween(App *app, TweenType tweenType, TweenData tweenData, float duration, TweenEasingType easingType)
+{
+	Tween *tween = calloc(1, sizeof(Tween));
+	tween->tweenType = tweenType;
+	tween->tweenData = tweenData;
+	tween->duration = duration;
+	tween->elapsedTime = 0;
+	tween->easingType = easingType;
+
+	AddToList(app->allTweeners, tween);
+}
+
+
+void UpdateTweeners(App *app, float deltaTime)
+{
+	for (int i = app->allTweeners->size - 1; i >= 0; i--)
+	{
+		Tween *tween = app->allTweeners->elements[i];
+
+		tween->elapsedTime += deltaTime;
+
+		float t = tween->elapsedTime / tween->duration;
+
+		switch (tween->easingType)
+		{
+			case LINEAR:
+				t = EaseLinear(t);
+				break;
+			case IN_SINE:
+				t = EaseInSine(t);
+				break;
+			case OUT_SINE:
+				t = EaseOutSine(t);
+				break;
+			case IN_OUT_SINE:
+				t = EaseInOutSine(t);
+				break;
+			case IN_QUAD:
+				t = EaseInQuad(t);
+				break;
+			case OUT_QUAD:
+				t = EaseOutQuad(t);
+				break;
+			case IN_OUT_QUAD:
+				t = EaseInOutQuad(t);
+				break;
+			case IN_CUBIC:
+				t = EaseInCubic(t);
+				break;
+			case OUT_CUBIC:
+				t = EaseOutCubic(t);
+				break;
+			case IN_OUT_CUBIC:
+				t = EaseInOutCubic(t);
+				break;
+			case IN_QUART:
+				t = EaseInQuart(t);
+				break;
+			case OUT_QUART:
+				t = EaseOutQuart(t);
+				break;
+			case IN_OUT_QUART:
+				t = EaseInOutQuart(t);
+				break;
+			case IN_QUINT:
+				t = EaseInQuint(t);
+				break;
+			case OUT_QUINT:
+				t = EaseOutQuint(t);
+				break;
+			case IN_OUT_QUINT:
+				t = EaseInOutQuint(t);
+				break;
+			case IN_EXPO:
+				t = EaseInExpo(t);
+				break;
+			case OUT_EXPO:
+				t = EaseOutExpo(t);
+				break;
+			case IN_OUT_EXPO:
+				t = EaseInOutExpo(t);
+				break;
+			case IN_CIRC:
+				t = EaseInCirc(t);
+				break;
+			case OUT_CIRC:
+				t = EaseOutCirc(t);
+				break;
+			case IN_OUT_CIRC:
+				t = EaseInOutCirc(t);
+				break;
+			case IN_BACK:
+				t = EaseInBack(t);
+				break;
+			case OUT_BACK:
+				t = EaseOutBack(t);
+				break;
+			case IN_OUT_BACK:
+				t = EaseInOutBack(t);
+				break;
+			case IN_ELASTIC:
+				t = EaseInElastic(t);
+				break;
+			case OUT_ELASTIC:
+				t = EaseOutElastic(t);
+				break;
+			case IN_OUT_ELASTIC:
+				t = EaseInOutElastic(t);
+				break;
+			case IN_BOUNCE:
+				t = EaseInBounce(t);
+				break;
+			case OUT_BOUNCE:
+				t = EaseOutBounce(t);
+				break;
+			case IN_OUT_BOUNCE:
+				t = EaseInOutBounce(t);
+				break;
+		}
+
+
+		if (tween->elapsedTime >= tween->duration)
+		{
+			switch (tween->tweenType)
+			{
+				case VECTOR2_FLOAT_TWEEN:
+					*tween->tweenData.vector2FloatTween.target = tween->tweenData.vector2FloatTween.endValue;
+					break;
+				case FLOAT_TWEEN:
+					*tween->tweenData.floatTween.target = tween->tweenData.floatTween.endValue;
+					break;
+			}
+
+			RemoveFromListAtIndex(app->allTweeners, i);
+			DestroyTween(tween);
+		}
+		else
+		{
+			switch (tween->tweenType)
+			{
+				case VECTOR2_FLOAT_TWEEN:
+					*tween->tweenData.vector2FloatTween.target = LerpVector2Float(
+						tween->tweenData.vector2FloatTween.fromValue, tween->tweenData.vector2FloatTween.endValue, t);
+					break;
+
+				case FLOAT_TWEEN:
+					*tween->tweenData.floatTween.target = LerpFloat(
+						tween->tweenData.floatTween.fromValue, tween->tweenData.floatTween.endValue, t);
+			}
+		}
+	}
+}
+
+
+void TweenVector2Float(Vector2Float *from, Vector2Float to, float duration)
+{
+	Vector2Float originalValue = *from;
+	float elapsedTime = 0;
+	Uint64 lastFrameTime = SDL_GetPerformanceCounter();
+	Uint64 currentFrameTime = 0;
+	float deltaTime = 0.0f;
+	float t = 0.0f;
+
+
+	while (elapsedTime < duration)
+	{
+		currentFrameTime = SDL_GetPerformanceCounter();
+		deltaTime = (currentFrameTime - lastFrameTime) / (float) SDL_GetPerformanceFrequency();
+		lastFrameTime = currentFrameTime;
+		elapsedTime += deltaTime;
+
+		printf("%f\n", deltaTime);
+
+		t = elapsedTime / duration;
+		t = ClampFloat(t, 0.0f, 1.0f);
+
+		*from = LerpVector2Float(originalValue, to, t);
+		SDL_Delay(16);
+	}
+
+	*from = to;
+}
+
+
+void DestroyTween(Tween *tween)
+{
+	if (tween == NULL)
+	{
+		return;
+	}
+
+	free(tween);
+}
+
+
+float EaseLinear(float t)
+{
+	return t;
+}
+
+
+float EaseInSine(float t)
+{
+	return 1 - cos(t * PI / 2);
+}
+
+
+float EaseOutSine(float t)
+{
+	return sin(t * PI / 2);
+}
+
+
+float EaseInOutSine(float t)
+{
+	return -(cos(PI * t) - 1) / 2;
+}
+
+
+float EaseInQuad(float t)
+{
+	return t * t;
+}
+
+
+float EaseOutQuad(float t)
+{
+	return t * (2 - t);
+}
+
+
+float EaseInOutQuad(float t)
+{
+	return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
+
+float EaseInCubic(float t)
+{
+	return t * t * t;
+}
+
+
+float EaseOutCubic(float t)
+{
+	return 1 - pow(1 - t, 3);
+}
+
+
+float EaseInOutCubic(float t)
+{
+	return t < 0.5 ? 4 * t * t * t : 1 - pow(-2 * t + 2, 3) / 2;
+}
+
+
+float EaseInQuart(float t)
+{
+	return t * t * t * t;
+}
+
+
+float EaseOutQuart(float t)
+{
+	return 1 - pow(1 - t, 4);
+}
+
+
+float EaseInOutQuart(float t)
+{
+	return t < 0.5 ? 8 * t * t * t * t : 1 - pow(-2 * t + 2, 4) / 2;
+}
+
+
+float EaseInQuint(float t)
+{
+	return t * t * t * t * t;
+}
+
+
+float EaseOutQuint(float t)
+{
+	return 1 - pow(1 - t, 5);
+}
+
+
+float EaseInOutQuint(float t)
+{
+	return t < 0.5 ? 16 * t * t * t * t * t : 1 - pow(-2 * t + 2, 5) / 2;
+}
+
+
+float EaseInExpo(float t)
+{
+	return t == 0 ? 0 : pow(2, 10 * (t - 1));
+}
+
+
+float EaseOutExpo(float t)
+{
+	return t == 1 ? 1 : 1 - pow(2, -10 * t);
+}
+
+
+float EaseInOutExpo(float t)
+{
+	return t == 0 ? 0 : t == 1 ? 1 : t < 0.5 ? pow(2, 20 * t - 10) / 2 : (2 - pow(2, -20 * t + 10)) / 2;
+}
+
+
+float EaseInCirc(float t)
+{
+	return 1 - sqrt(1 - t * t);
+}
+
+
+float EaseOutCirc(float t)
+{
+	return sqrt(1 - pow(t - 1, 2));
+}
+
+
+float EaseInOutCirc(float t)
+{
+	return t < 0.5 ? (1 - sqrt(1 - 4 * t * t)) / 2 : (sqrt(1 - (-2 * t + 2) * (-2 * t + 2)) + 1) / 2;
+}
+
+
+float EaseInBack(float t)
+{
+	return cbrt(1 - t) * 3 - 2;
+}
+
+
+float EaseOutBack(float t)
+{
+	return 1 + cbrt(t - 1) * 3;
+}
+
+
+float EaseInOutBack(float t)
+{
+	return t < 0.5
+		       ? (pow(2 * t, 2) * ((2.5 + 1) * 2 * t - 2.5)) / 2
+		       : (pow(2 * t - 2, 2) * ((2.5 + 1) * (t * 2 - 2) + 2.5) + 2) / 2;
+}
+
+
+float EaseInElastic(float t)
+{
+	return sin(13 * PI / 2 * t) * pow(2, 10 * (t - 1));
+}
+
+
+float EaseOutElastic(float t)
+{
+	return sin(-13 * PI / 2 * (t + 1)) * pow(2, -10 * t) + 1;
+}
+
+
+float EaseInOutElastic(float t)
+{
+	return t < 0.5
+		       ? sin(13 * PI / 2 * 2 * t) * pow(2, 10 * ((2 * t) - 1)) / 2
+		       : (sin(-13 * PI / 2 * ((2 * t - 1) + 1)) * pow(2, -10 * (2 * t - 1)) + 2) / 2;
+}
+
+
+float EaseOutBounce(float t)
+{
+	const float n1 = 7.5625f;
+	const float d1 = 2.75f;
+
+	if (t < 1 / d1)
+	{
+		return n1 * t * t;
+	}
+	if (t < 2 / d1)
+	{
+		return n1 * (t -= 1.5f / d1) * t + 0.75f;
+	}
+	if (t < 2.5 / d1)
+	{
+		return n1 * (t -= 2.25f / d1) * t + 0.9375f;
+	}
+	return n1 * (t -= 2.625f / d1) * t + 0.984375f;
+}
+
+
+float EaseInBounce(float t)
+{
+	return 1 - EaseOutBounce(1 - t);
+}
+
+
+float EaseInOutBounce(float t)
+{
+	return t < 0.5 ? (1 - EaseOutBounce(1 - 2 * t)) / 2 : (1 + EaseOutBounce(2 * t - 1)) / 2;
+}

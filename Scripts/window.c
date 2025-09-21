@@ -3,7 +3,7 @@
 #include "Headers/app.h"
 #include "Headers/input.h"
 #include "Headers/ui.h"
-#include "Utils/MathUtils.h"
+#include "Utils/mathUtils.h"
 
 
 Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int size, WindowRenderType renderType,

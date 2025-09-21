@@ -9,7 +9,7 @@
 #include "Headers/input.h"
 #include "Headers/structs.h"
 #include "Headers/window.h"
-#include "Utils/MathUtils.h"
+#include "Utils/mathUtils.h"
 
 
 void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness, UIEntity *connectedEntity);
@@ -44,16 +44,20 @@ void DrawDynamicText(Window *window, TextAtlas *textAtlas, char *text, Vector2In
 
 void DrawThickRectBorder(Window *window, Vector2Int position, Vector2Int size, int thickness)
 {
-	SDL_Rect topRect = {position.x, position.y, size.x, thickness};
+	SDL_Rect topRect = {position.x - size.x / 2, position.y - size.y / 2, size.x, thickness};
 	SDL_RenderFillRect(window->renderer, &topRect);
 
-	SDL_Rect bottomRect = {position.x, position.y + size.y - thickness, size.x, thickness};
+	SDL_Rect bottomRect = {position.x - size.x / 2, position.y + size.y / 2 - thickness, size.x, thickness};
 	SDL_RenderFillRect(window->renderer, &bottomRect);
 
-	SDL_Rect leftRect = {position.x, position.y + thickness, thickness, size.y - 2 * thickness};
+	SDL_Rect leftRect = {
+		position.x - size.x / 2, position.y - size.y / 2 + thickness, thickness, size.y - 2 * thickness
+	};
 	SDL_RenderFillRect(window->renderer, &leftRect);
 
-	SDL_Rect rightRect = {position.x + size.x - thickness, position.y + thickness, thickness, size.y - 2 * thickness};
+	SDL_Rect rightRect = {
+		position.x + size.x / 2 - thickness, position.y - size.y / 2 + thickness, thickness, size.y - 2 * thickness
+	};
 	SDL_RenderFillRect(window->renderer, &rightRect);
 }
 
@@ -189,9 +193,8 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 	int textWidth = textSurface->w;
 	int textHeight = textSurface->h;
 
-	Vector2Int centeredPosition = (Vector2Int){position.x - textWidth / 2, position.y - textHeight / 2};
 
-	textEntity->worldPosition = centeredPosition;
+	textEntity->worldPosition = position;
 
 	textEntity->uiType = TEXT;
 	textEntity->originalSize = (Vector2Int){textWidth, textHeight};
@@ -218,8 +221,7 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 	buttonEntity->OnInteraction = OnInteraction;
 	buttonEntity->OnInteractionAnimation = OnInteractionAnimation;
 
-	Vector2Int centeredPosition = (Vector2Int){position.x - size.x / 2, position.y - size.y / 2};
-	buttonEntity->worldPosition = centeredPosition;
+	buttonEntity->worldPosition = position;
 
 	if (backgroundTexture == NULL)
 	{
@@ -292,9 +294,12 @@ void UpdateUIElements(App *app)
 			{
 				Vector2Int mousePosition = GetMousePosition();
 
-				Vector2Int boundsMin = uiEntity->worldPosition;
+				Vector2Int boundsMin = (Vector2Int){
+					uiEntity->worldPosition.x - uiEntity->size.x / 2, uiEntity->worldPosition.y - uiEntity->size.y / 2
+				};
 				Vector2Int boundsMax = (Vector2Int){
-					uiEntity->worldPosition.x + uiEntity->originalSize.x, uiEntity->worldPosition.y + uiEntity->originalSize.y
+					uiEntity->worldPosition.x + uiEntity->size.x / 2,
+					uiEntity->worldPosition.y + uiEntity->size.y / 2
 				};
 
 				if (IsPointInBounds(mousePosition, boundsMin, boundsMax))

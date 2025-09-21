@@ -1,4 +1,4 @@
-﻿#include "MathUtils.h"
+﻿#include "mathUtils.h"
 
 
 float ClampFloat(float value, float min, float max)
@@ -82,10 +82,10 @@ Vector2Float ClampVector2Float(Vector2Float value, Vector2Float min, Vector2Floa
 
 bool IsEntityInBounds(GameEntity *entity, Vector2Int position, Vector2Int boundsMin, Vector2Int boundsMax)
 {
-	int entityLeft = position.x + entity->originalSize.x / 2 * entity->scale.x;
-	int entityTop = position.y + entity->originalSize.y / 2 * entity->scale.y;
-	int entityRight = position.x + entity->originalSize.x / 2 * entity->scale.x;
-	int entityBottom = position.y + entity->originalSize.y / 2 * entity->scale.y;
+	int entityLeft = position.x - entity->size.x / 2;
+	int entityTop = position.y - entity->size.y / 2;
+	int entityRight = position.x + entity->size.x / 2;
+	int entityBottom = position.y + entity->size.y / 2;
 
 	return entityLeft >= boundsMin.x &&
 	       entityRight <= boundsMax.x &&
@@ -98,6 +98,24 @@ bool IsPointInBounds(Vector2Int point, Vector2Int boundsMin, Vector2Int boundsMa
 {
 	return point.x >= boundsMin.x && point.x <= boundsMax.x &&
 	       point.y >= boundsMin.y && point.y <= boundsMax.y;
+}
+
+bool IsEntityOverlapping(GameEntity *entity1, Vector2Int position1, GameEntity *entity2, Vector2Int position2)
+{
+	int entity1Left = position1.x - entity1->size.x / 2;
+	int entity1Right = position1.x + entity1->size.x / 2;
+	int entity1Top = position1.y - entity1->size.y / 2;
+	int entity1Bottom = position1.y + entity1->size.y / 2;
+
+	int entity2Left = position2.x - entity2->size.x / 2;
+	int entity2Right = position2.x + entity2->size.x / 2;
+	int entity2Top = position2.y - entity2->size.y / 2;
+	int entity2Bottom = position2.y + entity2->size.y / 2;
+
+	return entity1Left < entity2Right &&
+	       entity1Right > entity2Left &&
+	       entity1Top < entity2Bottom &&
+	       entity1Bottom > entity2Top;
 }
 
 

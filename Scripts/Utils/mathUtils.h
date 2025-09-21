@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "../Headers/structs.h"
+#define PI 3.14159265359
 
 float ClampFloat(float value, float min, float max);
 
@@ -12,6 +13,8 @@ Vector2Float ClampVector2Float(Vector2Float value, Vector2Float min, Vector2Floa
 bool IsEntityInBounds(GameEntity *entity, Vector2Int position, Vector2Int boundsMin, Vector2Int boundsMax);
 
 bool IsPointInBounds(Vector2Int point, Vector2Int boundsMin, Vector2Int boundsMax);
+
+bool IsEntityOverlapping(GameEntity *entity1, Vector2Int position1, GameEntity *entity2, Vector2Int position2);
 
 float GetPercentageChange(float oldValue, float newValue);
 

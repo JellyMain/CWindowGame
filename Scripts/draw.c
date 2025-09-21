@@ -5,7 +5,7 @@
 #include "DataStructures/Headers/Dictionary.h"
 #include "Headers/app.h"
 #include "Headers/window.h"
-#include "Utils/ViewPortUtils.h"
+#include "Utils/viewPortUtils.h"
 
 
 Dictionary *InitDrawDictionary()
@@ -74,12 +74,11 @@ void BlitGameEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int pos
 {
 	SDL_Rect rect;
 
-	rect.x = position.x;
-	rect.y = position.y;
-
 	entity->size.x = entity->originalSize.x * entity->scale.x;
 	entity->size.y = entity->originalSize.y * entity->scale.y;
 
+	rect.x = position.x - entity->size.x / 2;
+	rect.y = position.y - entity->size.y / 2;
 	rect.w = entity->size.x;
 	rect.h = entity->size.y;
 
@@ -91,12 +90,11 @@ void BlitUIEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int posit
 {
 	SDL_Rect rect;
 
-	rect.x = position.x;
-	rect.y = position.y;
-
 	entity->size.x = entity->originalSize.x * entity->scale.x;
 	entity->size.y = entity->originalSize.y * entity->scale.y;
 
+	rect.x = position.x - entity->size.x / 2;
+	rect.y = position.y - entity->size.y / 2;
 	rect.w = entity->size.x;
 	rect.h = entity->size.y;
 
@@ -196,8 +194,10 @@ void Render(App *app)
 
 
 				DrawDynamicText(window, app->textAtlas, entityInfo, (Vector2Int){
-					                gizmoEntity->connectedEntity->worldPosition.x,
-					                gizmoEntity->connectedEntity->worldPosition.y - 10
+					                gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->connectedEntity->size.x
+					                / 2,
+					                gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->connectedEntity->size.y
+					                / 2 - 10
 				                }, (Vector2Float){1, 1});
 			}
 		}

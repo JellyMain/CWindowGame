@@ -5,8 +5,8 @@
 #include "Headers/app.h"
 #include "Headers/draw.h"
 #include "Headers/window.h"
-#include "Utils/MathUtils.h"
-#include "Utils/Tweener.h"
+#include "Utils/mathUtils.h"
+#include "Utils/tweener.h"
 
 void OnButtonClicked();
 
@@ -53,6 +53,5 @@ void OnButtonClickedAnimation(App *app, UIEntity *uiEntity)
 		}
 	};
 
-
-	CreateTween(app, VECTOR2_FLOAT_TWEEN, tweenData, 2);
+	CreateTween(app, VECTOR2_FLOAT_TWEEN, tweenData, 2, IN_OUT_BOUNCE);
 }

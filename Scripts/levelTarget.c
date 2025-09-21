@@ -4,7 +4,7 @@
 #include "Headers/draw.h"
 #include "Headers/structs.h"
 #include "Headers/window.h"
-#include "Utils/MathUtils.h"
+#include "Utils/mathUtils.h"
 
 
 GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
@@ -36,18 +36,5 @@ GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 
 bool HasReachedLevelTarget(GameEntity *player, GameEntity *levelTarget)
 {
-	Vector2Int boundsMin = {
-		levelTarget->worldPosition.x, levelTarget->worldPosition.y
-	};
-	Vector2Int boundsMax = {
-		levelTarget->worldPosition.x + levelTarget->originalSize.x * levelTarget->scale.x,
-		levelTarget->worldPosition.y + levelTarget->originalSize.y * levelTarget->scale.y
-	};
-
-	if (IsEntityInBounds(player, player->worldPosition, boundsMin, boundsMax))
-	{
-		return true;
-	}
-
-	return false;
+	return IsEntityOverlapping(player, player->worldPosition, levelTarget, levelTarget->worldPosition);
 }

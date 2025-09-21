@@ -3,7 +3,7 @@
 #include "Headers/draw.h"
 #include "Headers/input.h"
 #include "Headers/structs.h"
-#include "Utils/MathUtils.h"
+#include "Utils/mathUtils.h"
 #define MOVE_SPEED 5
 
 

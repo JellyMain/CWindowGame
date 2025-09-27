@@ -23,6 +23,8 @@ bool SetToList(List *list, int index, void *element);
 
 bool RemoveFromListAtIndex(List *list, int index);
 
+bool RemoveFromList(List *list, void *element);
+
 int GetListSize(List *list);
 
 bool IsListEmpty(List *list);

@@ -171,7 +171,6 @@ int main()
 
 		UpdateUIElements(app);
 
-
 		ProcessInput();
 
 		MovePlayer(app, player);

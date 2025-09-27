@@ -47,11 +47,29 @@ void OnButtonClickedAnimation(App *app, UIEntity *uiEntity)
 {
 	TweenData tweenData = {
 		.vector2FloatTween = {
-			.target = &uiEntity->scale,
-			.fromValue = uiEntity->scale,
+			.target = &uiEntity->parentScale,
+			.fromValue = uiEntity->parentScale,
 			.endValue = {2, 2}
 		}
 	};
 
-	CreateTween(app, VECTOR2_FLOAT_TWEEN, tweenData, 2, IN_OUT_BOUNCE);
+
+	TweenData tweenDataReverse = {
+		.vector2FloatTween = {
+			.target = &uiEntity->parentScale,
+			.fromValue = {2, 2},
+			.endValue = {1, 1}
+		}
+	};
+
+
+	Tween *buttonTween = CreateTween(VECTOR2_FLOAT_TWEEN, tweenData, 2, true, IN_OUT_BOUNCE);
+	Tween *buttonTweenReverse = CreateTween(VECTOR2_FLOAT_TWEEN, tweenDataReverse, 2, true, IN_OUT_BOUNCE);
+
+	TweenSequence *tweenSequence = CreateTweenSequence();
+
+	AddTweenToSequence(tweenSequence, buttonTween);
+	AddTweenToSequence(tweenSequence, buttonTweenReverse);
+
+	PlayTweenSequence(app, tweenSequence);
 }

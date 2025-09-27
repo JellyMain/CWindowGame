@@ -164,6 +164,44 @@ bool RemoveFromListAtIndex(List *list, int index)
 }
 
 
+bool RemoveFromList(List *list, void *element)
+{
+	if (list == NULL)
+	{
+		fprintf(stderr, "List is NULL\n");
+		return false;
+	}
+
+	int index = -1;
+
+	for (int i = list->size - 1; i >= 0; i--)
+	{
+		if (list->elements[i] == element)
+		{
+			list->elements[i] = NULL;
+			index = i;
+			break;
+		}
+	}
+
+	if (index == -1)
+	{
+		fprintf(stderr, "Element was not found in the list\n");
+		return false;
+	}
+
+
+	for (int i = index; i < list->size - 1; i++)
+	{
+		void *nextElement = list->elements[i + 1];
+		list->elements[i] = nextElement;
+	}
+
+	list->size--;
+	return true;
+}
+
+
 int GetListSize(List *list)
 {
 	if (list == NULL)

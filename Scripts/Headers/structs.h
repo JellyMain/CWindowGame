@@ -2,6 +2,10 @@
 #include <SDL.h>
 #include "../DataStructures/Headers/List.h"
 #include "../DataStructures/Headers/Dictionary.h"
+#define VECTOR2_FLOAT_ONE (Vector2Float){1.0f, 1.0f}
+#define VECTOR2_INT_ONE (Vector2Int){1, 1}
+#define VECTOR2_FLOAT_ZERO (Vector2Float){0.0f, 0.0f}
+#define VECTOR2_INT_ZERO (Vector2Int){0,0}
 
 
 typedef struct
@@ -18,6 +22,7 @@ typedef struct
 	List *allUIEntities;
 	List *allGizmosEntities;
 	List *allTweeners;
+	List *allTweenSequences;
 	Dictionary *gizmosEntitiesDrawDictionary;
 	Dictionary *gameEntitiesDrawDictionary;
 	Dictionary *uiEntitiesDrawDictionary;
@@ -120,7 +125,9 @@ typedef struct
 typedef struct UIEntity
 {
 	Vector2Int worldPosition;
-	Vector2Float scale;
+	Vector2Float entityScale;
+	Vector2Float parentScale;
+	Vector2Float lastFrameParentScale;
 	Vector2Int originalSize;
 	Vector2Int size;
 	SDL_Texture *texture;
@@ -180,5 +187,16 @@ typedef struct
 	TweenData tweenData;
 	float duration;
 	float elapsedTime;
+	bool isFinished;
+	bool destroyOnComplete;
 	TweenEasingType easingType;
 } Tween;
+
+
+typedef struct
+{
+	List *tweeners;
+	bool isStarted;
+	bool isFinished;
+
+} TweenSequence;

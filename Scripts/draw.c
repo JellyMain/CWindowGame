@@ -90,8 +90,8 @@ void BlitUIEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int posit
 {
 	SDL_Rect rect;
 
-	entity->size.x = entity->originalSize.x * entity->scale.x;
-	entity->size.y = entity->originalSize.y * entity->scale.y;
+	entity->size.x = entity->originalSize.x * entity->entityScale.x * entity->parentScale.x;
+	entity->size.y = entity->originalSize.y * entity->entityScale.y * entity->parentScale.y;
 
 	rect.x = position.x - entity->size.x / 2;
 	rect.y = position.y - entity->size.y / 2;

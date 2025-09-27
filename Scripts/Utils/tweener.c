@@ -65,188 +65,247 @@ float EaseOutBounce(float t);
 
 float EaseInOutBounce(float t);
 
+void UpdateTween(App *app, Tween *tween, float deltaTime);
 
-void CreateTween(App *app, TweenType tweenType, TweenData tweenData, float duration, TweenEasingType easingType)
+
+Tween *CreateTween(TweenType tweenType, TweenData tweenData, float duration, bool destroyOnComplete,
+                   TweenEasingType easingType)
 {
 	Tween *tween = calloc(1, sizeof(Tween));
+	tween->destroyOnComplete = destroyOnComplete;
+	tween->isFinished = false;
 	tween->tweenType = tweenType;
 	tween->tweenData = tweenData;
 	tween->duration = duration;
 	tween->elapsedTime = 0;
 	tween->easingType = easingType;
 
+	return tween;
+}
+
+
+void PlayTween(App *app, Tween *tween)
+{
 	AddToList(app->allTweeners, tween);
+}
+
+
+TweenSequence *CreateTweenSequence()
+{
+	TweenSequence *tweenSequence = calloc(1, sizeof(TweenSequence));
+	tweenSequence->tweeners = CreateList(0);
+	return tweenSequence;
+}
+
+
+void PlayTweenSequence(App *app, TweenSequence *tweenSequence)
+{
+	tweenSequence->isStarted = true;
+	AddToList(app->allTweenSequences, tweenSequence);
+}
+
+
+void AddTweenToSequence(TweenSequence *tweenSequence, Tween *tween)
+{
+	if (!tweenSequence->isStarted)
+	{
+		tween->destroyOnComplete = false;
+		AddToList(tweenSequence->tweeners, tween);
+	}
+	else
+	{
+		printf("Sequence is already started");
+	}
+}
+
+
+void UpdateSequences(App *app, float deltaTime)
+{
+	for (int i = app->allTweenSequences->size - 1; i >= 0; i--)
+	{
+		TweenSequence *tweenSequence = app->allTweenSequences->elements[i];
+
+		for (int j = 0; j < tweenSequence->tweeners->size; j++)
+		{
+			Tween *tween = tweenSequence->tweeners->elements[j];
+
+			if (!tween->isFinished)
+			{
+				UpdateTween(app, tween, deltaTime);
+				break;
+			}
+		}
+
+		Tween *lastTween = tweenSequence->tweeners->elements[tweenSequence->tweeners->size - 1];
+
+		if (lastTween->isFinished)
+		{
+			RemoveFromList(app->allTweenSequences, tweenSequence);
+			DestroySequence(tweenSequence);
+		}
+	}
 }
 
 
 void UpdateTweeners(App *app, float deltaTime)
 {
+	UpdateSequences(app, deltaTime);
+
 	for (int i = app->allTweeners->size - 1; i >= 0; i--)
 	{
 		Tween *tween = app->allTweeners->elements[i];
 
-		tween->elapsedTime += deltaTime;
-
-		float t = tween->elapsedTime / tween->duration;
-
-		switch (tween->easingType)
-		{
-			case LINEAR:
-				t = EaseLinear(t);
-				break;
-			case IN_SINE:
-				t = EaseInSine(t);
-				break;
-			case OUT_SINE:
-				t = EaseOutSine(t);
-				break;
-			case IN_OUT_SINE:
-				t = EaseInOutSine(t);
-				break;
-			case IN_QUAD:
-				t = EaseInQuad(t);
-				break;
-			case OUT_QUAD:
-				t = EaseOutQuad(t);
-				break;
-			case IN_OUT_QUAD:
-				t = EaseInOutQuad(t);
-				break;
-			case IN_CUBIC:
-				t = EaseInCubic(t);
-				break;
-			case OUT_CUBIC:
-				t = EaseOutCubic(t);
-				break;
-			case IN_OUT_CUBIC:
-				t = EaseInOutCubic(t);
-				break;
-			case IN_QUART:
-				t = EaseInQuart(t);
-				break;
-			case OUT_QUART:
-				t = EaseOutQuart(t);
-				break;
-			case IN_OUT_QUART:
-				t = EaseInOutQuart(t);
-				break;
-			case IN_QUINT:
-				t = EaseInQuint(t);
-				break;
-			case OUT_QUINT:
-				t = EaseOutQuint(t);
-				break;
-			case IN_OUT_QUINT:
-				t = EaseInOutQuint(t);
-				break;
-			case IN_EXPO:
-				t = EaseInExpo(t);
-				break;
-			case OUT_EXPO:
-				t = EaseOutExpo(t);
-				break;
-			case IN_OUT_EXPO:
-				t = EaseInOutExpo(t);
-				break;
-			case IN_CIRC:
-				t = EaseInCirc(t);
-				break;
-			case OUT_CIRC:
-				t = EaseOutCirc(t);
-				break;
-			case IN_OUT_CIRC:
-				t = EaseInOutCirc(t);
-				break;
-			case IN_BACK:
-				t = EaseInBack(t);
-				break;
-			case OUT_BACK:
-				t = EaseOutBack(t);
-				break;
-			case IN_OUT_BACK:
-				t = EaseInOutBack(t);
-				break;
-			case IN_ELASTIC:
-				t = EaseInElastic(t);
-				break;
-			case OUT_ELASTIC:
-				t = EaseOutElastic(t);
-				break;
-			case IN_OUT_ELASTIC:
-				t = EaseInOutElastic(t);
-				break;
-			case IN_BOUNCE:
-				t = EaseInBounce(t);
-				break;
-			case OUT_BOUNCE:
-				t = EaseOutBounce(t);
-				break;
-			case IN_OUT_BOUNCE:
-				t = EaseInOutBounce(t);
-				break;
-		}
-
-
-		if (tween->elapsedTime >= tween->duration)
-		{
-			switch (tween->tweenType)
-			{
-				case VECTOR2_FLOAT_TWEEN:
-					*tween->tweenData.vector2FloatTween.target = tween->tweenData.vector2FloatTween.endValue;
-					break;
-				case FLOAT_TWEEN:
-					*tween->tweenData.floatTween.target = tween->tweenData.floatTween.endValue;
-					break;
-			}
-
-			RemoveFromListAtIndex(app->allTweeners, i);
-			DestroyTween(tween);
-		}
-		else
-		{
-			switch (tween->tweenType)
-			{
-				case VECTOR2_FLOAT_TWEEN:
-					*tween->tweenData.vector2FloatTween.target = LerpVector2Float(
-						tween->tweenData.vector2FloatTween.fromValue, tween->tweenData.vector2FloatTween.endValue, t);
-					break;
-
-				case FLOAT_TWEEN:
-					*tween->tweenData.floatTween.target = LerpFloat(
-						tween->tweenData.floatTween.fromValue, tween->tweenData.floatTween.endValue, t);
-			}
-		}
+		UpdateTween(app, tween, deltaTime);
 	}
 }
 
 
-void TweenVector2Float(Vector2Float *from, Vector2Float to, float duration)
+void UpdateTween(App *app, Tween *tween, float deltaTime)
 {
-	Vector2Float originalValue = *from;
-	float elapsedTime = 0;
-	Uint64 lastFrameTime = SDL_GetPerformanceCounter();
-	Uint64 currentFrameTime = 0;
-	float deltaTime = 0.0f;
-	float t = 0.0f;
-
-
-	while (elapsedTime < duration)
+	if (tween->isFinished)
 	{
-		currentFrameTime = SDL_GetPerformanceCounter();
-		deltaTime = (currentFrameTime - lastFrameTime) / (float) SDL_GetPerformanceFrequency();
-		lastFrameTime = currentFrameTime;
-		elapsedTime += deltaTime;
-
-		printf("%f\n", deltaTime);
-
-		t = elapsedTime / duration;
-		t = ClampFloat(t, 0.0f, 1.0f);
-
-		*from = LerpVector2Float(originalValue, to, t);
-		SDL_Delay(16);
+		return;
 	}
 
-	*from = to;
+	tween->elapsedTime += deltaTime;
+
+	float t = tween->elapsedTime / tween->duration;
+
+	switch (tween->easingType)
+	{
+		case LINEAR:
+			t = EaseLinear(t);
+			break;
+		case IN_SINE:
+			t = EaseInSine(t);
+			break;
+		case OUT_SINE:
+			t = EaseOutSine(t);
+			break;
+		case IN_OUT_SINE:
+			t = EaseInOutSine(t);
+			break;
+		case IN_QUAD:
+			t = EaseInQuad(t);
+			break;
+		case OUT_QUAD:
+			t = EaseOutQuad(t);
+			break;
+		case IN_OUT_QUAD:
+			t = EaseInOutQuad(t);
+			break;
+		case IN_CUBIC:
+			t = EaseInCubic(t);
+			break;
+		case OUT_CUBIC:
+			t = EaseOutCubic(t);
+			break;
+		case IN_OUT_CUBIC:
+			t = EaseInOutCubic(t);
+			break;
+		case IN_QUART:
+			t = EaseInQuart(t);
+			break;
+		case OUT_QUART:
+			t = EaseOutQuart(t);
+			break;
+		case IN_OUT_QUART:
+			t = EaseInOutQuart(t);
+			break;
+		case IN_QUINT:
+			t = EaseInQuint(t);
+			break;
+		case OUT_QUINT:
+			t = EaseOutQuint(t);
+			break;
+		case IN_OUT_QUINT:
+			t = EaseInOutQuint(t);
+			break;
+		case IN_EXPO:
+			t = EaseInExpo(t);
+			break;
+		case OUT_EXPO:
+			t = EaseOutExpo(t);
+			break;
+		case IN_OUT_EXPO:
+			t = EaseInOutExpo(t);
+			break;
+		case IN_CIRC:
+			t = EaseInCirc(t);
+			break;
+		case OUT_CIRC:
+			t = EaseOutCirc(t);
+			break;
+		case IN_OUT_CIRC:
+			t = EaseInOutCirc(t);
+			break;
+		case IN_BACK:
+			t = EaseInBack(t);
+			break;
+		case OUT_BACK:
+			t = EaseOutBack(t);
+			break;
+		case IN_OUT_BACK:
+			t = EaseInOutBack(t);
+			break;
+		case IN_ELASTIC:
+			t = EaseInElastic(t);
+			break;
+		case OUT_ELASTIC:
+			t = EaseOutElastic(t);
+			break;
+		case IN_OUT_ELASTIC:
+			t = EaseInOutElastic(t);
+			break;
+		case IN_BOUNCE:
+			t = EaseInBounce(t);
+			break;
+		case OUT_BOUNCE:
+			t = EaseOutBounce(t);
+			break;
+		case IN_OUT_BOUNCE:
+			t = EaseInOutBounce(t);
+			break;
+	}
+
+
+	if (tween->elapsedTime >= tween->duration)
+	{
+		switch (tween->tweenType)
+		{
+			case VECTOR2_FLOAT_TWEEN:
+				*tween->tweenData.vector2FloatTween.target = tween->tweenData.vector2FloatTween.endValue;
+				break;
+			case FLOAT_TWEEN:
+				*tween->tweenData.floatTween.target = tween->tweenData.floatTween.endValue;
+				break;
+		}
+
+		if (tween->destroyOnComplete)
+		{
+			RemoveFromList(app->allTweeners, tween);
+			DestroyTween(tween);
+		}
+		else
+		{
+			RemoveFromList(app->allTweeners, tween);
+			tween->isFinished = true;
+		}
+	}
+	else
+	{
+		switch (tween->tweenType)
+		{
+			case VECTOR2_FLOAT_TWEEN:
+				*tween->tweenData.vector2FloatTween.target = LerpVector2Float(
+					tween->tweenData.vector2FloatTween.fromValue, tween->tweenData.vector2FloatTween.endValue, t);
+				break;
+
+			case FLOAT_TWEEN:
+				*tween->tweenData.floatTween.target = LerpFloat(
+					tween->tweenData.floatTween.fromValue, tween->tweenData.floatTween.endValue, t);
+		}
+	}
 }
 
 
@@ -258,6 +317,23 @@ void DestroyTween(Tween *tween)
 	}
 
 	free(tween);
+}
+
+
+void DestroySequence(TweenSequence *tweenSequence)
+{
+	if (tweenSequence == NULL)
+	{
+		return;
+	}
+
+	for (int i = 0; i < tweenSequence->tweeners->size; ++i)
+	{
+		Tween *tween = tweenSequence->tweeners->elements[i];
+		DestroyTween(tween);
+	}
+
+	free(tweenSequence);
 }
 
 

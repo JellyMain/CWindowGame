@@ -159,8 +159,20 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 {
 	UIEntity *textEntity = calloc(1, sizeof(UIEntity));
 
-	textEntity->scale = scale;
+	textEntity->entityScale = scale;
 	textEntity->parentEntity = parent;
+	textEntity->childEntities = CreateList(0);
+
+	if (parent != NULL)
+	{
+		textEntity->parentScale = parent->parentScale;
+	}
+	else
+	{
+		textEntity->parentScale = VECTOR2_FLOAT_ONE;
+	}
+
+	textEntity->lastFrameParentScale = textEntity->parentScale;
 
 	TTF_Font *font = TTF_OpenFont("D:/CWindowGame/Assets/ByteBounce.ttf", fontSize);
 	if (!font)
@@ -214,12 +226,24 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
                   UIEntity *parent)
 {
 	UIEntity *buttonEntity = calloc(1, sizeof(UIEntity));
-	buttonEntity->scale = scale;
+	buttonEntity->entityScale = scale;
 	buttonEntity->uiType = BUTTON;
 	buttonEntity->childEntities = CreateList(0);
 	buttonEntity->parentEntity = parent;
 	buttonEntity->OnInteraction = OnInteraction;
 	buttonEntity->OnInteractionAnimation = OnInteractionAnimation;
+
+	if (parent != NULL)
+	{
+		buttonEntity->parentScale = parent->parentScale;
+	}
+	else
+	{
+		buttonEntity->parentScale = VECTOR2_FLOAT_ONE;
+	}
+
+	buttonEntity->lastFrameParentScale = buttonEntity->parentScale;
+
 
 	buttonEntity->worldPosition = position;
 
@@ -287,6 +311,29 @@ void UpdateUIElements(App *app)
 	for (int i = 0; i < app->allUIEntities->size; i++)
 	{
 		UIEntity *uiEntity = app->allUIEntities->elements[i];
+
+		if (uiEntity->childEntities->size > 0)
+		{
+			Vector2Float parentScaleDelta = (Vector2Float){
+				uiEntity->parentScale.x - uiEntity->lastFrameParentScale.x,
+				uiEntity->parentScale.y - uiEntity->lastFrameParentScale.y
+			};
+
+			if (parentScaleDelta.x != 0.0f || parentScaleDelta.y != 0.0f)
+			{
+				for (int j = 0; j < uiEntity->childEntities->size; j++)
+				{
+					UIEntity *child = uiEntity->childEntities->elements[j];
+					child->parentScale = (Vector2Float){
+						child->parentScale.x + parentScaleDelta.x, child->parentScale.y + parentScaleDelta.y
+					};
+				}
+			}
+
+
+			uiEntity->lastFrameParentScale = uiEntity->parentScale;
+		}
+
 
 		switch (uiEntity->uiType)
 		{

@@ -1,4 +1,4 @@
 ﻿#pragma once
-#include "Headers/structs.h"
+#include "structs.h"
 
 void CreateMenu(App *app);

@@ -1,7 +1,7 @@
 ﻿#include <SDL_events.h>
 #include "Headers/input.h"
 
-#include "stateMachine.h"
+#include "Headers/stateMachine.h"
 #include "Headers/app.h"
 #include "Headers/structs.h"
 

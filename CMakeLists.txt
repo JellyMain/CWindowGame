@@ -42,9 +42,11 @@ add_executable(WindowGame Scripts/main.c
         Scripts/levelService.c
         Scripts/Headers/levelService.h
         Scripts/menu.c
-        Scripts/menu.h
+        Scripts/Headers/menu.h
         Scripts/stateMachine.c
-        Scripts/stateMachine.h
+        Scripts/Headers/stateMachine.h
+        Scripts/update.c
+        Scripts/Headers/update.h
 )
 
 

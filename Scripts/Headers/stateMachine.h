@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Headers/structs.h"
+#include "structs.h"
 
 void SetPendingState(App *app, GameState state);
 

@@ -3,4 +3,6 @@
 
 void CreateLevel(App *app, int level);
 
-void CleanUpLevel(App *app);
+void CleanUpScene(App *app);
+
+LevelData *CreateLevelData();

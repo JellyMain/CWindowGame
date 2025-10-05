@@ -2,7 +2,7 @@
 #include <SDL_timer.h>
 #include <time.h>
 
-#include "stateMachine.h"
+#include "Headers/stateMachine.h"
 #include "Headers/ui.h"
 #include "Headers/levelTarget.h"
 #include "Headers/player.h"
@@ -18,6 +18,7 @@
 
 
 static App *g_app = NULL;
+
 
 int EventFilter(void *userdata, SDL_Event *event)
 {
@@ -51,6 +52,7 @@ void HandleGameStates(App *app)
 	}
 }
 
+
 int main()
 {
 	srand(time(NULL));
@@ -62,10 +64,6 @@ int main()
 	}
 
 	g_app = app;
-
-
-	SDL_SetEventFilter(EventFilter, NULL);
-
 
 	SetPendingState(app, MENU_GAME_STATE);
 
@@ -84,31 +82,12 @@ int main()
 
 		Render(app);
 
-		UpdateTweeners(app, deltaTime);
-
-		for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
-		{
-			KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
-			Window *window = pair->key;
-			UpdateWindow(app, window);
-		}
-
-		UpdateUIElements(app);
-
 		ProcessInput();
 
-		if (app->gameState == GAMEPLAY_GAME_STATE)
+		for (int i = 0; i < app->updateSystem->updatables->size; ++i)
 		{
-			MovePlayer(app, app->player);
-
-			if (app->hasWon == false)
-			{
-				if (HasReachedLevelTarget(app->player, app->levelTarget))
-				{
-					app->hasWon = true;
-					SetPendingState(app, GAME_OVER_GAME_STATE);
-				}
-			}
+			Updatable *updatable = app->updateSystem->updatables->elements[i];
+			updatable->Update(updatable->data, app, deltaTime);
 		}
 
 		SDL_Delay(16);

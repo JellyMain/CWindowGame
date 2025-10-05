@@ -1,14 +1,16 @@
 ﻿#include "Headers/app.h"
+
+#include "Headers/update.h"
 #include "Headers/draw.h"
-#include "Headers/ui.h"
+#include "Headers/levelService.h"
 
 
 App *CreateApp(bool showGizmos)
 {
 	App *app = calloc(1, sizeof(App));
 
-	app->player = NULL;
-	app->levelTarget = NULL;
+	app->updateSystem = CreateUpdateSystem();
+	app->levelData = CreateLevelData();
 	app->pendingGameState = NONE_GAME_STATE;
 	app->gameState = MENU_GAME_STATE;
 	app->hasWon = false;

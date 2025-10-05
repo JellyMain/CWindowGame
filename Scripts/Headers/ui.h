@@ -13,7 +13,6 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
                   void (*OnInteraction)(App *app),
                   void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity), UIEntity *parent);
 
-void UpdateUIElements(App *app);
 
 TextAtlas *CreateTextAtlas(char *fontPath, int fontSize);
 
@@ -23,3 +22,7 @@ void DrawThickRectBorder(Window *window, Vector2Int position, Vector2Int size, i
 
 void DrawDynamicText(Window *window, TextAtlas *textAtlas, char *text, Vector2Int position,
                      Vector2Float scale);
+
+void UpdateWindow(App *app, Window *window);
+
+Updatable *CreateUIUpdatable();

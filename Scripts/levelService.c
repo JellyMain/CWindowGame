@@ -3,6 +3,7 @@
 #include "Headers/levelTarget.h"
 #include "Headers/player.h"
 #include "Headers/structs.h"
+#include "Headers/update.h"
 #include "Headers/window.h"
 
 
@@ -22,10 +23,18 @@ void CreateLevel(App *app, int level)
 	                             "WindowC");
 
 
-	app->player = CreatePlayer(app, (Vector2Int){300, 300}, (Vector2Float){2, 2});
-	app->levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Float){2, 2});
+	app->levelData->levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Float){2, 2});
+	app->levelData->player = CreatePlayer(app, (Vector2Int){300, 300}, (Vector2Float){2, 2});
 }
 
+
+LevelData *CreateLevelData()
+{
+	LevelData *levelData = calloc(1, sizeof(LevelData));
+	levelData->player = NULL;
+	levelData->levelTarget = NULL;
+	return levelData;
+}
 
 
 void CleanUpWindow(Window *window)
@@ -72,8 +81,15 @@ void CleanUpUIEntity(UIEntity *entity)
 }
 
 
-void CleanUpLevel(App *app)
+void CleanUpScene(App *app)
 {
+	for (int i = 0; i < app->updateSystem->updatables->size; ++i)
+	{
+		Updatable *updatable = app->updateSystem->updatables->elements[i];
+		DestroyUpdatable(updatable);
+	}
+
+
 	for (int i = 0; i < app->allGizmosEntities->size; i++)
 	{
 		GizmoEntity *gizmoEntity = app->allGizmosEntities->elements[i];
@@ -92,6 +108,7 @@ void CleanUpLevel(App *app)
 		CleanUpUIEntity(uiEntity);
 	}
 
+	ListClear(app->updateSystem->updatables);
 	ListClear(app->allUIEntities);
 	ListClear(app->allGameEntities);
 	ListClear(app->allGizmosEntities);

@@ -1,6 +1,6 @@
-﻿#include "menu.h"
+﻿#include "Headers/menu.h"
 
-#include "stateMachine.h"
+#include "Headers/stateMachine.h"
 #include "Headers/levelService.h"
 #include "Headers/structs.h"
 #include "Headers/ui.h"

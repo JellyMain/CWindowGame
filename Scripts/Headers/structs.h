@@ -27,8 +27,8 @@ typedef struct
 
 typedef struct
 {
-	struct GameEntity *player;
-	struct GameEntity *levelTarget;
+	struct LevelData *levelData;
+	struct UpdateSystem *updateSystem;
 	GameState pendingGameState;
 	GameState gameState;
 	List *allGameEntities;
@@ -44,6 +44,7 @@ typedef struct
 	bool hasWon;
 	bool showGizmos;
 } App;
+
 
 typedef struct
 {
@@ -234,3 +235,23 @@ typedef struct
 	bool isStarted;
 	bool isFinished;
 } TweenSequence;
+
+
+typedef struct
+{
+	void *data;
+	void (*Update)(void *self, App *app, float deltaTime);
+} Updatable;
+
+
+typedef struct UpdateSystem
+{
+	List *updatables;
+} UpdateSystem;
+
+
+typedef struct LevelData
+{
+	GameEntity *player;
+	GameEntity *levelTarget;
+} LevelData;

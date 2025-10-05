@@ -4,6 +4,7 @@
 #include <SDL_render.h>
 #include <SDL_ttf.h>
 
+#include "Headers/update.h"
 #include "Headers/app.h"
 #include "Headers/draw.h"
 #include "Headers/input.h"
@@ -374,6 +375,7 @@ void UpdateChildrenPosition(UIEntity *uiEntity)
 	}
 }
 
+
 void HandleInteractions(App *app, UIEntity *uiEntity)
 {
 	switch (uiEntity->uiType)
@@ -415,7 +417,8 @@ void HandleInteractions(App *app, UIEntity *uiEntity)
 	}
 }
 
-void UpdateUIElements(App *app)
+
+void UpdateUIElements(void *data, App *app, float deltaTime)
 {
 	for (int i = 0; i < app->allUIEntities->size; i++)
 	{
@@ -427,4 +430,9 @@ void UpdateUIElements(App *app)
 	}
 }
 
-//TODO: Separate loading and updating states.Right now when I clean the level and create new, elements are trying to update, which cases them to reference to freed memory
+
+Updatable *CreateUIUpdatable()
+{
+	Updatable *updatable = CreateUpdatable(NULL, UpdateUIElements);
+	return updatable;
+}

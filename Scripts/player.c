@@ -1,5 +1,6 @@
 ﻿#include "Headers/player.h"
 
+#include "Headers/update.h"
 #include "Headers/draw.h"
 #include "Headers/input.h"
 #include "Headers/structs.h"
@@ -76,4 +77,18 @@ void MovePlayer(App *app, GameEntity *player)
 	{
 		player->worldPosition = nextFramePosition;
 	}
+}
+
+
+void UpdatePlayer(void *data, App *app, float deltaTime)
+{
+	GameEntity *player = data;
+	MovePlayer(app, player);
+}
+
+
+Updatable *CreatePlayerUpdatable(GameEntity *player)
+{
+	Updatable *updatable = CreateUpdatable(player, UpdatePlayer);
+	return updatable;
 }

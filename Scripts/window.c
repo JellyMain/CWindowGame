@@ -1,12 +1,14 @@
 ﻿#include "Headers/window.h"
 
+#include "Headers/update.h"
 #include "Headers/app.h"
 #include "Headers/input.h"
 #include "Headers/ui.h"
 #include "Utils/mathUtils.h"
 
 
-Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int size, WindowRenderType renderType,
+Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int size,
+                                     WindowRenderType renderType,
                                      WindowType windowType,
                                      char *title)
 {
@@ -111,6 +113,24 @@ void UpdateWindow(App *app, Window *window)
 			}
 		}
 	}
+}
+
+
+void UpdateWindows(void *data, App *app, float deltaTime)
+{
+	for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
+	{
+		KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
+		Window *window = pair->key;
+		UpdateWindow(app, window);
+	}
+}
+
+
+Updatable *CreateWindowsUpdatable()
+{
+	Updatable *updatable = CreateUpdatable(NULL, UpdateWindows);
+	return updatable;
 }
 
 

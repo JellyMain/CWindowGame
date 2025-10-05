@@ -2,6 +2,7 @@
 
 #include <SDL_timer.h>
 #include "mathUtils.h"
+#include "../Headers/update.h"
 
 float EaseLinear(float t);
 
@@ -65,14 +66,16 @@ float EaseOutBounce(float t);
 
 float EaseInOutBounce(float t);
 
-void UpdateTween(App *app, Tween *tween, float deltaTime);
 
 void FinishTween(App *app, Tween *tween);
 
 void FinishSequence(App *app, TweenSequence *tweenSequence);
 
+void UpdateTween(App *app, Tween *tween, float deltaTime);
 
-Tween *CreateTween(TweenType tweenType, void *target, TweenData tweenData, float duration, bool destroyOnComplete,
+
+Tween *CreateTween(TweenType tweenType, void *target, TweenData tweenData, float duration,
+                   bool destroyOnComplete,
                    TweenEasingType easingType)
 {
 	Tween *tween = calloc(1, sizeof(Tween));
@@ -168,6 +171,7 @@ void AddTweenToSequence(TweenSequence *tweenSequence, Tween *tween)
 	}
 }
 
+
 void UpdateSequences(App *app)
 {
 	for (int i = app->allTweenSequences->size - 1; i >= 0; i--)
@@ -199,7 +203,7 @@ void UpdateSequences(App *app)
 }
 
 
-void UpdateTweeners(App *app, float deltaTime)
+void UpdateTweeners(void *data, App *app, float deltaTime)
 {
 	UpdateSequences(app);
 
@@ -209,6 +213,13 @@ void UpdateTweeners(App *app, float deltaTime)
 
 		UpdateTween(app, tween, deltaTime);
 	}
+}
+
+
+Updatable *CreateTweenersUpdatable()
+{
+	Updatable *updatable = CreateUpdatable(NULL, UpdateTweeners);
+	return updatable;
 }
 
 
@@ -267,6 +278,7 @@ void FinishTween(App *app, Tween *tween)
 
 	DictionaryChangeValue(app->tweenTargetsDictionary, tween->target, NULL);
 }
+
 
 void UpdateTween(App *app, Tween *tween, float deltaTime)
 {
@@ -383,7 +395,8 @@ void UpdateTween(App *app, Tween *tween, float deltaTime)
 		{
 			case VECTOR2_FLOAT_TWEEN:
 				*(Vector2Float *) tween->target = LerpVector2Float(
-					tween->tweenData.vector2FloatTween.fromValue, tween->tweenData.vector2FloatTween.endValue, t);
+					tween->tweenData.vector2FloatTween.fromValue, tween->tweenData.vector2FloatTween.endValue,
+					t);
 				break;
 
 			case FLOAT_TWEEN:

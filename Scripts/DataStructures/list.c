@@ -1,9 +1,9 @@
-﻿#include "Headers/List.h"
+﻿#include "Headers/list.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-List *CreateList(int capacity)
+List *ListCreate(int capacity)
 {
 	if (capacity <= 0)
 	{
@@ -34,14 +34,14 @@ List *CreateList(int capacity)
 }
 
 
-void DestroyList(List *list)
+void ListDestroy(List *list)
 {
 	if (list == NULL)
 	{
 		return;
 	}
 
-	ClearList(list);
+	ListClear(list);
 
 	free(list->elements);
 	free(list);
@@ -78,7 +78,7 @@ bool ListHasEnoughCapacity(List *list, int minCapacity)
 }
 
 
-bool AddToList(List *list, void *element)
+bool ListAdd(List *list, void *element)
 {
 	if (list == NULL)
 	{
@@ -99,7 +99,7 @@ bool AddToList(List *list, void *element)
 }
 
 
-void *GetFromList(List *list, int index)
+void *ListGet(List *list, int index)
 {
 	if (list == NULL)
 	{
@@ -116,7 +116,7 @@ void *GetFromList(List *list, int index)
 }
 
 
-bool SetToList(List *list, int index, void *element)
+bool ListSet(List *list, int index, void *element)
 {
 	if (list == NULL)
 	{
@@ -136,7 +136,7 @@ bool SetToList(List *list, int index, void *element)
 }
 
 
-bool RemoveFromListAtIndex(List *list, int index)
+bool ListRemoveAtIndex(List *list, int index)
 {
 	if (list == NULL)
 	{
@@ -164,7 +164,7 @@ bool RemoveFromListAtIndex(List *list, int index)
 }
 
 
-bool RemoveFromList(List *list, void *element)
+bool ListRemove(List *list, void *element)
 {
 	if (list == NULL)
 	{
@@ -202,7 +202,7 @@ bool RemoveFromList(List *list, void *element)
 }
 
 
-int GetListSize(List *list)
+int ListGetSize(List *list)
 {
 	if (list == NULL)
 	{
@@ -214,7 +214,7 @@ int GetListSize(List *list)
 }
 
 
-bool IsListEmpty(List *list)
+bool ListIsEmpty(List *list)
 {
 	if (list == NULL || list->size == 0)
 	{
@@ -225,7 +225,7 @@ bool IsListEmpty(List *list)
 }
 
 
-void ClearList(List *list)
+void ListClear(List *list)
 {
 	if (list == NULL)
 	{

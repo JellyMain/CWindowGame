@@ -12,19 +12,22 @@
 #include "Utils/mathUtils.h"
 
 
-void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness, UIEntity *connectedEntity);
+void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness,
+                 UIEntity *connectedEntity);
 
 
-void DrawDynamicText(Window *window, TextAtlas *textAtlas, char *text, Vector2Int position, Vector2Float scale)
+void DrawDynamicText(Window *window, TextAtlas *textAtlas, char *text, Vector2Int position,
+                     Vector2Float scale)
 {
 	int currentX = 0;
-	SDL_Texture *atlasTexture = GetFromDictionary(textAtlas->windowTexturesDictionary, window);
+	SDL_Texture *atlasTexture = DictionaryGet(textAtlas->windowTexturesDictionary, window);
 
 	for (int i = 0; text[i] != '\0'; i++)
 	{
 		unsigned char character = (unsigned char) text[i];
 
-		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h > 0)
+		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h >
+		    0)
 		{
 			SDL_Rect charRect = textAtlas->characterRects[character];
 			SDL_Rect dstRect = {
@@ -47,16 +50,20 @@ void DrawThickRectBorder(Window *window, Vector2Int position, Vector2Int size, i
 	SDL_Rect topRect = {position.x - size.x / 2, position.y - size.y / 2, size.x, thickness};
 	SDL_RenderFillRect(window->renderer, &topRect);
 
-	SDL_Rect bottomRect = {position.x - size.x / 2, position.y + size.y / 2 - thickness, size.x, thickness};
+	SDL_Rect bottomRect = {
+		position.x - size.x / 2, position.y + size.y / 2 - thickness, size.x, thickness
+	};
 	SDL_RenderFillRect(window->renderer, &bottomRect);
 
 	SDL_Rect leftRect = {
-		position.x - size.x / 2, position.y - size.y / 2 + thickness, thickness, size.y - 2 * thickness
+		position.x - size.x / 2, position.y - size.y / 2 + thickness, thickness,
+		size.y - 2 * thickness
 	};
 	SDL_RenderFillRect(window->renderer, &leftRect);
 
 	SDL_Rect rightRect = {
-		position.x + size.x / 2 - thickness, position.y - size.y / 2 + thickness, thickness, size.y - 2 * thickness
+		position.x + size.x / 2 - thickness, position.y - size.y / 2 + thickness, thickness,
+		size.y - 2 * thickness
 	};
 	SDL_RenderFillRect(window->renderer, &rightRect);
 }
@@ -66,7 +73,7 @@ TextAtlas *CreateTextAtlas(char *fontPath, int fontSize)
 {
 	TextAtlas *textAtlas = calloc(1, sizeof(TextAtlas));
 	memset(textAtlas->characterRects, 0, sizeof(textAtlas->characterRects));
-	textAtlas->windowTexturesDictionary = CreateDictionary(HashWindow, WindowEquals);
+	textAtlas->windowTexturesDictionary = DictionaryCreate(HashWindow, WindowEquals);
 
 	TTF_Font *font = TTF_OpenFont(fontPath, fontSize);
 
@@ -124,7 +131,8 @@ TextAtlas *CreateTextAtlas(char *fontPath, int fontSize)
 		SDL_Rect characterRect = textAtlas->characterRects[(int) characters[i]];
 		char text[2] = {characters[i], '\0'};
 
-		SDL_Surface *characterSurface = TTF_RenderText_Blended(font, text, (SDL_Color){255, 255, 255, 255});
+		SDL_Surface *characterSurface = TTF_RenderText_Blended(
+			font, text, (SDL_Color){255, 255, 255, 255});
 
 		if (characterSurface == NULL)
 		{
@@ -149,19 +157,23 @@ TextAtlas *CreateTextAtlas(char *fontPath, int fontSize)
 
 void AddAtlasTexture(TextAtlas *textAtlas, Window *window)
 {
-	SDL_Texture *atlasTexture = SDL_CreateTextureFromSurface(window->renderer, textAtlas->atlasSurface);
-	AddToDictionary(textAtlas->windowTexturesDictionary, window, atlasTexture);
+	SDL_Texture *atlasTexture = SDL_CreateTextureFromSurface(
+		window->renderer, textAtlas->atlasSurface);
+	DictionaryAdd(textAtlas->windowTexturesDictionary, window, atlasTexture);
 }
 
 
-UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *app, Window *window, Vector2Int position,
+UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *app, Window *window,
+                           Vector2Int position,
                            Vector2Float scale, UIEntity *parent)
 {
 	UIEntity *textEntity = calloc(1, sizeof(UIEntity));
 
 	textEntity->entityScale = scale;
 	textEntity->parentEntity = parent;
-	textEntity->childEntities = CreateList(0);
+	textEntity->childEntities = ListCreate(0);
+	textEntity->worldPosition = position;
+	textEntity->lastFrameWorldPosition = position;
 
 	if (parent != NULL)
 	{
@@ -205,9 +217,6 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 	int textWidth = textSurface->w;
 	int textHeight = textSurface->h;
 
-
-	textEntity->worldPosition = position;
-
 	textEntity->uiType = TEXT;
 	textEntity->originalSize = (Vector2Int){textWidth, textHeight};
 
@@ -220,15 +229,18 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 }
 
 
-void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color backgroundColor, char *text, int fontSize,
-                  SDL_Color textColor, App *app, Window *window, Vector2Int position, Vector2Float scale,
-                  void (*OnInteraction)(), void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity),
+void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color backgroundColor,
+                  char *text, int fontSize,
+                  SDL_Color textColor, App *app, Window *window, Vector2Int position,
+                  Vector2Float scale,
+                  void (*OnInteraction)(App *app),
+                  void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity),
                   UIEntity *parent)
 {
 	UIEntity *buttonEntity = calloc(1, sizeof(UIEntity));
 	buttonEntity->entityScale = scale;
 	buttonEntity->uiType = BUTTON;
-	buttonEntity->childEntities = CreateList(0);
+	buttonEntity->childEntities = ListCreate(0);
 	buttonEntity->parentEntity = parent;
 	buttonEntity->OnInteraction = OnInteraction;
 	buttonEntity->OnInteractionAnimation = OnInteractionAnimation;
@@ -246,6 +258,7 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 
 
 	buttonEntity->worldPosition = position;
+	buttonEntity->lastFrameWorldPosition = position;
 
 	if (backgroundTexture == NULL)
 	{
@@ -258,7 +271,8 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 		}
 
 		SDL_FillRect(buttonSurface, NULL,
-		             SDL_MapRGB(buttonSurface->format, backgroundColor.r, backgroundColor.g, backgroundColor.b));
+		             SDL_MapRGB(buttonSurface->format, backgroundColor.r, backgroundColor.g,
+		                        backgroundColor.b));
 
 		buttonEntity->texture = SDL_CreateTextureFromSurface(window->renderer, buttonSurface);
 		buttonEntity->originalSize = size;
@@ -287,15 +301,17 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 
 	if (text != NULL && strlen(text) > 0)
 	{
-		UIEntity *textEntity = CreateStaticText(text, fontSize, textColor, app, window, position, scale, buttonEntity);
-		AddToList(buttonEntity->childEntities, textEntity);
+		UIEntity *textEntity = CreateStaticText(text, fontSize, textColor, app, window, position,
+		                                        scale, buttonEntity);
+		ListAdd(buttonEntity->childEntities, textEntity);
 	}
 
 	CreateGizmo(app, window, (SDL_Color){255, 0, 0, 255}, 2, buttonEntity);
 }
 
 
-void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness, UIEntity *connectedEntity)
+void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness,
+                 UIEntity *connectedEntity)
 {
 	GizmoEntity *gizmoEntity = calloc(1, sizeof(GizmoEntity));
 	gizmoEntity->connectedEntity = connectedEntity;
@@ -306,70 +322,109 @@ void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness, UIEnt
 }
 
 
+void UpdateChildrenScale(UIEntity *uiEntity)
+{
+	if (uiEntity->childEntities->size > 0)
+	{
+		Vector2Float parentScaleDelta = (Vector2Float){
+			uiEntity->parentScale.x - uiEntity->lastFrameParentScale.x,
+			uiEntity->parentScale.y - uiEntity->lastFrameParentScale.y
+		};
+
+		if (parentScaleDelta.x != 0.0f || parentScaleDelta.y != 0.0f)
+		{
+			for (int j = 0; j < uiEntity->childEntities->size; j++)
+			{
+				UIEntity *child = uiEntity->childEntities->elements[j];
+				child->parentScale = (Vector2Float){
+					child->parentScale.x + parentScaleDelta.x,
+					child->parentScale.y + parentScaleDelta.y
+				};
+			}
+		}
+
+
+		uiEntity->lastFrameParentScale = uiEntity->parentScale;
+	}
+}
+
+
+void UpdateChildrenPosition(UIEntity *uiEntity)
+{
+	if (uiEntity->childEntities->size > 0)
+	{
+		Vector2Int parentPositionDelta = (Vector2Int){
+			uiEntity->worldPosition.x - uiEntity->lastFrameWorldPosition.x,
+			uiEntity->worldPosition.y - uiEntity->lastFrameWorldPosition.y
+		};
+
+		if (parentPositionDelta.x != 0 || parentPositionDelta.y != 0)
+		{
+			for (int j = 0; j < uiEntity->childEntities->size; j++)
+			{
+				UIEntity *child = uiEntity->childEntities->elements[j];
+				child->worldPosition = (Vector2Int){
+					child->worldPosition.x + parentPositionDelta.x,
+					child->worldPosition.y + parentPositionDelta.y
+				};
+			}
+		}
+
+		uiEntity->lastFrameWorldPosition = uiEntity->worldPosition;
+	}
+}
+
+void HandleInteractions(App *app, UIEntity *uiEntity)
+{
+	switch (uiEntity->uiType)
+	{
+		case BUTTON:
+		{
+			Vector2Int mousePosition = GetMousePosition();
+
+			Vector2Int boundsMin = (Vector2Int){
+				uiEntity->worldPosition.x - uiEntity->size.x / 2,
+				uiEntity->worldPosition.y - uiEntity->size.y / 2
+			};
+			Vector2Int boundsMax = (Vector2Int){
+				uiEntity->worldPosition.x + uiEntity->size.x / 2,
+				uiEntity->worldPosition.y + uiEntity->size.y / 2
+			};
+
+			if (IsPointInBounds(mousePosition, boundsMin, boundsMax))
+			{
+				if (IsLeftMouseButtonClicked())
+				{
+					if (uiEntity->OnInteraction != NULL)
+					{
+						uiEntity->OnInteraction(app);
+					}
+					if (uiEntity->OnInteractionAnimation != NULL)
+					{
+						uiEntity->OnInteractionAnimation(app, uiEntity);
+					}
+				}
+			}
+
+			break;
+		}
+
+
+		default:
+			break;
+	}
+}
+
 void UpdateUIElements(App *app)
 {
 	for (int i = 0; i < app->allUIEntities->size; i++)
 	{
 		UIEntity *uiEntity = app->allUIEntities->elements[i];
 
-		if (uiEntity->childEntities->size > 0)
-		{
-			Vector2Float parentScaleDelta = (Vector2Float){
-				uiEntity->parentScale.x - uiEntity->lastFrameParentScale.x,
-				uiEntity->parentScale.y - uiEntity->lastFrameParentScale.y
-			};
-
-			if (parentScaleDelta.x != 0.0f || parentScaleDelta.y != 0.0f)
-			{
-				for (int j = 0; j < uiEntity->childEntities->size; j++)
-				{
-					UIEntity *child = uiEntity->childEntities->elements[j];
-					child->parentScale = (Vector2Float){
-						child->parentScale.x + parentScaleDelta.x, child->parentScale.y + parentScaleDelta.y
-					};
-				}
-			}
-
-
-			uiEntity->lastFrameParentScale = uiEntity->parentScale;
-		}
-
-
-		switch (uiEntity->uiType)
-		{
-			case BUTTON:
-			{
-				Vector2Int mousePosition = GetMousePosition();
-
-				Vector2Int boundsMin = (Vector2Int){
-					uiEntity->worldPosition.x - uiEntity->size.x / 2, uiEntity->worldPosition.y - uiEntity->size.y / 2
-				};
-				Vector2Int boundsMax = (Vector2Int){
-					uiEntity->worldPosition.x + uiEntity->size.x / 2,
-					uiEntity->worldPosition.y + uiEntity->size.y / 2
-				};
-
-				if (IsPointInBounds(mousePosition, boundsMin, boundsMax))
-				{
-					if (IsLeftMouseButtonClicked())
-					{
-						if (uiEntity->OnInteraction != NULL)
-						{
-							uiEntity->OnInteraction();
-						}
-						if (uiEntity->OnInteractionAnimation != NULL)
-						{
-							uiEntity->OnInteractionAnimation(app, uiEntity);
-						}
-					}
-				}
-
-				break;
-			}
-
-
-			default:
-				break;
-		}
+		UpdateChildrenScale(uiEntity);
+		UpdateChildrenPosition(uiEntity);
+		HandleInteractions(app, uiEntity);
 	}
 }
+
+//TODO: Separate loading and updating states.Right now when I clean the level and create new, elements are trying to update, which cases them to reference to freed memory

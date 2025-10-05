@@ -38,7 +38,14 @@ add_executable(WindowGame Scripts/main.c
         Scripts/ui.c
         Scripts/Headers/ui.h
         Scripts/Utils/Tweener.c
-        Scripts/Utils/Tweener.h)
+        Scripts/Utils/Tweener.h
+        Scripts/levelService.c
+        Scripts/Headers/levelService.h
+        Scripts/menu.c
+        Scripts/menu.h
+        Scripts/stateMachine.c
+        Scripts/stateMachine.h
+)
 
 
 target_link_libraries(WindowGame PRIVATE SDL2::SDL2

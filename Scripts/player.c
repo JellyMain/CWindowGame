@@ -15,11 +15,11 @@ bool IsPositionInBounds(App *app, GameEntity *entity, Vector2Int position)
 		Window *window = pair->key;
 
 		Vector2Int boundsMin = {
-			window->windowPosition.x, window->windowPosition.y
+			window->position.x, window->position.y
 		};
 		Vector2Int boundsMax = {
-			window->windowPosition.x + window->windowSize.x,
-			window->windowPosition.y + window->windowSize.y
+			window->position.x + window->size.x,
+			window->position.y + window->size.y
 		};
 
 		if (IsEntityInBounds(entity, position, boundsMin, boundsMax))
@@ -36,7 +36,7 @@ GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 {
 	GameEntity *player = calloc(1, sizeof(GameEntity));
 
-	player->texturesList = CreateList(0);
+	player->texturesList = ListCreate(0);
 
 	Vector2Int playerSize = {0};
 
@@ -46,7 +46,7 @@ GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 		Window *window = pair->key;
 		SDL_Texture *texture = LoadTexture("D:/CWindowGame/Assets/SlimeEnemy.png", window->renderer);
 		SDL_QueryTexture(texture, NULL, NULL, &playerSize.x, &playerSize.y);
-		AddToList(player->texturesList, texture);
+		ListAdd(player->texturesList, texture);
 	}
 
 	player->worldPosition = position;

@@ -11,7 +11,7 @@ GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 {
 	GameEntity *levelTarget = calloc(1, sizeof(GameEntity));
 
-	levelTarget->texturesList = CreateList(0);
+	levelTarget->texturesList = ListCreate(0);
 
 	Vector2Int levelTargetSize = {0};
 
@@ -21,7 +21,7 @@ GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 		Window *window = pair->key;
 		SDL_Texture *texture = LoadTexture("D:/CWindowGame/Assets/LevelTarget.png", window->renderer);
 		SDL_QueryTexture(texture, NULL, NULL, &levelTargetSize.x, &levelTargetSize.y);
-		AddToList(levelTarget->texturesList, texture);
+		ListAdd(levelTarget->texturesList, texture);
 	}
 
 	levelTarget->worldPosition = position;

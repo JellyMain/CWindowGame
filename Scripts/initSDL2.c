@@ -3,12 +3,11 @@
 #include <SDL_ttf.h>
 
 #include "Headers/ui.h"
-#include "Headers/app.h"
 #include "Headers/window.h"
 
-int InitSDL2(App *outApp)
+int InitSDL2(App *app)
 {
-	if (!outApp)
+	if (!app)
 	{
 		return -1;
 	}
@@ -31,21 +30,7 @@ int InitSDL2(App *outApp)
 	}
 
 
-	outApp->textAtlas = CreateTextAtlas("D:/CWindowGame/Assets/ByteBounce.ttf", 16);
-
-	CreateGameWindowWithRenderer(outApp, (Vector2Int){300, 100}, (Vector2Int){300, 300},
-	                             WINDOW_WORLD_SPACE,
-	                             SCALE_WITH_RESIZE,
-	                             "WindowA");
-	CreateGameWindowWithRenderer(outApp, (Vector2Int){100, 100}, (Vector2Int){300, 300},
-	                             WINDOW_WORLD_SPACE,
-	                             FIXED_SIZE,
-	                             "WindowB");
-	CreateGameWindowWithRenderer(outApp, (Vector2Int){500, 300}, (Vector2Int){300, 300},
-	                             WINDOW_WORLD_SPACE,
-	                             FIXED_SIZE,
-	                             "WindowC");
-
+	app->textAtlas = CreateTextAtlas("D:/CWindowGame/Assets/ByteBounce.ttf", 16);
 
 	return 0;
 }

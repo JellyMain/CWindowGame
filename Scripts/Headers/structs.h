@@ -1,11 +1,20 @@
 ﻿#pragma once
 #include <SDL.h>
-#include "../DataStructures/Headers/List.h"
-#include "../DataStructures/Headers/Dictionary.h"
+#include "../DataStructures/Headers/list.h"
+#include "../DataStructures/Headers/dictionary.h"
 #define VECTOR2_FLOAT_ONE (Vector2Float){1.0f, 1.0f}
 #define VECTOR2_INT_ONE (Vector2Int){1, 1}
 #define VECTOR2_FLOAT_ZERO (Vector2Float){0.0f, 0.0f}
 #define VECTOR2_INT_ZERO (Vector2Int){0,0}
+
+
+typedef enum
+{
+	NONE_GAME_STATE,
+	GAMEPLAY_GAME_STATE,
+	MENU_GAME_STATE,
+	GAME_OVER_GAME_STATE
+} GameState;
 
 
 typedef struct
@@ -18,11 +27,16 @@ typedef struct
 
 typedef struct
 {
+	struct GameEntity *player;
+	struct GameEntity *levelTarget;
+	GameState pendingGameState;
+	GameState gameState;
 	List *allGameEntities;
 	List *allUIEntities;
 	List *allGizmosEntities;
 	List *allTweeners;
 	List *allTweenSequences;
+	Dictionary *tweenTargetsDictionary;
 	Dictionary *gizmosEntitiesDrawDictionary;
 	Dictionary *gameEntitiesDrawDictionary;
 	Dictionary *uiEntitiesDrawDictionary;
@@ -49,6 +63,8 @@ typedef enum
 {
 	VECTOR2_FLOAT_TWEEN,
 	FLOAT_TWEEN,
+	VECTOR2_INT_TWEEN,
+	INT_TWEEN,
 } TweenType;
 
 
@@ -112,7 +128,7 @@ typedef enum
 } WindowType;
 
 
-typedef struct
+typedef struct GameEntity
 {
 	Vector2Int worldPosition;
 	Vector2Float scale;
@@ -128,6 +144,7 @@ typedef struct UIEntity
 	Vector2Float entityScale;
 	Vector2Float parentScale;
 	Vector2Float lastFrameParentScale;
+	Vector2Int lastFrameWorldPosition;
 	Vector2Int originalSize;
 	Vector2Int size;
 	SDL_Texture *texture;
@@ -135,7 +152,7 @@ typedef struct UIEntity
 	struct UIEntity *parentEntity;
 	List *childEntities;
 
-	void (*OnInteraction)();
+	void (*OnInteraction)(App *app);
 
 	void (*OnInteractionAnimation)(App *app, struct UIEntity *uiEntity);
 } UIEntity;
@@ -152,14 +169,19 @@ typedef struct
 typedef struct
 {
 	SDL_Window *sdlWindow;
-	Vector2Int windowPosition;
-	Vector2Int windowSize;
+	Vector2Int position;
+	Vector2Int size;
 	Vector2Int viewportOffset;
 	Vector2Int lastFrameSize;
 	SDL_Renderer *renderer;
 	WindowRenderType renderType;
 	WindowType windowType;
 	List *entitiesInWindowList;
+	Vector2Int windowCenterPoint;
+	Vector2Int upperRightPoint;
+	Vector2Int lowerRightPoint;
+	Vector2Int upperLeftPoint;
+	Vector2Int lowerLeftPoint;
 } Window;
 
 
@@ -167,17 +189,27 @@ typedef union
 {
 	struct
 	{
-		Vector2Float *target;
 		Vector2Float fromValue;
 		Vector2Float endValue;
 	} vector2FloatTween;
 
 	struct
 	{
-		float *target;
 		float fromValue;
 		float endValue;
 	} floatTween;
+
+	struct
+	{
+		Vector2Int fromValue;
+		Vector2Int endValue;
+	} vector2IntTween;
+
+	struct
+	{
+		int fromValue;
+		int endValue;
+	} intTween;
 } TweenData;
 
 
@@ -187,9 +219,12 @@ typedef struct
 	TweenData tweenData;
 	float duration;
 	float elapsedTime;
+	bool isStarted;
 	bool isFinished;
 	bool destroyOnComplete;
 	TweenEasingType easingType;
+	void *target;
+	int id;
 } Tween;
 
 
@@ -198,5 +233,4 @@ typedef struct
 	List *tweeners;
 	bool isStarted;
 	bool isFinished;
-
 } TweenSequence;

@@ -2,7 +2,7 @@
 #include <SDL_render.h>
 
 #include "structs.h"
-#include "../DataStructures/Headers/Dictionary.h"
+#include "../DataStructures/Headers/dictionary.h"
 
 SDL_Texture *LoadTexture(char *fileName, SDL_Renderer *renderer);
 

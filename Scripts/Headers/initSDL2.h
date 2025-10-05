@@ -2,6 +2,6 @@
 #include "app.h"
 
 
-int InitSDL2(App *outApp);
+int InitSDL2(App *app);
 
 void Cleanup(App *app);

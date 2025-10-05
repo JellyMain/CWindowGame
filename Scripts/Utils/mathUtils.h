@@ -25,3 +25,7 @@ float LerpFloat(float a, float b, float t);
 Vector2Float LerpVector2Float(Vector2Float a, Vector2Float b, float t);
 
 void TweenVector2Float(Vector2Float *from, Vector2Float to, float duration);
+
+int LerpInt(int a, int b, float t);
+
+Vector2Int LerpVector2Int(Vector2Int a, Vector2Int b, float t);

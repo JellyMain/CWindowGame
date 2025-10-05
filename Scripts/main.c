@@ -1,6 +1,8 @@
 ﻿#include <SDL_events.h>
 #include <SDL_timer.h>
+#include <time.h>
 
+#include "stateMachine.h"
 #include "Headers/ui.h"
 #include "Headers/levelTarget.h"
 #include "Headers/player.h"
@@ -9,6 +11,7 @@
 #include "Headers/structs.h"
 #include "Headers/app.h"
 #include "Headers/input.h"
+#include "Headers/levelService.h"
 #include "Headers/window.h"
 #include "Headers/winService.h"
 #include "Utils/tweener.h"
@@ -37,100 +40,20 @@ int EventFilter(void *userdata, SDL_Event *event)
 }
 
 
-void CleanUpWindow(Window *window)
+void HandleGameStates(App *app)
 {
-	if (window == NULL)
+	if (app->pendingGameState != NONE_GAME_STATE)
 	{
-		return;
+		SDL_SetEventFilter(NULL, NULL);
+		EnterState(app, app->pendingGameState);
+		app->pendingGameState = NONE_GAME_STATE;
+		SDL_SetEventFilter(EventFilter, NULL);
 	}
-
-	SDL_DestroyWindow(window->sdlWindow);
-	SDL_DestroyRenderer(window->renderer);
-
-	free(window);
 }
-
-
-void CleanUpGameEntity(GameEntity *entity)
-{
-	if (entity == NULL)
-	{
-		return;
-	}
-
-	for (int i = 0; i < entity->texturesList->size; ++i)
-	{
-		SDL_DestroyTexture(entity->texturesList->elements[i]);
-	}
-
-	DestroyList(entity->texturesList);
-	free(entity);
-}
-
-
-void CleanUpUIEntity(UIEntity *entity)
-{
-	if (entity == NULL)
-	{
-		return;
-	}
-
-	DestroyList(entity->childEntities);
-	SDL_DestroyTexture(entity->texture);
-	free(entity);
-}
-
-
-void CleanUpLevel(App *app)
-{
-	for (int i = 0; i < app->allGizmosEntities->size; i++)
-	{
-		GizmoEntity *gizmoEntity = app->allGizmosEntities->elements[i];
-		free(gizmoEntity);
-	}
-
-	for (int i = 0; i < app->allGameEntities->size; i++)
-	{
-		GameEntity *entity = app->allGameEntities->elements[i];
-		CleanUpGameEntity(entity);
-	}
-
-	for (int i = 0; i < app->allUIEntities->size; i++)
-	{
-		UIEntity *uiEntity = app->allUIEntities->elements[i];
-		CleanUpUIEntity(uiEntity);
-	}
-
-	ClearList(app->allUIEntities);
-	ClearList(app->allGameEntities);
-	ClearList(app->allGizmosEntities);
-
-	for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
-	{
-		KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
-		Window *window = pair->key;
-		List *gameEntitiesDrawList = pair->value;
-		List *uiEntitiesDrawList = GetFromDictionary(app->uiEntitiesDrawDictionary, window);
-		List *gizmoEntitiesDrawList = GetFromDictionary(app->gizmosEntitiesDrawDictionary, window);
-
-		SDL_Texture *atlasTexture = GetFromDictionary(app->textAtlas->windowTexturesDictionary, window);
-		SDL_DestroyTexture(atlasTexture);
-
-		ClearList(gizmoEntitiesDrawList);
-		ClearList(uiEntitiesDrawList);
-		ClearList(gameEntitiesDrawList);
-		CleanUpWindow(window);
-	}
-
-	ClearDictionary(app->textAtlas->windowTexturesDictionary);
-	ClearDictionary(app->gizmosEntitiesDrawDictionary);
-	ClearDictionary(app->gameEntitiesDrawDictionary);
-	ClearDictionary(app->uiEntitiesDrawDictionary);
-}
-
 
 int main()
 {
+	srand(time(NULL));
 	App *app = CreateApp(true);
 
 	if (InitSDL2(app) != 0)
@@ -138,13 +61,13 @@ int main()
 		return 1;
 	}
 
-
-	GameEntity *player = CreatePlayer(app, (Vector2Int){300, 300}, (Vector2Float){2, 2});
-	GameEntity *levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Float){2, 2});
-
 	g_app = app;
 
+
 	SDL_SetEventFilter(EventFilter, NULL);
+
+
+	SetPendingState(app, MENU_GAME_STATE);
 
 	Uint64 lastFrameTime = SDL_GetPerformanceCounter();
 	Uint64 currentFrameTime = 0;
@@ -152,11 +75,12 @@ int main()
 
 	while (1)
 	{
+		HandleGameStates(app);
+
+
 		currentFrameTime = SDL_GetPerformanceCounter();
 		deltaTime = (currentFrameTime - lastFrameTime) / (float) SDL_GetPerformanceFrequency();
 		lastFrameTime = currentFrameTime;
-
-		ProcessInput();
 
 		Render(app);
 
@@ -173,17 +97,17 @@ int main()
 
 		ProcessInput();
 
-		MovePlayer(app, player);
-
-		if (HasReachedLevelTarget(player, levelTarget))
+		if (app->gameState == GAMEPLAY_GAME_STATE)
 		{
+			MovePlayer(app, app->player);
+
 			if (app->hasWon == false)
 			{
-				SDL_SetEventFilter(NULL, NULL);
-				CleanUpLevel(app);
-				CreateWinScreen(app, 64);
-				app->hasWon = true;
-				SDL_SetEventFilter(EventFilter, NULL);
+				if (HasReachedLevelTarget(app->player, app->levelTarget))
+				{
+					app->hasWon = true;
+					SetPendingState(app, GAME_OVER_GAME_STATE);
+				}
 			}
 		}
 

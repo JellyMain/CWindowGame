@@ -1,4 +1,4 @@
-﻿#include "Headers/Dictionary.h"
+﻿#include "Headers/dictionary.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,10 +6,10 @@
 #define DEFAULT_BUCKETS_NUMBER 101
 #define MAX_LOAD_FACTOR 0.75
 
-void CheckAndResizeDictionary(Dictionary *dict);
+void DictionaryCheckAndResize(Dictionary *dict);
 
 
-Dictionary *CreateDictionary(unsigned int (*hashFunction)(void *key), bool (*keyEquals)(void *key1, void *key2))
+Dictionary *DictionaryCreate(unsigned int (*hashFunction)(void *key), bool (*keyEquals)(void *key1, void *key2))
 {
 	Dictionary *dict = calloc(1, sizeof(Dictionary));
 
@@ -31,13 +31,13 @@ Dictionary *CreateDictionary(unsigned int (*hashFunction)(void *key), bool (*key
 
 	for (int i = 0; i < DEFAULT_BUCKETS_NUMBER; i++)
 	{
-		List *bucket = CreateList(0);
+		List *bucket = ListCreate(0);
 
 		if (bucket == NULL)
 		{
 			for (int j = 0; j < DEFAULT_BUCKETS_NUMBER; j++)
 			{
-				DestroyList(buckets[j]);
+				ListDestroy(buckets[j]);
 			}
 
 			fprintf(stderr, "Failed to allocate memory for dictionary buckets\n");
@@ -48,7 +48,7 @@ Dictionary *CreateDictionary(unsigned int (*hashFunction)(void *key), bool (*key
 		buckets[i] = bucket;
 	}
 
-	dict->allPairs = CreateList(0);
+	dict->allPairs = ListCreate(0);
 	dict->bucketsNumber = DEFAULT_BUCKETS_NUMBER;
 	dict->buckets = buckets;
 	dict->hashFunction = hashFunction;
@@ -59,7 +59,7 @@ Dictionary *CreateDictionary(unsigned int (*hashFunction)(void *key), bool (*key
 }
 
 
-bool AddToDictionary(Dictionary *dict, void *key, void *value)
+bool DictionaryAdd(Dictionary *dict, void *key, void *value)
 {
 	if (dict == NULL)
 	{
@@ -91,7 +91,7 @@ bool AddToDictionary(Dictionary *dict, void *key, void *value)
 	List *bucket = dict->buckets[bucketIndex];
 
 
-	if (!AddToList(bucket, pair))
+	if (!ListAdd(bucket, pair))
 	{
 		fprintf(stderr, "Failed to add pair to dictionary\n");
 		free(pair);
@@ -100,16 +100,16 @@ bool AddToDictionary(Dictionary *dict, void *key, void *value)
 
 	if (bucket->size > 1)
 	{
-		CheckAndResizeDictionary(dict);
+		DictionaryCheckAndResize(dict);
 	}
 
-	AddToList(dict->allPairs, pair);
+	ListAdd(dict->allPairs, pair);
 
 	return true;
 }
 
 
-void DestroyDictionary(Dictionary *dict)
+void DictionaryDestroy(Dictionary *dict)
 {
 	if (dict == NULL)
 	{
@@ -125,10 +125,10 @@ void DestroyDictionary(Dictionary *dict)
 			free(pair);
 		}
 
-		DestroyList(bucket);
+		ListDestroy(bucket);
 	}
 
-	DestroyList(dict->allPairs);
+	ListDestroy(dict->allPairs);
 
 	free(dict->buckets);
 	free(dict);
@@ -187,13 +187,13 @@ bool ResizeDictionary(Dictionary *dict, int newSize)
 
 	for (int i = 0; i < newSize; i++)
 	{
-		newBuckets[i] = CreateList(0);
+		newBuckets[i] = ListCreate(0);
 
 		if (newBuckets[i] == NULL)
 		{
 			for (int j = 0; j < newSize; j++)
 			{
-				DestroyList(newBuckets[j]);
+				ListDestroy(newBuckets[j]);
 			}
 
 			fprintf(stderr, "Failed to allocate memory for dictionary buckets\n");
@@ -213,10 +213,10 @@ bool ResizeDictionary(Dictionary *dict, int newSize)
 			unsigned int hash = dict->hashFunction(pair->key);
 			unsigned int newBucketIndex = hash % newSize;
 
-			AddToList(newBuckets[newBucketIndex], pair);
+			ListAdd(newBuckets[newBucketIndex], pair);
 		}
 
-		DestroyList(bucket);
+		ListDestroy(bucket);
 	}
 
 	free(dict->buckets);
@@ -228,7 +228,7 @@ bool ResizeDictionary(Dictionary *dict, int newSize)
 }
 
 
-void CheckAndResizeDictionary(Dictionary *dict)
+void DictionaryCheckAndResize(Dictionary *dict)
 {
 	if (dict == NULL)
 	{
@@ -245,7 +245,7 @@ void CheckAndResizeDictionary(Dictionary *dict)
 }
 
 
-void ChangeDictionaryValue(Dictionary *dict, void *key, void *value)
+void DictionaryChangeValue(Dictionary *dict, void *key, void *value)
 {
 	if (dict == NULL)
 	{
@@ -256,12 +256,6 @@ void ChangeDictionaryValue(Dictionary *dict, void *key, void *value)
 	if (key == NULL)
 	{
 		fprintf(stderr, "Key is NULL\n");
-		return;
-	}
-
-	if (value == NULL)
-	{
-		fprintf(stderr, "Value is NULL\n");
 		return;
 	}
 
@@ -284,7 +278,7 @@ void ChangeDictionaryValue(Dictionary *dict, void *key, void *value)
 }
 
 
-void *GetFromDictionary(Dictionary *dict, void *key)
+void *DictionaryGet(Dictionary *dict, void *key)
 {
 	if (dict == NULL)
 	{
@@ -318,7 +312,7 @@ void *GetFromDictionary(Dictionary *dict, void *key)
 }
 
 
-void RemoveFromDictionary(Dictionary *dict, void *key)
+void DictionaryRemove(Dictionary *dict, void *key)
 {
 	if (dict == NULL)
 	{
@@ -343,13 +337,13 @@ void RemoveFromDictionary(Dictionary *dict, void *key)
 
 		if (dict->keyEquals(pair->key, key))
 		{
-			RemoveFromListAtIndex(bucket, i);
+			ListRemoveAtIndex(bucket, i);
 
 			for (int j = 0; j < dict->allPairs->size; j++)
 			{
 				if (dict->allPairs->elements[j] == pair)
 				{
-					RemoveFromListAtIndex(dict->allPairs, j);
+					ListRemoveAtIndex(dict->allPairs, j);
 					break;
 				}
 			}
@@ -364,7 +358,7 @@ void RemoveFromDictionary(Dictionary *dict, void *key)
 }
 
 
-void ClearDictionary(Dictionary *dict)
+void DictionaryClear(Dictionary *dict)
 {
 	if (dict == NULL)
 	{
@@ -380,10 +374,10 @@ void ClearDictionary(Dictionary *dict)
 
 	for (int i = 0; i < dict->bucketsNumber; i++)
 	{
-		ClearList(dict->buckets[i]);
+		ListClear(dict->buckets[i]);
 	}
 
-	ClearList(dict->allPairs);
+	ListClear(dict->allPairs);
 	dict->totalEntries = 0;
 }
 
@@ -399,4 +393,18 @@ unsigned int HashInt(void *key)
 bool IntEquals(void *key1, void *key2)
 {
 	return *(int *) key1 == *(int *) key2;
+}
+
+
+unsigned int HashPointer(void *key)
+{
+	uintptr_t address = (uintptr_t) key;
+	unsigned int hash = address * 2654435761u;
+	return hash;
+}
+
+
+bool PointerEquals(void *key1, void *key2)
+{
+	return (uintptr_t) key1 == (uintptr_t) key2;
 }

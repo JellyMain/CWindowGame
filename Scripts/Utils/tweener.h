@@ -3,7 +3,7 @@
 
 void TweenFloat(float *from, float to, float duration);
 
-Tween *CreateTween(TweenType tweenType, TweenData tweenData, float duration, bool destroyOnComplete,
+Tween *CreateTween(TweenType tweenType, void *target, TweenData tweenData, float duration, bool destroyOnComplete,
                    TweenEasingType easingType);
 
 void UpdateTweeners(App *app, float deltaTime);

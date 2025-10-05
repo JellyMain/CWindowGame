@@ -11,3 +11,5 @@ void UpdateWindow(App *app, Window *window);
 unsigned int HashWindow(void *window);
 
 bool WindowEquals(void *window1, void *window2);
+
+Vector2Int GetDisplayCenterPosition();

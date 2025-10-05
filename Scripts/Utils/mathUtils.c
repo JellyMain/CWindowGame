@@ -149,3 +149,18 @@ Vector2Float LerpVector2Float(Vector2Float a, Vector2Float b, float t)
 	result.y = LerpFloat(a.y, b.y, t);
 	return result;
 }
+
+
+int LerpInt(int a, int b, float t)
+{
+	return (int) LerpFloat((float) a, (float) b, t);
+}
+
+
+Vector2Int LerpVector2Int(Vector2Int a, Vector2Int b, float t)
+{
+	Vector2Int result;
+	result.x = LerpInt(a.x, b.x, t);
+	result.y = LerpInt(a.y, b.y, t);
+	return result;
+}

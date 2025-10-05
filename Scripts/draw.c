@@ -2,7 +2,7 @@
 #include "Headers/structs.h"
 #include <SDL_image.h>
 #include "Headers/ui.h"
-#include "DataStructures/Headers/Dictionary.h"
+#include "DataStructures/Headers/dictionary.h"
 #include "Headers/app.h"
 #include "Headers/window.h"
 #include "Utils/viewPortUtils.h"
@@ -11,7 +11,7 @@
 Dictionary *InitDrawDictionary()
 {
 	//Window - List of entities dictionary
-	Dictionary *drawDictionary = CreateDictionary(HashWindow, WindowEquals);
+	Dictionary *drawDictionary = DictionaryCreate(HashWindow, WindowEquals);
 	return drawDictionary;
 }
 
@@ -23,34 +23,34 @@ void AddToAllGameEntitiesDrawLists(App *app, GameEntity *entity)
 		KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
 		List *drawList = pair->value;
 
-		AddToList(drawList, entity);
+		ListAdd(drawList, entity);
 	}
 
-	AddToList(app->allGameEntities, entity);
+	ListAdd(app->allGameEntities, entity);
 }
 
 
 void AddToGameEntitiesDrawList(App *app, Window *window, GameEntity *entity)
 {
-	List *drawList = GetFromDictionary(app->gameEntitiesDrawDictionary, window);
-	AddToList(drawList, entity);
-	AddToList(app->allGameEntities, entity);
+	List *drawList = DictionaryGet(app->gameEntitiesDrawDictionary, window);
+	ListAdd(drawList, entity);
+	ListAdd(app->allGameEntities, entity);
 }
 
 
 void AddToUIEntitiesDrawList(App *app, Window *window, UIEntity *entity)
 {
-	List *drawList = GetFromDictionary(app->uiEntitiesDrawDictionary, window);
-	AddToList(drawList, entity);
-	AddToList(app->allUIEntities, entity);
+	List *drawList = DictionaryGet(app->uiEntitiesDrawDictionary, window);
+	ListAdd(drawList, entity);
+	ListAdd(app->allUIEntities, entity);
 }
 
 
 void AddToGizmoEntitiesDrawList(App *app, Window *window, GizmoEntity *gizmoEntity)
 {
-	List *drawList = GetFromDictionary(app->gizmosEntitiesDrawDictionary, window);
-	AddToList(drawList, gizmoEntity);
-	AddToList(app->allGizmosEntities, gizmoEntity);
+	List *drawList = DictionaryGet(app->gizmosEntitiesDrawDictionary, window);
+	ListAdd(drawList, gizmoEntity);
+	ListAdd(app->allGizmosEntities, gizmoEntity);
 }
 
 
@@ -122,8 +122,8 @@ void Render(App *app)
 		KeyValuePair *gameEntitiesPair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
 		Window *window = gameEntitiesPair->key;
 		List *gameEntitiesDrawList = gameEntitiesPair->value;
-		List *uiEntitiesDrawList = GetFromDictionary(app->uiEntitiesDrawDictionary, window);
-		List *gizmoEntitiesDrawList = GetFromDictionary(app->gizmosEntitiesDrawDictionary, window);
+		List *uiEntitiesDrawList = DictionaryGet(app->uiEntitiesDrawDictionary, window);
+		List *gizmoEntitiesDrawList = DictionaryGet(app->gizmosEntitiesDrawDictionary, window);
 		SDL_Renderer *renderer = window->renderer;
 
 		PrepareScene(renderer);

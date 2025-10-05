@@ -6,16 +6,22 @@
 App *CreateApp(bool showGizmos)
 {
 	App *app = calloc(1, sizeof(App));
+
+	app->player = NULL;
+	app->levelTarget = NULL;
+	app->pendingGameState = NONE_GAME_STATE;
+	app->gameState = MENU_GAME_STATE;
 	app->hasWon = false;
 	app->showGizmos = showGizmos;
 	app->gameEntitiesDrawDictionary = InitDrawDictionary();
 	app->uiEntitiesDrawDictionary = InitDrawDictionary();
 	app->gizmosEntitiesDrawDictionary = InitDrawDictionary();
-	app->allGizmosEntities = CreateList(0);
-	app->allUIEntities = CreateList(0);
-	app->allGameEntities = CreateList(0);
-	app->allTweeners = CreateList(0);
-	app->allTweenSequences = CreateList(0);
+	app->allGizmosEntities = ListCreate(0);
+	app->allUIEntities = ListCreate(0);
+	app->allGameEntities = ListCreate(0);
+	app->allTweeners = ListCreate(0);
+	app->allTweenSequences = ListCreate(0);
+	app->tweenTargetsDictionary = DictionaryCreate(HashPointer, PointerEquals);
 
 	return app;
 }

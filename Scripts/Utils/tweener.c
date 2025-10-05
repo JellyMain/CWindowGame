@@ -67,33 +67,83 @@ float EaseInOutBounce(float t);
 
 void UpdateTween(App *app, Tween *tween, float deltaTime);
 
+void FinishTween(App *app, Tween *tween);
 
-Tween *CreateTween(TweenType tweenType, TweenData tweenData, float duration, bool destroyOnComplete,
+void FinishSequence(App *app, TweenSequence *tweenSequence);
+
+
+Tween *CreateTween(TweenType tweenType, void *target, TweenData tweenData, float duration, bool destroyOnComplete,
                    TweenEasingType easingType)
 {
 	Tween *tween = calloc(1, sizeof(Tween));
 	tween->destroyOnComplete = destroyOnComplete;
+	tween->isStarted = false;
 	tween->isFinished = false;
 	tween->tweenType = tweenType;
 	tween->tweenData = tweenData;
 	tween->duration = duration;
 	tween->elapsedTime = 0;
 	tween->easingType = easingType;
+	tween->target = target;
+	tween->id = rand();
 
 	return tween;
 }
 
 
+void SetActiveTweenForTarget(App *app, Tween *tween)
+{
+	if (DictionaryHasKey(app->tweenTargetsDictionary, tween->target))
+	{
+		Tween *playingTween = DictionaryGet(app->tweenTargetsDictionary, tween->target);
+		if (playingTween != NULL)
+		{
+			bool foundInSequence = false;
+
+			for (int i = 0; i < app->allTweenSequences->size; i++)
+			{
+				TweenSequence *tweenSequence = app->allTweenSequences->elements[i];
+
+				for (int j = 0; j < tweenSequence->tweeners->size; j++)
+				{
+					Tween *sequenceTween = tweenSequence->tweeners->elements[j];
+					if (sequenceTween == playingTween)
+					{
+						foundInSequence = true;
+						FinishSequence(app, tweenSequence);
+						break;
+					}
+				}
+			}
+
+			if (!foundInSequence)
+			{
+				FinishTween(app, playingTween);
+			}
+		}
+
+		DictionaryChangeValue(app->tweenTargetsDictionary, tween->target, tween);
+	}
+	else
+	{
+		DictionaryAdd(app->tweenTargetsDictionary, tween->target, tween);
+	}
+}
+
+
 void PlayTween(App *app, Tween *tween)
 {
-	AddToList(app->allTweeners, tween);
+	SetActiveTweenForTarget(app, tween);
+
+	ListAdd(app->allTweeners, tween);
+	tween->isStarted = true;
 }
 
 
 TweenSequence *CreateTweenSequence()
 {
 	TweenSequence *tweenSequence = calloc(1, sizeof(TweenSequence));
-	tweenSequence->tweeners = CreateList(0);
+	tweenSequence->tweeners = ListCreate(0);
 	return tweenSequence;
 }
 
@@ -101,7 +151,7 @@ TweenSequence *CreateTweenSequence()
 void PlayTweenSequence(App *app, TweenSequence *tweenSequence)
 {
 	tweenSequence->isStarted = true;
-	AddToList(app->allTweenSequences, tweenSequence);
+	ListAdd(app->allTweenSequences, tweenSequence);
 }
 
 
@@ -110,16 +160,15 @@ void AddTweenToSequence(TweenSequence *tweenSequence, Tween *tween)
 	if (!tweenSequence->isStarted)
 	{
 		tween->destroyOnComplete = false;
-		AddToList(tweenSequence->tweeners, tween);
+		ListAdd(tweenSequence->tweeners, tween);
 	}
 	else
 	{
-		printf("Sequence is already started");
+		printf("Sequence is already started\n");
 	}
 }
 
-
-void UpdateSequences(App *app, float deltaTime)
+void UpdateSequences(App *app)
 {
 	for (int i = app->allTweenSequences->size - 1; i >= 0; i--)
 	{
@@ -129,9 +178,13 @@ void UpdateSequences(App *app, float deltaTime)
 		{
 			Tween *tween = tweenSequence->tweeners->elements[j];
 
-			if (!tween->isFinished)
+			if (!tween->isStarted)
 			{
-				UpdateTween(app, tween, deltaTime);
+				PlayTween(app, tween);
+				break;
+			}
+			if (tween->isStarted && !tween->isFinished)
+			{
 				break;
 			}
 		}
@@ -140,8 +193,7 @@ void UpdateSequences(App *app, float deltaTime)
 
 		if (lastTween->isFinished)
 		{
-			RemoveFromList(app->allTweenSequences, tweenSequence);
-			DestroySequence(tweenSequence);
+			FinishSequence(app, tweenSequence);
 		}
 	}
 }
@@ -149,7 +201,7 @@ void UpdateSequences(App *app, float deltaTime)
 
 void UpdateTweeners(App *app, float deltaTime)
 {
-	UpdateSequences(app, deltaTime);
+	UpdateSequences(app);
 
 	for (int i = app->allTweeners->size - 1; i >= 0; i--)
 	{
@@ -159,6 +211,62 @@ void UpdateTweeners(App *app, float deltaTime)
 	}
 }
 
+
+void FinishSequence(App *app, TweenSequence *tweenSequence)
+{
+	for (int i = 0; i < tweenSequence->tweeners->size; i++)
+	{
+		Tween *tween = tweenSequence->tweeners->elements[i];
+		if (!tween->isFinished)
+		{
+			FinishTween(app, tween);
+		}
+	}
+
+	ListRemove(app->allTweenSequences, tweenSequence);
+	DestroySequence(tweenSequence);
+}
+
+
+void FinishTween(App *app, Tween *tween)
+{
+	switch (tween->tweenType)
+	{
+		case VECTOR2_FLOAT_TWEEN:
+			*(Vector2Float *) tween->target = tween->tweenData.vector2FloatTween.endValue;
+			break;
+		case FLOAT_TWEEN:
+			*(float *) tween->target = tween->tweenData.floatTween.endValue;
+			break;
+
+		case VECTOR2_INT_TWEEN:
+			*(Vector2Int *) tween->target = tween->tweenData.vector2IntTween.endValue;
+			break;
+
+		case INT_TWEEN:
+			*(int *) tween->target = tween->tweenData.intTween.endValue;
+			break;
+	}
+
+	if (tween->destroyOnComplete)
+	{
+		if (tween->isStarted)
+		{
+			ListRemove(app->allTweeners, tween);
+			DestroyTween(tween);
+		}
+	}
+	else
+	{
+		if (tween->isStarted)
+		{
+			ListRemove(app->allTweeners, tween);
+			tween->isFinished = true;
+		}
+	}
+
+	DictionaryChangeValue(app->tweenTargetsDictionary, tween->target, NULL);
+}
 
 void UpdateTween(App *app, Tween *tween, float deltaTime)
 {
@@ -269,42 +377,33 @@ void UpdateTween(App *app, Tween *tween, float deltaTime)
 	}
 
 
-	if (tween->elapsedTime >= tween->duration)
+	if (tween->elapsedTime < tween->duration)
 	{
 		switch (tween->tweenType)
 		{
 			case VECTOR2_FLOAT_TWEEN:
-				*tween->tweenData.vector2FloatTween.target = tween->tweenData.vector2FloatTween.endValue;
-				break;
-			case FLOAT_TWEEN:
-				*tween->tweenData.floatTween.target = tween->tweenData.floatTween.endValue;
-				break;
-		}
-
-		if (tween->destroyOnComplete)
-		{
-			RemoveFromList(app->allTweeners, tween);
-			DestroyTween(tween);
-		}
-		else
-		{
-			RemoveFromList(app->allTweeners, tween);
-			tween->isFinished = true;
-		}
-	}
-	else
-	{
-		switch (tween->tweenType)
-		{
-			case VECTOR2_FLOAT_TWEEN:
-				*tween->tweenData.vector2FloatTween.target = LerpVector2Float(
+				*(Vector2Float *) tween->target = LerpVector2Float(
 					tween->tweenData.vector2FloatTween.fromValue, tween->tweenData.vector2FloatTween.endValue, t);
 				break;
 
 			case FLOAT_TWEEN:
-				*tween->tweenData.floatTween.target = LerpFloat(
+				*(float *) tween->target = LerpFloat(
 					tween->tweenData.floatTween.fromValue, tween->tweenData.floatTween.endValue, t);
+				break;
+
+			case VECTOR2_INT_TWEEN:
+				*(Vector2Int *) tween->target = LerpVector2Int(tween->tweenData.vector2IntTween.fromValue,
+				                                               tween->tweenData.vector2IntTween.endValue, t);
+				break;
+
+			case INT_TWEEN:
+				*(int *) tween->target = LerpInt(tween->tweenData.intTween.fromValue,
+				                                 tween->tweenData.intTween.endValue, t);
 		}
+	}
+	else
+	{
+		FinishTween(app, tween);
 	}
 }
 
@@ -327,7 +426,7 @@ void DestroySequence(TweenSequence *tweenSequence)
 		return;
 	}
 
-	for (int i = 0; i < tweenSequence->tweeners->size; ++i)
+	for (int i = 0; i < tweenSequence->tweeners->size; i++)
 	{
 		Tween *tween = tweenSequence->tweeners->elements[i];
 		DestroyTween(tween);

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../DataStructures/Headers/Dictionary.h"
+#include "../DataStructures/Headers/dictionary.h"
 #include "DictionaryTests.h"
 
 #include <time.h>
@@ -34,30 +34,30 @@ static void TestBasicOperations()
 {
 	printf("=== Testing Basic Dictionary Operations ===\n");
 
-	Dictionary *dict = CreateDictionary(HashInt, IntEquals);
+	Dictionary *dict = DictionaryCreate(HashInt, IntEquals);
 	assert(dict != NULL);
 	printf("[OK] Dictionary creation successful\n");
 
 	// Test adding items
 	int key1 = 42;
 	char *value1 = "Answer to everything";
-	bool result = AddToDictionary(dict, &key1, value1);
+	bool result = DictionaryAdd(dict, &key1, value1);
 	assert(result == true);
 	printf("[OK] Adding first item successful\n");
 
 	int key2 = 100;
 	char *value2 = "One hundred";
-	result = AddToDictionary(dict, &key2, value2);
+	result = DictionaryAdd(dict, &key2, value2);
 	assert(result == true);
 	printf("[OK] Adding second item successful\n");
 
 	// Test retrieving items
-	char *retrieved1 = (char *) GetFromDictionary(dict, &key1);
+	char *retrieved1 = (char *) DictionaryGet(dict, &key1);
 	assert(retrieved1 != NULL);
 	assert(strcmp(retrieved1, value1) == 0);
 	printf("[OK] Retrieving first item: %s\n", retrieved1);
 
-	char *retrieved2 = (char *) GetFromDictionary(dict, &key2);
+	char *retrieved2 = (char *) DictionaryGet(dict, &key2);
 	assert(retrieved2 != NULL);
 	assert(strcmp(retrieved2, value2) == 0);
 	printf("[OK] Retrieving second item: %s\n", retrieved2);
@@ -69,13 +69,13 @@ static void TestBasicOperations()
 
 	// Test updating values
 	char *newValue1 = "Updated answer";
-	ChangeDictionaryValue(dict, &key1, newValue1);
-	char *updated = (char *) GetFromDictionary(dict, &key1);
+	DictionaryChangeValue(dict, &key1, newValue1);
+	char *updated = (char *) DictionaryGet(dict, &key1);
 	assert(updated != NULL);
 	assert(strcmp(updated, newValue1) == 0);
 	printf("[OK] Value update successful: %s\n", updated);
 
-	DestroyDictionary(dict);
+	DictionaryDestroy(dict);
 	printf("[OK] Dictionary destruction successful\n");
 	printf("Basic operations test PASSED!\n\n");
 }
@@ -85,12 +85,12 @@ static void TestEdgeCases()
 {
 	printf("=== Testing Edge Cases ===\n");
 
-	Dictionary *dict = CreateDictionary(HashInt, IntEquals);
+	Dictionary *dict = DictionaryCreate(HashInt, IntEquals);
 	assert(dict != NULL);
 
 	// Test with non-existent key
 	int nonExistentKey = 999;
-	char *result = (char *) GetFromDictionary(dict, &nonExistentKey);
+	char *result = (char *) DictionaryGet(dict, &nonExistentKey);
 	assert(result == NULL);
 	printf("[OK] Non-existent key returns NULL\n");
 
@@ -99,25 +99,25 @@ static void TestEdgeCases()
 	printf("[OK] Non-existent key check returns false\n");
 
 	// Test updating non-existent key
-	ChangeDictionaryValue(dict, &nonExistentKey, "Should not work");
-	result = (char *) GetFromDictionary(dict, &nonExistentKey);
+	DictionaryChangeValue(dict, &nonExistentKey, "Should not work");
+	result = (char *) DictionaryGet(dict, &nonExistentKey);
 	assert(result == NULL);
 	printf("[OK] Updating non-existent key has no effect\n");
 
 	// Test null dictionary operations
-	result = (char *) GetFromDictionary(NULL, &nonExistentKey);
+	result = (char *) DictionaryGet(NULL, &nonExistentKey);
 	assert(result == NULL);
 
 	bool keyExists = DictionaryHasKey(NULL, &nonExistentKey);
 	assert(keyExists == false);
 
 	// These should not crash
-	AddToDictionary(NULL, &nonExistentKey, "test");
-	ChangeDictionaryValue(NULL, &nonExistentKey, "test");
-	DestroyDictionary(NULL);
+	DictionaryAdd(NULL, &nonExistentKey, "test");
+	DictionaryChangeValue(NULL, &nonExistentKey, "test");
+	DictionaryDestroy(NULL);
 	printf("[OK] NULL dictionary operations handled gracefully\n");
 
-	DestroyDictionary(dict);
+	DictionaryDestroy(dict);
 	printf("Edge cases test PASSED!\n\n");
 }
 
@@ -126,41 +126,41 @@ static void TestStringKeys()
 {
 	printf("=== Testing String Keys ===\n");
 
-	Dictionary *stringDict = CreateDictionary(HashString, StringEquals);
+	Dictionary *stringDict = DictionaryCreate(HashString, StringEquals);
 	assert(stringDict != NULL);
 	printf("[OK] String dictionary creation successful\n");
 
 	// Add string key-value pairs
 	char *key1 = "name";
 	char *value1 = "John Doe";
-	bool result = AddToDictionary(stringDict, key1, value1);
+	bool result = DictionaryAdd(stringDict, key1, value1);
 	assert(result == true);
 
 	char *key2 = "age";
 	int *age = malloc(sizeof(int));
 	*age = 30;
-	result = AddToDictionary(stringDict, key2, age);
+	result = DictionaryAdd(stringDict, key2, age);
 	assert(result == true);
 
 	char *key3 = "city";
 	char *value3 = "New York";
-	result = AddToDictionary(stringDict, key3, value3);
+	result = DictionaryAdd(stringDict, key3, value3);
 	assert(result == true);
 
 	printf("[OK] Added string key-value pairs\n");
 
 	// Retrieve and verify
-	char *retrievedName = (char *) GetFromDictionary(stringDict, "name");
+	char *retrievedName = (char *) DictionaryGet(stringDict, "name");
 	assert(retrievedName != NULL);
 	assert(strcmp(retrievedName, "John Doe") == 0);
 	printf("[OK] Retrieved name: %s\n", retrievedName);
 
-	int *retrievedAge = (int *) GetFromDictionary(stringDict, "age");
+	int *retrievedAge = (int *) DictionaryGet(stringDict, "age");
 	assert(retrievedAge != NULL);
 	assert(*retrievedAge == 30);
 	printf("[OK] Retrieved age: %d\n", *retrievedAge);
 
-	char *retrievedCity = (char *) GetFromDictionary(stringDict, "city");
+	char *retrievedCity = (char *) DictionaryGet(stringDict, "city");
 	assert(retrievedCity != NULL);
 	assert(strcmp(retrievedCity, "New York") == 0);
 	printf("[OK] Retrieved city: %s\n", retrievedCity);
@@ -171,7 +171,7 @@ static void TestStringKeys()
 	printf("[OK] String key existence check successful\n");
 
 	free(age);
-	DestroyDictionary(stringDict);
+	DictionaryDestroy(stringDict);
 	printf("String keys test PASSED!\n\n");
 }
 
@@ -180,7 +180,7 @@ static void TestLargeDataset()
 {
 	printf("=== Testing Large Dataset ===\n");
 
-	Dictionary *dict = CreateDictionary(HashInt, IntEquals);
+	Dictionary *dict = DictionaryCreate(HashInt, IntEquals);
 	assert(dict != NULL);
 
 	const int NUM_ITEMS = 1000;
@@ -195,7 +195,7 @@ static void TestLargeDataset()
 		values[i] = malloc(50);
 		sprintf(values[i], "Value_%d", i);
 
-		bool result = AddToDictionary(dict, &keys[i], values[i]);
+		bool result = DictionaryAdd(dict, &keys[i], values[i]);
 		assert(result == true);
 	}
 	printf("[OK] Added %d items successfully\n", NUM_ITEMS);
@@ -204,7 +204,7 @@ static void TestLargeDataset()
 	printf("Verifying all items...\n");
 	for (int i = 0; i < NUM_ITEMS; i++)
 	{
-		char *retrieved = GetFromDictionary(dict, &keys[i]);
+		char *retrieved = DictionaryGet(dict, &keys[i]);
 		printf("[OK] Retrieved item %d: %s\n", i, retrieved);
 		assert(retrieved != NULL);
 		assert(strcmp(retrieved, values[i]) == 0);
@@ -220,9 +220,9 @@ static void TestLargeDataset()
 	{
 		char *newValue = malloc(50);
 		sprintf(newValue, "Updated_Value_%d", i);
-		ChangeDictionaryValue(dict, &keys[i], newValue);
+		DictionaryChangeValue(dict, &keys[i], newValue);
 
-		char *retrieved = (char *) GetFromDictionary(dict, &keys[i]);
+		char *retrieved = (char *) DictionaryGet(dict, &keys[i]);
 		assert(retrieved != NULL);
 		assert(strcmp(retrieved, newValue) == 0);
 
@@ -239,7 +239,7 @@ static void TestLargeDataset()
 	free(keys);
 	free(values);
 
-	DestroyDictionary(dict);
+	DictionaryDestroy(dict);
 	printf("Large dataset test PASSED!\n\n");
 }
 
@@ -248,7 +248,7 @@ static void TestDuplicateKeys()
 {
 	printf("=== Testing Duplicate Key Handling ===\n");
 
-	Dictionary *dict = CreateDictionary(HashInt, IntEquals);
+	Dictionary *dict = DictionaryCreate(HashInt, IntEquals);
 	assert(dict != NULL);
 
 	int key = 42;
@@ -256,19 +256,19 @@ static void TestDuplicateKeys()
 	char *value2 = "Second value";
 
 	// Add first value
-	bool result = AddToDictionary(dict, &key, value1);
+	bool result = DictionaryAdd(dict, &key, value1);
 	assert(result == true);
 
-	char *retrieved = (char *) GetFromDictionary(dict, &key);
+	char *retrieved = (char *) DictionaryGet(dict, &key);
 	assert(strcmp(retrieved, value1) == 0);
 	printf("[OK] First value added: %s\n", retrieved);
 
 	// Add duplicate key (this will create a second entry in the same bucket)
-	result = AddToDictionary(dict, &key, value2);
+	result = DictionaryAdd(dict, &key, value2);
 	assert(result == true);
 
 	// The retrieved value should be one of them (implementation dependent)
-	retrieved = (char *) GetFromDictionary(dict, &key);
+	retrieved = (char *) DictionaryGet(dict, &key);
 	assert(retrieved != NULL);
 	printf("[OK] After duplicate add, retrieved: %s\n", retrieved);
 
@@ -276,7 +276,7 @@ static void TestDuplicateKeys()
 	assert(DictionaryHasKey(dict, &key) == true);
 	printf("[OK] Key still exists after duplicate\n");
 
-	DestroyDictionary(dict);
+	DictionaryDestroy(dict);
 	printf("Duplicate keys test PASSED!\n\n");
 }
 
@@ -299,7 +299,7 @@ void TestDictionary(void)
 void TestDictionaryPerformance()
 {
 	// Initialize dictionary
-	Dictionary *dict = CreateDictionary(HashInt, IntEquals);
+	Dictionary *dict = DictionaryCreate(HashInt, IntEquals);
 
 	// Variables for timing
 	clock_t start, end;
@@ -322,7 +322,7 @@ void TestDictionaryPerformance()
 		for (int i = 0; i < n; i++)
 		{
 			keys[i] = i;
-			AddToDictionary(dict, &keys[i], &keys[i]);
+			DictionaryAdd(dict, &keys[i], &keys[i]);
 		}
 		end = clock();
 		cpu_time_used = (double) (end - start) / CLOCKS_PER_SEC;
@@ -332,17 +332,17 @@ void TestDictionaryPerformance()
 		start = clock();
 		for (int i = 0; i < n; i++)
 		{
-			GetFromDictionary(dict, &keys[i]);
+			DictionaryGet(dict, &keys[i]);
 		}
 		end = clock();
 		cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 		printf("Lookup of %d items: %.8f seconds\n", n, cpu_time_used);
 
 		// Clean up for next iteration
-		DestroyDictionary(dict);
-		dict = CreateDictionary(HashInt, IntEquals);
+		DictionaryDestroy(dict);
+		dict = DictionaryCreate(HashInt, IntEquals);
 		free(keys);
 	}
 
-	DestroyDictionary(dict);
+	DictionaryDestroy(dict);
 }

@@ -4,6 +4,7 @@
 #include "Headers/ui.h"
 #include "DataStructures/Headers/dictionary.h"
 #include "Headers/app.h"
+#include "Headers/update.h"
 #include "Headers/window.h"
 #include "Utils/viewPortUtils.h"
 
@@ -56,26 +57,29 @@ void AddToGizmoEntitiesDrawList(App *app, Window *window, GizmoEntity *gizmoEnti
 
 SDL_Texture *LoadTexture(char *fileName, SDL_Renderer *renderer)
 {
-	SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading texture: %s", fileName);
+	char buffer[150];
+	snprintf(buffer, sizeof(buffer), "%s%s", "Assets/", fileName);
+	SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading texture: %s", buffer);
 
-	SDL_Texture *texture = IMG_LoadTexture(renderer, fileName);
+	SDL_Texture *texture = IMG_LoadTexture(renderer, buffer);
 
 	if (!texture)
 	{
 		SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR,
-		               "Failed to load texture: %s, Error: %s", fileName, IMG_GetError());
+		               "Failed to load texture: %s, Error: %s", buffer, IMG_GetError());
 	}
 
 	return texture;
 }
 
 
-void BlitGameEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position, GameEntity *entity)
+void BlitGameEntity(App *app, SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position,
+                    GameEntity *entity)
 {
 	SDL_Rect rect;
 
-	entity->size.x = entity->originalSize.x * entity->scale.x;
-	entity->size.y = entity->originalSize.y * entity->scale.y;
+	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->scale.x;
+	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->scale.y;
 
 	rect.x = position.x - entity->size.x / 2;
 	rect.y = position.y - entity->size.y / 2;
@@ -86,12 +90,13 @@ void BlitGameEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int pos
 }
 
 
-void BlitUIEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position, UIEntity *entity)
+void BlitUIEntity(App *app, SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int position,
+                  UIEntity *entity)
 {
 	SDL_Rect rect;
 
-	entity->size.x = entity->originalSize.x * entity->entityScale.x * entity->parentScale.x;
-	entity->size.y = entity->originalSize.y * entity->entityScale.y * entity->parentScale.y;
+	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->entityScale.x * entity->parentScale.x;
+	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->entityScale.y * entity->parentScale.y;
 
 	rect.x = position.x - entity->size.x / 2;
 	rect.y = position.y - entity->size.y / 2;
@@ -99,6 +104,34 @@ void BlitUIEntity(SDL_Renderer *renderer, SDL_Texture *texture, Vector2Int posit
 	rect.h = entity->size.y;
 
 	SDL_RenderCopy(renderer, texture, NULL, &rect);
+}
+
+
+void BlitGizmo(App *app, Window *window, GizmoEntity *gizmoEntity)
+{
+	SDL_SetRenderDrawColor(window->renderer, gizmoEntity->color.r, gizmoEntity->color.g, gizmoEntity->color.b,
+	                       gizmoEntity->color.a);
+
+	DrawThickRectBorder(window, gizmoEntity->connectedEntity->worldPosition, gizmoEntity->connectedEntity->size,
+	                    gizmoEntity->thickness);
+
+
+	char entityInfo[150];
+	snprintf(entityInfo, sizeof(entityInfo), "x:%d,y:%d w:%d,h%d",
+	         gizmoEntity->connectedEntity->worldPosition.x,
+	         gizmoEntity->connectedEntity->worldPosition.y,
+	         gizmoEntity->connectedEntity->size.x,
+	         gizmoEntity->connectedEntity->size.y);
+
+
+	DrawDynamicText(window, app->textAtlas, entityInfo, (Vector2Int){
+		                gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->
+		                connectedEntity->size.x
+		                / 2,
+		                gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->
+		                connectedEntity->size.y
+		                / 2 - 10
+	                }, (Vector2Float){1, 1});
 }
 
 
@@ -115,7 +148,14 @@ void PresentScene(SDL_Renderer *renderer)
 }
 
 
-void Render(App *app)
+Updatable *CreateRenderUpdatable()
+{
+	Updatable *updatable = CreateUpdatable(NULL, UpdateRenderer);
+	return updatable;
+}
+
+
+void UpdateRenderer(void *data, App *app, float deltaTime)
 {
 	for (int i = 0; i < app->gameEntitiesDrawDictionary->allPairs->size; i++)
 	{
@@ -152,7 +192,7 @@ void Render(App *app)
 
 			SDL_Texture *entityTexture = entity->texturesList->elements[i];
 
-			BlitGameEntity(renderer, entityTexture, screenPos, entity);
+			BlitGameEntity(app, renderer, entityTexture, screenPos, entity);
 		}
 
 
@@ -161,7 +201,7 @@ void Render(App *app)
 			UIEntity *entity = uiEntitiesDrawList->elements[j];
 			SDL_Texture *entityTexture = entity->texture;
 			Vector2Int screenPos = entity->worldPosition;
-			BlitUIEntity(renderer, entityTexture, screenPos, entity);
+			BlitUIEntity(app, renderer, entityTexture, screenPos, entity);
 		}
 
 
@@ -169,37 +209,13 @@ void Render(App *app)
 		{
 			SDL_SetRenderDrawBlendMode(window->renderer, SDL_BLENDMODE_BLEND);
 
-
 			for (int k = 0; k < gizmoEntitiesDrawList->size; k++)
 			{
 				GizmoEntity *gizmoEntity = gizmoEntitiesDrawList->elements[k];
-
-				SDL_SetRenderDrawColor(window->renderer,
-				                       gizmoEntity->color.r,
-				                       gizmoEntity->color.g,
-				                       gizmoEntity->color.b,
-				                       gizmoEntity->color.a);
-
-
-				DrawThickRectBorder(window, gizmoEntity->connectedEntity->worldPosition,
-				                    gizmoEntity->connectedEntity->size, gizmoEntity->thickness);
-
-
-				char entityInfo[150];
-				snprintf(entityInfo, sizeof(entityInfo), "x:%d,y:%d w:%d,h%d",
-				         gizmoEntity->connectedEntity->worldPosition.x,
-				         gizmoEntity->connectedEntity->worldPosition.y,
-				         gizmoEntity->connectedEntity->size.x,
-				         gizmoEntity->connectedEntity->size.y);
-
-
-				DrawDynamicText(window, app->textAtlas, entityInfo, (Vector2Int){
-					                gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->connectedEntity->size.x
-					                / 2,
-					                gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->connectedEntity->size.y
-					                / 2 - 10
-				                }, (Vector2Float){1, 1});
+				BlitGizmo(app, window, gizmoEntity);
 			}
+
+			SDL_SetRenderDrawBlendMode(window->renderer, SDL_BLENDMODE_NONE);
 		}
 
 		PresentScene(renderer);

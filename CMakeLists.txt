@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 4.0)
 project(WindowGame C)
 
+
 set(CMAKE_C_STANDARD 11)
+
+file(COPY ${CMAKE_SOURCE_DIR}/Assets
+        DESTINATION ${CMAKE_BINARY_DIR})
 
 
 find_package(SDL2 CONFIG REQUIRED)
@@ -27,8 +31,8 @@ add_executable(WindowGame Scripts/main.c
         Scripts/Utils/MathUtils.h
         Scripts/Utils/ViewPortUtils.c
         Scripts/Utils/ViewPortUtils.h
-        Scripts/Window.c
-        Scripts/Headers/Window.h
+        Scripts/window.c
+        Scripts/Headers/window.h
         Scripts/Headers/app.h
         Scripts/levelTarget.c
         Scripts/Headers/levelTarget.h

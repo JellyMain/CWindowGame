@@ -5,7 +5,7 @@
 #include "Headers/levelService.h"
 
 
-App *CreateApp(bool showGizmos)
+App *CreateApp(int pixelsPerUnit,bool showGizmos)
 {
 	App *app = calloc(1, sizeof(App));
 
@@ -13,6 +13,7 @@ App *CreateApp(bool showGizmos)
 	app->levelData = CreateLevelData();
 	app->pendingGameState = NONE_GAME_STATE;
 	app->gameState = MENU_GAME_STATE;
+	app->pixelsPerUnit = pixelsPerUnit;
 	app->hasWon = false;
 	app->showGizmos = showGizmos;
 	app->gameEntitiesDrawDictionary = InitDrawDictionary();

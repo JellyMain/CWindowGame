@@ -3,8 +3,8 @@
 
 Vector2Int GetMoveDirection();
 
-void ProcessInput();
-
 Vector2Int GetMousePosition();
 
 bool IsLeftMouseButtonClicked();
+
+Updatable *CreateInputUpdatable();

@@ -6,9 +6,9 @@
 
 SDL_Texture *LoadTexture(char *fileName, SDL_Renderer *renderer);
 
-void Render(App *app);
-
 Dictionary *InitDrawDictionary();
+
+Updatable *CreateRenderUpdatable();
 
 void AddToAllGameEntitiesDrawLists(App *app, GameEntity *entity);
 
@@ -17,3 +17,5 @@ void AddToGameEntitiesDrawList(App *app, Window *window, GameEntity *entity);
 void AddToUIEntitiesDrawList(App *app, Window *window, UIEntity *entity);
 
 void AddToGizmoEntitiesDrawList(App *app, Window *window, GizmoEntity *gizmoEntity);
+
+void UpdateRenderer(void *data, App *app, float deltaTime);

@@ -26,14 +26,8 @@ int EventFilter(void *userdata, SDL_Event *event)
 	{
 		if (g_app)
 		{
-			Render(g_app);
-
-			for (int i = 0; i < g_app->gameEntitiesDrawDictionary->allPairs->size; i++)
-			{
-				KeyValuePair *pair = g_app->gameEntitiesDrawDictionary->allPairs->elements[i];
-				Window *window = pair->key;
-				UpdateWindow(g_app, window);
-			}
+			UpdateRenderer(NULL, g_app, 0);
+			UpdateWindows(NULL, g_app, 0);
 		}
 	}
 
@@ -56,7 +50,7 @@ void HandleGameStates(App *app)
 int main()
 {
 	srand(time(NULL));
-	App *app = CreateApp(true);
+	App *app = CreateApp(4, true);
 
 	if (InitSDL2(app) != 0)
 	{
@@ -75,16 +69,11 @@ int main()
 	{
 		HandleGameStates(app);
 
-
 		currentFrameTime = SDL_GetPerformanceCounter();
 		deltaTime = (currentFrameTime - lastFrameTime) / (float) SDL_GetPerformanceFrequency();
 		lastFrameTime = currentFrameTime;
 
-		Render(app);
-
-		ProcessInput();
-
-		for (int i = 0; i < app->updateSystem->updatables->size; ++i)
+		for (int i = 0; i < app->updateSystem->updatables->size; i++)
 		{
 			Updatable *updatable = app->updateSystem->updatables->elements[i];
 			updatable->Update(updatable->data, app, deltaTime);

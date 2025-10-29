@@ -14,3 +14,5 @@ bool WindowEquals(void *window1, void *window2);
 Vector2Int GetDisplayCenterPosition();
 
 Updatable *CreateWindowsUpdatable();
+
+void UpdateWindows(void *data, App *app, float deltaTime);

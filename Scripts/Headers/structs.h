@@ -31,6 +31,7 @@ typedef struct
 	struct UpdateSystem *updateSystem;
 	GameState pendingGameState;
 	GameState gameState;
+	int pixelsPerUnit;
 	List *allGameEntities;
 	List *allUIEntities;
 	List *allGizmosEntities;
@@ -152,10 +153,12 @@ typedef struct UIEntity
 	UIType uiType;
 	struct UIEntity *parentEntity;
 	List *childEntities;
-
-	void (*OnInteraction)(App *app);
-
+	bool isHovered;
+	void *interactionData;
+	void (*OnHover)(App *app, struct UIEntity *uiEntity);
+	void (*OnInteraction)(App *app, void *interactionData);
 	void (*OnInteractionAnimation)(App *app, struct UIEntity *uiEntity);
+	void (*OnHoverExit)(App *app, struct UIEntity *uiEntity);
 } UIEntity;
 
 

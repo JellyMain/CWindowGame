@@ -21,7 +21,7 @@ GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 	{
 		KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
 		Window *window = pair->key;
-		SDL_Texture *texture = LoadTexture("D:/CWindowGame/Assets/LevelTarget.png", window->renderer);
+		SDL_Texture *texture = LoadTexture("LevelTarget.png", window->renderer);
 		SDL_QueryTexture(texture, NULL, NULL, &levelTargetSize.x, &levelTargetSize.y);
 		ListAdd(levelTarget->texturesList, texture);
 	}

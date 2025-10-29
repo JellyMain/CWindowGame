@@ -45,7 +45,7 @@ GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 	{
 		KeyValuePair *pair = app->gameEntitiesDrawDictionary->allPairs->elements[i];
 		Window *window = pair->key;
-		SDL_Texture *texture = LoadTexture("D:/CWindowGame/Assets/SlimeEnemy.png", window->renderer);
+		SDL_Texture *texture = LoadTexture("SlimeEnemy.png", window->renderer);
 		SDL_QueryTexture(texture, NULL, NULL, &playerSize.x, &playerSize.y);
 		ListAdd(player->texturesList, texture);
 	}

@@ -5,9 +5,10 @@
 #include "Headers/window.h"
 #include "Utils/tweener.h"
 
-void OnButtonClicked(App *app);
+void OnButtonClicked(App *app, void *data);
 
 void OnButtonClickedAnimation(App *app, UIEntity *uiEntity);
+
 
 void CreateWinScreen(App *app)
 {
@@ -24,23 +25,23 @@ void CreateWinScreen(App *app)
 
 
 	Vector2Int continueTextPosition = (Vector2Int){
-		winWindow->size.x / 2, winWindow->size.y / 2 + 100
+		winWindow->size.x / 2, winWindow->size.y / 2 + 120
 	};
 
 
-	CreateStaticText("You Win!!!!!!!!!", 64, (SDL_Color){255, 255, 255}, app, winWindow,
+	CreateStaticText("You Win!!!!!!!!!", (SDL_Color){255, 255, 255}, app, winWindow,
 	                 youWinTextPosition,
 	                 (Vector2Float){1, 1}, NULL);
 
 
-	CreateButton(NULL, (Vector2Int){200, 100}, (SDL_Color){255, 255, 255}, "Continue", 64,
+	CreateButton(NULL, (Vector2Int){75, 30}, (SDL_Color){255, 255, 255}, "Continue", (Vector2Float){0.3f, 0.3f},
 	             (SDL_Color){0, 0, 0}, app, winWindow,
-	             continueTextPosition, (Vector2Float){1, 1}, OnButtonClicked,
-	             OnButtonClickedAnimation,NULL);
+	             continueTextPosition, (Vector2Float){1, 1}, NULL, OnButtonClicked,
+	             OnButtonClickedAnimation,NULL,NULL,NULL);
 }
 
 
-void OnButtonClicked(App *app)
+void OnButtonClicked(App *app, void *data)
 {
 	printf("Button clicked\n");
 }

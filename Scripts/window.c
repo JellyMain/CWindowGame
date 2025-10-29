@@ -8,9 +8,7 @@
 
 
 Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int size,
-                                     WindowRenderType renderType,
-                                     WindowType windowType,
-                                     char *title)
+                                     WindowRenderType renderType, WindowType windowType, char *title)
 {
 	Uint32 windowFlags = SDL_WINDOW_SHOWN;
 
@@ -35,6 +33,7 @@ Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int s
 	Vector2Int windowLowerRightPoint = (Vector2Int){size.x, size.y};
 
 	window->sdlWindow = sdlWindow;
+
 	window->renderer = renderer;
 	window->position = position;
 	window->windowCenterPoint = windowCenterPoint;

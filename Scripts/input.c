@@ -4,8 +4,12 @@
 #include "Headers/stateMachine.h"
 #include "Headers/app.h"
 #include "Headers/structs.h"
+#include "Headers/update.h"
+
+void ProcessInput(void *data, App *app, float deltaTime);
 
 static bool isLeftMouseButtonClicked = false;
+
 
 Vector2Int GetMoveDirection()
 {
@@ -34,7 +38,14 @@ Vector2Int GetMoveDirection()
 }
 
 
-void ProcessInput()
+Updatable *CreateInputUpdatable()
+{
+	Updatable *updatable = CreateUpdatable(NULL, ProcessInput);
+	return updatable;
+}
+
+
+void ProcessInput(void *data, App *app, float deltaTime)
 {
 	isLeftMouseButtonClicked = false;
 

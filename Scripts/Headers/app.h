@@ -2,4 +2,4 @@
 #include "structs.h"
 
 
-App *CreateApp(bool showGizmos);
+App *CreateApp(int pixelsPerUnit,bool showGizmos);

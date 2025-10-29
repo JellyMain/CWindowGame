@@ -1,5 +1,6 @@
 ﻿#include "Headers/ui.h"
 
+#include <SDL_image.h>
 #include <SDL_log.h>
 #include <SDL_render.h>
 #include <SDL_ttf.h>
@@ -52,31 +53,33 @@ void DrawThickRectBorder(Window *window, Vector2Int position, Vector2Int size, i
 	SDL_RenderFillRect(window->renderer, &topRect);
 
 	SDL_Rect bottomRect = {
-		position.x - size.x / 2, position.y + size.y / 2 - thickness, size.x, thickness
+		position.x - size.x / 2, position.y + size.y / 2, size.x, thickness
 	};
 	SDL_RenderFillRect(window->renderer, &bottomRect);
 
 	SDL_Rect leftRect = {
 		position.x - size.x / 2, position.y - size.y / 2 + thickness, thickness,
-		size.y - 2 * thickness
+		size.y - 2 * thickness + 1
 	};
 	SDL_RenderFillRect(window->renderer, &leftRect);
 
 	SDL_Rect rightRect = {
 		position.x + size.x / 2 - thickness, position.y - size.y / 2 + thickness, thickness,
-		size.y - 2 * thickness
+		size.y - 2 * thickness + 1
 	};
 	SDL_RenderFillRect(window->renderer, &rightRect);
 }
 
 
-TextAtlas *CreateTextAtlas(char *fontPath, int fontSize)
+TextAtlas *CreateTextAtlas(char *fileName, int fontSize)
 {
 	TextAtlas *textAtlas = calloc(1, sizeof(TextAtlas));
 	memset(textAtlas->characterRects, 0, sizeof(textAtlas->characterRects));
 	textAtlas->windowTexturesDictionary = DictionaryCreate(HashWindow, WindowEquals);
 
-	TTF_Font *font = TTF_OpenFont(fontPath, fontSize);
+	char buffer[150];
+	snprintf(buffer, sizeof(buffer), "%s%s", "Assets/", fileName);
+	TTF_Font *font = TTF_OpenFont(buffer, fontSize);
 
 	if (font == NULL)
 	{
@@ -160,13 +163,15 @@ void AddAtlasTexture(TextAtlas *textAtlas, Window *window)
 {
 	SDL_Texture *atlasTexture = SDL_CreateTextureFromSurface(
 		window->renderer, textAtlas->atlasSurface);
+
+	SDL_SetTextureScaleMode(atlasTexture, SDL_ScaleModeNearest);
+
 	DictionaryAdd(textAtlas->windowTexturesDictionary, window, atlasTexture);
 }
 
 
-UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *app, Window *window,
-                           Vector2Int position,
-                           Vector2Float scale, UIEntity *parent)
+UIEntity *CreateStaticText(char *text, SDL_Color textColor, App *app, Window *window, Vector2Int position, Vector2Float scale,
+                           UIEntity *parent)
 {
 	UIEntity *textEntity = calloc(1, sizeof(UIEntity));
 
@@ -175,6 +180,7 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 	textEntity->childEntities = ListCreate(0);
 	textEntity->worldPosition = position;
 	textEntity->lastFrameWorldPosition = position;
+	textEntity->isHovered = false;
 
 	if (parent != NULL)
 	{
@@ -187,7 +193,11 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 
 	textEntity->lastFrameParentScale = textEntity->parentScale;
 
-	TTF_Font *font = TTF_OpenFont("D:/CWindowGame/Assets/ByteBounce.ttf", fontSize);
+
+	char buffer[150];
+	snprintf(buffer, sizeof(buffer), "%s%s", "Assets/", "Sillyfont-Regular.ttf");
+	TTF_Font *font = TTF_OpenFont(buffer, 64);
+
 	if (!font)
 	{
 		SDL_Log("TTF_OpenFont failed: %s", TTF_GetError());
@@ -231,20 +241,26 @@ UIEntity *CreateStaticText(char *text, int fontSize, SDL_Color textColor, App *a
 
 
 void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color backgroundColor,
-                  char *text, int fontSize,
+                  char *text, Vector2Float textScale,
                   SDL_Color textColor, App *app, Window *window, Vector2Int position,
-                  Vector2Float scale,
-                  void (*OnInteraction)(App *app),
+                  Vector2Float buttonScale, void *interactionData,
+                  void (*OnInteraction)(App *app, void *data),
                   void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity),
+                  void (*OnHover)(App *app, UIEntity *uiEntity),
+                  void (*OnHoverExit)(App *app, UIEntity *uiEntity),
                   UIEntity *parent)
 {
 	UIEntity *buttonEntity = calloc(1, sizeof(UIEntity));
-	buttonEntity->entityScale = scale;
+	buttonEntity->entityScale = buttonScale;
 	buttonEntity->uiType = BUTTON;
+	buttonEntity->isHovered = false;
 	buttonEntity->childEntities = ListCreate(0);
 	buttonEntity->parentEntity = parent;
 	buttonEntity->OnInteraction = OnInteraction;
 	buttonEntity->OnInteractionAnimation = OnInteractionAnimation;
+	buttonEntity->OnHover = OnHover;
+	buttonEntity->OnHoverExit = OnHoverExit;
+	buttonEntity->interactionData = interactionData;
 
 	if (parent != NULL)
 	{
@@ -263,7 +279,7 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 
 	if (backgroundTexture == NULL)
 	{
-		SDL_Surface *buttonSurface = SDL_CreateRGBSurface(0, size.x, scale.y, 32, 0, 0, 0, 0);
+		SDL_Surface *buttonSurface = SDL_CreateRGBSurface(0, size.x, buttonScale.y, 32, 0, 0, 0, 0);
 		if (!buttonSurface)
 		{
 			SDL_Log("Unable to create rectangle surface: %s", SDL_GetError());
@@ -302,12 +318,11 @@ void CreateButton(SDL_Texture *backgroundTexture, Vector2Int size, SDL_Color bac
 
 	if (text != NULL && strlen(text) > 0)
 	{
-		UIEntity *textEntity = CreateStaticText(text, fontSize, textColor, app, window, position,
-		                                        scale, buttonEntity);
+		UIEntity *textEntity = CreateStaticText(text, textColor, app, window, position, textScale, buttonEntity);
 		ListAdd(buttonEntity->childEntities, textEntity);
 	}
 
-	CreateGizmo(app, window, (SDL_Color){255, 0, 0, 255}, 2, buttonEntity);
+	CreateGizmo(app, window, (SDL_Color){255, 0, 0, 255}, 1, buttonEntity);
 }
 
 
@@ -343,7 +358,6 @@ void UpdateChildrenScale(UIEntity *uiEntity)
 				};
 			}
 		}
-
 
 		uiEntity->lastFrameParentScale = uiEntity->parentScale;
 	}
@@ -395,17 +409,35 @@ void HandleInteractions(App *app, UIEntity *uiEntity)
 
 			if (IsPointInBounds(mousePosition, boundsMin, boundsMax))
 			{
+				if (!uiEntity->isHovered)
+				{
+					uiEntity->isHovered = true;
+
+					if (uiEntity->OnHover != NULL)
+					{
+						uiEntity->OnHover(app, uiEntity);
+					}
+				}
+
 				if (IsLeftMouseButtonClicked())
 				{
 					if (uiEntity->OnInteraction != NULL)
 					{
-						uiEntity->OnInteraction(app);
+						uiEntity->OnInteraction(app, uiEntity->interactionData);
 					}
 					if (uiEntity->OnInteractionAnimation != NULL)
 					{
 						uiEntity->OnInteractionAnimation(app, uiEntity);
 					}
 				}
+			}
+			else
+			{
+				if (uiEntity->isHovered && uiEntity->OnHoverExit != NULL)
+				{
+					uiEntity->OnHoverExit(app, uiEntity);
+				}
+				uiEntity->isHovered = false;
 			}
 
 			break;

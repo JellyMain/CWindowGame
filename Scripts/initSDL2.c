@@ -5,6 +5,7 @@
 #include "Headers/ui.h"
 #include "Headers/window.h"
 
+
 int InitSDL2(App *app)
 {
 	if (!app)
@@ -19,7 +20,7 @@ int InitSDL2(App *app)
 		return -2;
 	}
 
-
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 
 
@@ -30,7 +31,7 @@ int InitSDL2(App *app)
 	}
 
 
-	app->textAtlas = CreateTextAtlas("D:/CWindowGame/Assets/ByteBounce.ttf", 16);
+	app->textAtlas = CreateTextAtlas("ByteBounce.ttf", 16);
 
 	return 0;
 }

@@ -23,8 +23,8 @@ void CreateLevel(App *app, int level)
 	                             "WindowC");
 
 
-	app->levelData->levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Float){2, 2});
-	app->levelData->player = CreatePlayer(app, (Vector2Int){300, 300}, (Vector2Float){2, 2});
+	app->levelData->levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Float){1, 1});
+	app->levelData->player = CreatePlayer(app, (Vector2Int){300, 300}, (Vector2Float){1, 1});
 }
 
 

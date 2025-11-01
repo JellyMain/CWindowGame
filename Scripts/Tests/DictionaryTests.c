@@ -4,7 +4,7 @@
 #include <assert.h>
 
 #include "../DataStructures/Headers/dictionary.h"
-#include "DictionaryTests.h"
+#include "Headers/DictionaryTests.h"
 
 #include <time.h>
 

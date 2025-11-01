@@ -1,20 +1,12 @@
 ﻿#include <SDL_events.h>
 #include <SDL_timer.h>
 #include <time.h>
-
-#include "Headers/stateMachine.h"
-#include "Headers/ui.h"
-#include "Headers/levelTarget.h"
-#include "Headers/player.h"
-#include "Headers/draw.h"
-#include "Headers/initSDL2.h"
-#include "Headers/structs.h"
-#include "Headers/app.h"
-#include "Headers/input.h"
-#include "Headers/levelService.h"
-#include "Headers/window.h"
-#include "Headers/winService.h"
-#include "Utils/tweener.h"
+#include "Infrastructure/Headers/stateMachine.h"
+#include "Render/Headers/draw.h"
+#include "Infrastructure/Headers/init.h"
+#include "General/Headers/structs.h"
+#include "Infrastructure/Headers/app.h"
+#include "Infrastructure/Headers/window.h"
 
 
 static App *g_app = NULL;
@@ -50,12 +42,9 @@ void HandleGameStates(App *app)
 int main()
 {
 	srand(time(NULL));
-	App *app = CreateApp(4, true);
+	App *app = CreateApp(2, true);
 
-	if (InitSDL2(app) != 0)
-	{
-		return 1;
-	}
+	Init(app);
 
 	g_app = app;
 

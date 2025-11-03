@@ -1,8 +1,9 @@
 ﻿#include "../Utils/Headers/viewPortUtils.h"
 
-Vector2Int WorldToScreen(Vector2Int worldPosition, Vector2Int viewportOffset)
+
+Vector2Float WorldToScreen(Vector2Float worldPosition, Vector2Int viewportOffset)
 {
-	return (Vector2Int)
+	return (Vector2Float)
 	{
 		worldPosition.x - viewportOffset.x,
 		worldPosition.y - viewportOffset.y

@@ -23,8 +23,8 @@ void CreateLevel(App *app, int level)
 	                             "WindowC");
 
 
-	app->levelData->levelTarget = CreateLevelTarget(app, (Vector2Int){500, 500}, (Vector2Float){1, 1});
-	app->levelData->player = CreatePlayer(app, (Vector2Int){300, 300}, (Vector2Float){1, 1});
+	app->levelData->levelTarget = CreateLevelTarget(app, (Vector2Float){500, 500}, (Vector2Float){1, 1});
+	app->levelData->player = CreatePlayer(app, (Vector2Float){300, 300}, (Vector2Float){1, 1});
 }
 
 
@@ -58,12 +58,13 @@ void CleanUpGameEntity(GameEntity *entity)
 		return;
 	}
 
-	if (entity->material->texture != NULL)
+	if (entity->texture != NULL)
 	{
-		glDeleteTextures(1, &entity->material->texture->textureId);
-		glDeleteProgram(entity->material->shaderProgram);
-		free(entity->material->texture);
+		glDeleteTextures(1, &entity->texture->textureId);
+		free(entity->texture);
 	}
+
+	glDeleteProgram(entity->material->shaderProgram);
 
 	free(entity);
 }
@@ -78,12 +79,13 @@ void CleanUpUIEntity(UIEntity *entity)
 
 	ListDestroy(entity->childEntities);
 
-	if (entity->material->texture != NULL)
+	if (entity->texture != NULL)
 	{
-		glDeleteTextures(1, &entity->material->texture->textureId);
-		glDeleteProgram(entity->material->shaderProgram);
-		free(entity->material->texture);
+		glDeleteTextures(1, &entity->texture->textureId);
+		free(entity->texture);
 	}
+
+	glDeleteProgram(entity->material->shaderProgram);
 
 	free(entity);
 }

@@ -12,16 +12,16 @@
 
 void UpdatePlayer(void *data, App *app, float deltaTime);
 
-bool IsPositionInBounds(App *app, GameEntity *entity, Vector2Int position)
+bool IsPositionInBounds(App *app, GameEntity *entity, Vector2Float position)
 {
 	for (int i = 0; i < app->allWindows->size; i++)
 	{
 		Window *window = app->allWindows->elements[i];
 
-		Vector2Int boundsMin = {
+		Vector2Float boundsMin = {
 			window->position.x, window->position.y
 		};
-		Vector2Int boundsMax = {
+		Vector2Float boundsMax = {
 			window->position.x + window->size.x,
 			window->position.y + window->size.y
 		};
@@ -36,22 +36,19 @@ bool IsPositionInBounds(App *app, GameEntity *entity, Vector2Int position)
 }
 
 
-GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
+GameEntity *CreatePlayer(App *app, Vector2Float position, Vector2Float scale)
 {
 	GameEntity *player = calloc(1, sizeof(GameEntity));
 
-	Vector2Int playerSize = {0};
-
 	Texture *texture = LoadTexture("SlimeEnemy.png");
 
-	player->material = CreateMaterial(NULL, NULL, texture);
-
-	playerSize.x = player->material->texture->width;
-	playerSize.y = player->material->texture->height;
+	player->texture = texture;
+	player->material = CreateMaterial(NULL, NULL);
 
 	player->worldPosition = position;
 	player->scale = scale;
-	player->originalSize = playerSize;
+	player->originalSize.x = player->texture->width;
+	player->originalSize.y = player->texture->height;
 
 	ListAdd(app->allGameEntities, player);
 
@@ -64,14 +61,14 @@ GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 
 void MovePlayer(App *app, GameEntity *player)
 {
-	Vector2Int direction = GetMoveDirection();
+	Vector2Float direction = GetMoveDirection();
 
 	if (direction.x == 0 && direction.y == 0)
 	{
 		return;
 	}
 
-	Vector2Int nextFramePosition = {
+	Vector2Float nextFramePosition = {
 		player->worldPosition.x + direction.x * MOVE_SPEED, player->worldPosition.y + direction.y * MOVE_SPEED
 	};
 

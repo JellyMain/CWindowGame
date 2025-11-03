@@ -16,25 +16,30 @@ void CreateWinScreen(App *app)
 	                                                 WINDOW_SCREEN_SPACE, FIXED_SIZE, "WinWindow"
 	);
 
-	Vector2Int youWinTextPosition = (Vector2Int)
+	CreateGameWindowWithRenderer(app, (Vector2Int){300, 600}, (Vector2Int){600, 600},
+	                             WINDOW_SCREEN_SPACE, FIXED_SIZE, "WinWindow2");
+
+	Vector2Float youWinTextPosition =
 	{
 		winWindow->size.x / 2,
 		winWindow->size.y / 2
 	};
 
 
-	Vector2Int continueTextPosition = (Vector2Int)
+	Vector2Float continueTextPosition =
 	{
 		winWindow->size.x / 2, winWindow->size.y / 2 + 120
 	};
 
 
-	CreateStaticText(app, "You Win!!!!!!!!!", (SDL_Color){255, 255, 255}, youWinTextPosition, (Vector2Float){0.3f, 0.3f},
+	CreateStaticText(app, "You Win!!!!!!!!!", (SDL_Color){255, 255, 255}, youWinTextPosition,
+	                 (Vector2Float){0.3f, 0.3f},
 	                 NULL);
 
 
-	CreateButton(NULL, (Vector2Int){75, 30}, (SDL_Color){255, 255, 255, 255}, "Continue", (Vector2Float){0.3f, 0.3f},
-	             (SDL_Color){0, 0, 0}, app, winWindow, continueTextPosition, (Vector2Float){1, 1},NULL, OnButtonClicked,
+	CreateButton(NULL, NULL, (Vector2Float){75, 30}, (SDL_Color){255, 255, 255, 255}, "Continue",
+	             (Vector2Float){0.3f, 0.3f},
+	             (SDL_Color){0, 0, 0}, app, continueTextPosition, (Vector2Float){1, 1},NULL, OnButtonClicked,
 	             OnButtonClickedAnimation, NULL, NULL, NULL);
 }
 

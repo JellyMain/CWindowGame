@@ -27,12 +27,13 @@ void CreateMainMenu(App *app)
 	                      menuWindow->position.y - menuWindow->size.y / 2);
 
 	Texture *playButtonTexture = LoadTexture("ButtonSprite.png");
-	Material *material = CreateMaterial("waves.frag", NULL, playButtonTexture);
-	material->texture = playButtonTexture;
 
-	UIEntity *playButton = CreateButton(material, (Vector2Int){100, 50}, (SDL_Color){0, 0, 0}, "Play",
+	Material *material = CreateMaterial("waves.frag", NULL);
+
+	UIEntity *playButton = CreateButton(playButtonTexture, material, (Vector2Float){100, 50}, (SDL_Color){0, 0, 0},
+	                                    "Play",
 	                                    (Vector2Float){0.3f, 0.3f},
-	                                    (SDL_Color){0, 0, 0}, app, menuWindow, menuWindow->windowCenterPoint,
+	                                    (SDL_Color){0, 0, 0}, app, menuWindow->windowCenterPoint,
 	                                    (Vector2Float){2, 2}, NULL, PlayButtonInteraction, NULL, OnPlayButtonHover,
 	                                    OnPlayButtonHoverExit,
 	                                    NULL);

@@ -80,12 +80,12 @@ Vector2Float ClampVector2Float(Vector2Float value, Vector2Float min, Vector2Floa
 }
 
 
-bool IsEntityInBounds(GameEntity *entity, Vector2Int position, Vector2Int boundsMin, Vector2Int boundsMax)
+bool IsEntityInBounds(GameEntity *entity, Vector2Float position, Vector2Float boundsMin, Vector2Float boundsMax)
 {
-	int entityLeft = position.x - entity->size.x / 2;
-	int entityTop = position.y - entity->size.y / 2;
-	int entityRight = position.x + entity->size.x / 2;
-	int entityBottom = position.y + entity->size.y / 2;
+	float entityLeft = position.x - entity->size.x / 2;
+	float entityTop = position.y - entity->size.y / 2;
+	float entityRight = position.x + entity->size.x / 2;
+	float entityBottom = position.y + entity->size.y / 2;
 
 	return entityLeft >= boundsMin.x &&
 	       entityRight <= boundsMax.x &&
@@ -94,23 +94,24 @@ bool IsEntityInBounds(GameEntity *entity, Vector2Int position, Vector2Int bounds
 }
 
 
-bool IsPointInBounds(Vector2Int point, Vector2Int boundsMin, Vector2Int boundsMax)
+bool IsPointInBounds(Vector2Float point, Vector2Float boundsMin, Vector2Float boundsMax)
 {
 	return point.x >= boundsMin.x && point.x <= boundsMax.x &&
 	       point.y >= boundsMin.y && point.y <= boundsMax.y;
 }
 
-bool IsEntityOverlapping(GameEntity *entity1, Vector2Int position1, GameEntity *entity2, Vector2Int position2)
-{
-	int entity1Left = position1.x - entity1->size.x / 2;
-	int entity1Right = position1.x + entity1->size.x / 2;
-	int entity1Top = position1.y - entity1->size.y / 2;
-	int entity1Bottom = position1.y + entity1->size.y / 2;
 
-	int entity2Left = position2.x - entity2->size.x / 2;
-	int entity2Right = position2.x + entity2->size.x / 2;
-	int entity2Top = position2.y - entity2->size.y / 2;
-	int entity2Bottom = position2.y + entity2->size.y / 2;
+bool IsEntityOverlapping(GameEntity *entity1, Vector2Float position1, GameEntity *entity2, Vector2Float position2)
+{
+	float entity1Left = position1.x - entity1->size.x / 2;
+	float entity1Right = position1.x + entity1->size.x / 2;
+	float entity1Top = position1.y - entity1->size.y / 2;
+	float entity1Bottom = position1.y + entity1->size.y / 2;
+
+	float entity2Left = position2.x - entity2->size.x / 2;
+	float entity2Right = position2.x + entity2->size.x / 2;
+	float entity2Top = position2.y - entity2->size.y / 2;
+	float entity2Bottom = position2.y + entity2->size.y / 2;
 
 	return entity1Left < entity2Right &&
 	       entity1Right > entity2Left &&
@@ -128,6 +129,7 @@ float GetPercentageChange(float oldValue, float newValue)
 	return (newValue - oldValue) * 100 / oldValue;
 }
 
+
 Vector2Float GetPercentageChangeVector2(Vector2Float oldValue, Vector2Float newValue)
 {
 	Vector2Float result;
@@ -141,6 +143,7 @@ float LerpFloat(float a, float b, float t)
 {
 	return (1 - t) * a + t * b;
 }
+
 
 Vector2Float LerpVector2Float(Vector2Float a, Vector2Float b, float t)
 {

@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include "../../General/Headers/structs.h"
 
-Vector2Int GetMoveDirection();
+Vector2Float GetMoveDirection();
 
-Vector2Int GetMousePosition();
+Vector2Float GetMousePosition();
 
 bool IsLeftMouseButtonClicked();
 

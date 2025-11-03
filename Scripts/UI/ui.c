@@ -102,12 +102,12 @@ TextAtlas *CreateTextAtlas(char *fileName, int fontSize)
 }
 
 
-UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Int position, Vector2Float scale,
+UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Float position, Vector2Float scale,
                            UIEntity *parent)
 {
 	UIEntity *textEntity = calloc(1, sizeof(UIEntity));
 
-	textEntity->entityScale = scale;
+	textEntity->scale = scale;
 	textEntity->parentEntity = parent;
 	textEntity->childEntities = ListCreate(0);
 	textEntity->worldPosition = position;
@@ -146,12 +146,13 @@ UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Int
 	}
 
 	Texture *texture = CreateTextureFromSurface(textSurface);
-	textEntity->material = CreateMaterial(NULL, NULL, texture);
+	textEntity->texture = texture;
+	textEntity->material = CreateMaterial(NULL, NULL);
 
 	textEntity->uiType = TEXT;
-	textEntity->originalSize = (Vector2Int){
-		textEntity->material->texture->width, textEntity->material->texture->height
-	};
+
+	textEntity->originalSize.x = textEntity->texture->width;
+	textEntity->originalSize.y = textEntity->texture->height;
 
 	TTF_CloseFont(font);
 	SDL_FreeSurface(textSurface);
@@ -162,9 +163,9 @@ UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Int
 }
 
 
-UIEntity *CreateButton(Material *buttonMaterial, Vector2Int size, SDL_Color backgroundColor,
+UIEntity *CreateButton(Texture *buttonTexture, Material *buttonMaterial, Vector2Float size, SDL_Color backgroundColor,
                        char *text, Vector2Float textScale,
-                       SDL_Color textColor, App *app, Window *window, Vector2Int position,
+                       SDL_Color textColor, App *app, Vector2Float position,
                        Vector2Float buttonScale, void *interactionData,
                        void (*OnInteraction)(App *app, void *data),
                        void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity),
@@ -173,7 +174,7 @@ UIEntity *CreateButton(Material *buttonMaterial, Vector2Int size, SDL_Color back
                        UIEntity *parent)
 {
 	UIEntity *buttonEntity = calloc(1, sizeof(UIEntity));
-	buttonEntity->entityScale = buttonScale;
+	buttonEntity->scale = buttonScale;
 	buttonEntity->uiType = BUTTON;
 	buttonEntity->isHovered = false;
 	buttonEntity->childEntities = ListCreate(0);
@@ -183,6 +184,7 @@ UIEntity *CreateButton(Material *buttonMaterial, Vector2Int size, SDL_Color back
 	buttonEntity->OnHover = OnHover;
 	buttonEntity->OnHoverExit = OnHoverExit;
 	buttonEntity->interactionData = interactionData;
+	buttonEntity->material = buttonMaterial;
 
 	if (parent != NULL)
 	{
@@ -195,24 +197,27 @@ UIEntity *CreateButton(Material *buttonMaterial, Vector2Int size, SDL_Color back
 
 	buttonEntity->lastFrameParentScale = buttonEntity->parentScale;
 
-
 	buttonEntity->worldPosition = position;
 	buttonEntity->lastFrameWorldPosition = position;
 
 
-	if (buttonMaterial == NULL)
+	if (buttonTexture == NULL)
 	{
 		Texture *rectTexture = CreateRect(size, backgroundColor);
-		buttonEntity->material = CreateMaterial(NULL, NULL, rectTexture);
+		buttonEntity->texture = rectTexture;
 	}
 	else
 	{
-		buttonEntity->material = buttonMaterial;
+		buttonEntity->texture = buttonTexture;
 	}
 
-	buttonEntity->originalSize = (Vector2Int){
-		buttonEntity->material->texture->width, buttonEntity->material->texture->height
-	};
+	if (buttonMaterial == NULL)
+	{
+		buttonEntity->material = CreateMaterial(NULL, NULL);
+	}
+
+	buttonEntity->originalSize.x = buttonEntity->texture->width;
+	buttonEntity->originalSize.y = buttonEntity->texture->height;
 
 	ListAdd(app->allUIEntities, buttonEntity);
 
@@ -278,7 +283,7 @@ void UpdateChildrenPosition(UIEntity *uiEntity)
 			for (int j = 0; j < uiEntity->childEntities->size; j++)
 			{
 				UIEntity *child = uiEntity->childEntities->elements[j];
-				child->worldPosition = (Vector2Int){
+				child->worldPosition = (Vector2Float){
 					child->worldPosition.x + parentPositionDelta.x,
 					child->worldPosition.y + parentPositionDelta.y
 				};
@@ -296,13 +301,13 @@ void HandleInteractions(App *app, UIEntity *uiEntity)
 	{
 		case BUTTON:
 		{
-			Vector2Int mousePosition = GetMousePosition();
+			Vector2Float mousePosition = GetMousePosition();
 
-			Vector2Int boundsMin = (Vector2Int){
+			Vector2Float boundsMin = {
 				uiEntity->worldPosition.x - uiEntity->size.x / 2,
 				uiEntity->worldPosition.y - uiEntity->size.y / 2
 			};
-			Vector2Int boundsMax = (Vector2Int){
+			Vector2Float boundsMax = {
 				uiEntity->worldPosition.x + uiEntity->size.x / 2,
 				uiEntity->worldPosition.y + uiEntity->size.y / 2
 			};

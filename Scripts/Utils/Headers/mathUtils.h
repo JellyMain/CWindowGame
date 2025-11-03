@@ -10,11 +10,11 @@ Vector2Int ClampVector2Int(Vector2Int value, Vector2Int min, Vector2Int max);
 
 Vector2Float ClampVector2Float(Vector2Float value, Vector2Float min, Vector2Float max);
 
-bool IsEntityInBounds(GameEntity *entity, Vector2Int position, Vector2Int boundsMin, Vector2Int boundsMax);
+bool IsEntityInBounds(GameEntity *entity, Vector2Float position, Vector2Float boundsMin, Vector2Float boundsMax);
 
-bool IsPointInBounds(Vector2Int point, Vector2Int boundsMin, Vector2Int boundsMax);
+bool IsPointInBounds(Vector2Float point, Vector2Float boundsMin, Vector2Float boundsMax);
 
-bool IsEntityOverlapping(GameEntity *entity1, Vector2Int position1, GameEntity *entity2, Vector2Int position2);
+bool IsEntityOverlapping(GameEntity *entity1, Vector2Float position1, GameEntity *entity2, Vector2Float position2);
 
 float GetPercentageChange(float oldValue, float newValue);
 

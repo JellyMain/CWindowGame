@@ -29,11 +29,11 @@ Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int s
 	SDL_Renderer *renderer = SDL_CreateRenderer(sdlWindow, -1,
 	                                            SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-	Vector2Int windowCenterPoint = (Vector2Int){size.x / 2, size.y / 2};
-	Vector2Int windowUpperLeftPoint = (Vector2Int){0, 0};
-	Vector2Int windowLowerLeftPoint = (Vector2Int){0, size.y};
-	Vector2Int windowUpperRightPoint = (Vector2Int){size.x, 0};
-	Vector2Int windowLowerRightPoint = (Vector2Int){size.x, size.y};
+	Vector2Float windowCenterPoint = {size.x / 2, size.y / 2};
+	Vector2Float windowUpperLeftPoint = {0, 0};
+	Vector2Float windowLowerLeftPoint = {0, size.y};
+	Vector2Float windowUpperRightPoint = {size.x, 0};
+	Vector2Float windowLowerRightPoint = {size.x, size.y};
 
 	window->sdlWindow = sdlWindow;
 
@@ -64,8 +64,8 @@ void UpdateWindow(App *app, Window *window)
 	{
 		GameEntity *entity = app->allGameEntities->elements[i];
 
-		Vector2Int minBounds = {window->position.x, window->position.y};
-		Vector2Int maxBounds = {
+		Vector2Float minBounds = {window->position.x, window->position.y};
+		Vector2Float maxBounds = {
 			window->position.x + window->size.x, window->position.y + window->size.y
 		};
 

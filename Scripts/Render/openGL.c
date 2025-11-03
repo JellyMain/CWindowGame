@@ -3,6 +3,7 @@
 #include "Headers/openGL.h"
 #include "glad/glad.h"
 #include "../General/Headers/structs.h"
+#include "Headers/textures.h"
 
 #define OpenGLCall(x) GLClearAllErrors(); x; GLCheckErrorStatus(__LINE__);
 
@@ -318,8 +319,8 @@ GLuint CreateShaderProgram(char *vertexShaderName, char *fragmentShaderName)
 Renderer *CreateRenderer()
 {
 	Renderer *renderer = calloc(1, sizeof(Renderer));
-	renderer->defaultShaderProgram = CreateShaderProgram(NULL, NULL);
-	renderer->gizmosShaderProgram = CreateShaderProgram("Gizmos/gizmos.vert", "Gizmos/gizmos.frag");
+	renderer->defaultMaterial = CreateMaterial(NULL, NULL);
+	renderer->defaultGizmoMaterial = CreateMaterial("Gizmos/gizmos.frag", "Gizmos/gizmos.vert");
 
 	glGenVertexArrays(1, &renderer->entitiesVAO);
 	glGenVertexArrays(1, &renderer->gizmosVAO);

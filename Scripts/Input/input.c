@@ -8,9 +8,9 @@ void ProcessInput(void *data, App *app, float deltaTime);
 static bool isLeftMouseButtonClicked = false;
 
 
-Vector2Int GetMoveDirection()
+Vector2Float GetMoveDirection()
 {
-	Vector2Int input = {0, 0};
+	Vector2Float input = {0, 0};
 
 	const Uint8 *keyState = SDL_GetKeyboardState(NULL);
 
@@ -80,12 +80,12 @@ bool IsLeftMouseButtonClicked()
 }
 
 
-Vector2Int GetMousePosition()
+Vector2Float GetMousePosition()
 {
 	int xPosition;
 	int yPosition;
 
 	SDL_GetMouseState(&xPosition, &yPosition);
 
-	return (Vector2Int){xPosition, yPosition};
+	return (Vector2Float){xPosition, yPosition};
 }

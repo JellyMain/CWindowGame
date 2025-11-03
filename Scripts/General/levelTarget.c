@@ -11,16 +11,16 @@
 void UpdateLevelTarget(void *data, App *app, float deltaTime);
 
 
-GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
+GameEntity *CreateLevelTarget(App *app, Vector2Float position, Vector2Float scale)
 {
 	GameEntity *levelTarget = calloc(1, sizeof(GameEntity));
 
 
 	Texture *texture = LoadTexture("LevelTarget.png");
-	levelTarget->material = CreateMaterial(NULL, NULL, texture);
-
-	levelTarget->originalSize.x = levelTarget->material->texture->width;
-	levelTarget->originalSize.y = levelTarget->material->texture->height;
+	levelTarget->texture = texture;
+	levelTarget->material = CreateMaterial(NULL, NULL);
+	levelTarget->originalSize.x = levelTarget->texture->width;
+	levelTarget->originalSize.y = levelTarget->texture->height;
 
 	levelTarget->worldPosition = position;
 	levelTarget->scale = scale;

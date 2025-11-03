@@ -44,7 +44,7 @@ void RenderTexture(Renderer *renderer, Texture *texture, float x, float y, float
 }
 
 
-void RenderGameEntity(App *app, Vector2Int screenPosition, GameEntity *entity, float projectionMatrix[16])
+void RenderGameEntity(App *app, Vector2Float screenPosition, GameEntity *entity, float projectionMatrix[16])
 {
 	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->scale.x;
 	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->scale.y;
@@ -54,25 +54,25 @@ void RenderGameEntity(App *app, Vector2Int screenPosition, GameEntity *entity, f
 
 	glUseProgram(entity->material->shaderProgram);
 	glUniformMatrix4fv(entity->material->projectionLocation, 1, GL_FALSE, projectionMatrix);
-	RenderTexture(app->renderer, entity->material->texture, x, y, entity->size.x, entity->size.y);
+	RenderTexture(app->renderer, entity->texture, x, y, entity->size.x, entity->size.y);
 }
 
 
-void RenderUIEntity(App *app, Vector2Int screenPosition, UIEntity *entity, float projectionMatrix[16])
+void RenderUIEntity(App *app, Vector2Float screenPosition, UIEntity *entity, float projectionMatrix[16])
 {
-	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->entityScale.x * entity->parentScale.x;
-	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->entityScale.y * entity->parentScale.y;
+	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->scale.x * entity->parentScale.x;
+	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->scale.y * entity->parentScale.y;
 
 	float x = screenPosition.x - entity->size.x / 2.0f;
 	float y = screenPosition.y - entity->size.y / 2.0f;
 
 	glUseProgram(entity->material->shaderProgram);
 	glUniformMatrix4fv(entity->material->projectionLocation, 1, GL_FALSE, projectionMatrix);
-	RenderTexture(app->renderer, entity->material->texture, x, y, entity->size.x, entity->size.y);
+	RenderTexture(app->renderer, entity->texture, x, y, entity->size.x, entity->size.y);
 }
 
 
-void DrawGizmoRect(Renderer *renderer, int x, int y, int width, int height)
+void DrawGizmoRect(Renderer *renderer, float x, float y, float width, float height)
 {
 	float verticesData[] = {
 		x, y,
@@ -87,14 +87,13 @@ void DrawGizmoRect(Renderer *renderer, int x, int y, int width, int height)
 }
 
 
-void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Int position, Vector2Float scale, Renderer *renderer,
+void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, Vector2Float scale, Renderer *renderer,
                        float projectionMatrix[16])
 {
-	int currentX = 0;
+	float currentX = 0;
 
-	glUseProgram(renderer->defaultShaderProgram);
-	glUniformMatrix4fv(glGetUniformLocation(renderer->defaultShaderProgram, "projection"), 1, GL_FALSE,
-	                   projectionMatrix);
+	glUseProgram(renderer->defaultMaterial->shaderProgram);
+	glUniformMatrix4fv(renderer->defaultMaterial->projectionLocation, 1, GL_FALSE, projectionMatrix);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textAtlas->atlasTexture->textureId);
@@ -143,7 +142,7 @@ void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Int position, Ve
 }
 
 
-void RenderHollowGizmoRect(App *app, Vector2Int position, Vector2Int size, int thickness)
+void RenderHollowGizmoRect(App *app, Vector2Float position, Vector2Float size, float thickness)
 {
 	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y - size.y / 2, size.x, thickness);
 
@@ -159,10 +158,10 @@ void RenderHollowGizmoRect(App *app, Vector2Int position, Vector2Int size, int t
 
 void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
 {
-	GLint projectionLocation = glGetUniformLocation(app->renderer->gizmosShaderProgram, "projection");
-	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projectionMatrix);
-	GLint uniformLocation = glGetUniformLocation(app->renderer->gizmosShaderProgram, "color");
-	glUniform4f(uniformLocation,
+	glUseProgram(app->renderer->defaultGizmoMaterial->shaderProgram);
+	glUniformMatrix4fv(app->renderer->defaultGizmoMaterial->projectionLocation, 1, GL_FALSE, projectionMatrix);
+	GLint colorLocation = glGetUniformLocation(app->renderer->defaultGizmoMaterial->shaderProgram, "color");
+	glUniform4f(colorLocation,
 	            gizmoEntity->color.r / 255.0f,
 	            gizmoEntity->color.g / 255.0f,
 	            gizmoEntity->color.b / 255.0f,
@@ -173,13 +172,13 @@ void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
 	                      gizmoEntity->thickness);
 
 	char entityInfo[150];
-	snprintf(entityInfo, sizeof(entityInfo), "x:%d,y:%d w:%d,h%d",
+	snprintf(entityInfo, sizeof(entityInfo), "x:%.1f,y:%.1f w:%.1f,h:%.1f",
 	         gizmoEntity->connectedEntity->worldPosition.x,
 	         gizmoEntity->connectedEntity->worldPosition.y,
 	         gizmoEntity->connectedEntity->size.x,
 	         gizmoEntity->connectedEntity->size.y);
 
-	RenderDynamicText(app->textAtlas, entityInfo, (Vector2Int){
+	RenderDynamicText(app->textAtlas, entityInfo, (Vector2Float){
 		                  gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->connectedEntity->size.x / 2,
 		                  gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->connectedEntity->size.y / 2 - 10
 	                  }, (Vector2Float){1, 1}, app->renderer, projectionMatrix);
@@ -220,7 +219,7 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 		{
 			GameEntity *entity = app->allGameEntities->elements[j];
 
-			Vector2Int screenPos;
+			Vector2Float screenPos;
 
 			switch (window->renderType)
 			{
@@ -245,14 +244,13 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 		for (int j = 0; j < app->allUIEntities->size; j++)
 		{
 			UIEntity *entity = app->allUIEntities->elements[j];
-			Vector2Int screenPos = entity->worldPosition;
+			Vector2Float screenPos = entity->worldPosition;
 			RenderUIEntity(app, screenPos, entity, projectionMatrix);
 		}
 
 
 		if (app->showGizmos)
 		{
-			glUseProgram(app->renderer->gizmosShaderProgram);
 			glBindVertexArray(app->renderer->gizmosVAO);
 
 			for (int k = 0; k < app->allGizmosEntities->size; k++)

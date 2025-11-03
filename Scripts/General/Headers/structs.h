@@ -146,31 +146,33 @@ typedef struct Renderer
 	GLuint gizmosVAO;
 	GLuint VBO;
 	GLuint EBO;
-	GLuint defaultShaderProgram;
-	GLuint gizmosShaderProgram;
+	struct Material *defaultMaterial;
+	struct Material *defaultGizmoMaterial;
 } Renderer;
 
 
 typedef struct GameEntity
 {
-	Vector2Int worldPosition;
+	Vector2Float worldPosition;
 	Vector2Float scale;
-	Vector2Int originalSize;
-	Vector2Int size;
+	Vector2Float originalSize;
+	Vector2Float size;
 	struct Material *material;
+	Texture *texture;
 } GameEntity;
 
 
 typedef struct UIEntity
 {
-	Vector2Int worldPosition;
-	Vector2Float entityScale;
+	Vector2Float worldPosition;
+	Vector2Float scale;
 	Vector2Float parentScale;
 	Vector2Float lastFrameParentScale;
-	Vector2Int lastFrameWorldPosition;
-	Vector2Int originalSize;
-	Vector2Int size;
+	Vector2Float lastFrameWorldPosition;
+	Vector2Float originalSize;
+	Vector2Float size;
 	struct Material *material;
+	Texture *texture;
 	UIType uiType;
 	struct UIEntity *parentEntity;
 	List *childEntities;
@@ -193,7 +195,6 @@ typedef struct
 
 typedef struct Material
 {
-	Texture *texture;
 	GLuint shaderProgram;
 	GLint projectionLocation;
 } Material;
@@ -210,11 +211,11 @@ typedef struct
 	WindowRenderType renderType;
 	WindowType windowType;
 	List *entitiesInWindowList;
-	Vector2Int windowCenterPoint;
-	Vector2Int upperRightPoint;
-	Vector2Int lowerRightPoint;
-	Vector2Int upperLeftPoint;
-	Vector2Int lowerLeftPoint;
+	Vector2Float windowCenterPoint;
+	Vector2Float upperRightPoint;
+	Vector2Float lowerRightPoint;
+	Vector2Float upperLeftPoint;
+	Vector2Float lowerLeftPoint;
 } Window;
 
 

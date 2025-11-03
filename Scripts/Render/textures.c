@@ -5,7 +5,7 @@
 #include "Headers/openGL.h"
 
 
-Texture *CreateRect(Vector2Int size, SDL_Color color)
+Texture *CreateRect(Vector2Float size, SDL_Color color)
 {
 	Texture *texture = calloc(1, sizeof(Texture));
 
@@ -60,12 +60,14 @@ Texture *CreateTextureFromSurface(SDL_Surface *surface)
 }
 
 
-Material *CreateMaterial(char *fragShaderName, char *vertShaderName, Texture *texture)
+Material *CreateMaterial(char *fragShaderName, char *vertShaderName)
 {
 	Material *material = calloc(1, sizeof(Material));
 
-	material->texture = texture;
+
 	material->shaderProgram = CreateShaderProgram(vertShaderName, fragShaderName);
+	glUseProgram(material->shaderProgram);
+	material->projectionLocation = glGetUniformLocation(material->shaderProgram, "projection");
 	return material;
 }
 

@@ -6,6 +6,6 @@ Texture *CreateTextureFromSurface(SDL_Surface *surface);
 
 Texture *LoadTexture(const char *fileName);
 
-Texture *CreateRect(Vector2Int size, SDL_Color color);
+Texture *CreateRect(Vector2Float size, SDL_Color color);
 
-Material *CreateMaterial(char *fragShaderName, char *vertShaderName, Texture *texture);
+Material *CreateMaterial(char *fragShaderName, char *vertShaderName);

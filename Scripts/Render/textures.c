@@ -54,7 +54,6 @@ Texture *CreateTextureFromSurface(SDL_Surface *surface)
 	texture->height = convertedSurface->h;
 	texture->width = convertedSurface->w;
 
-	SDL_FreeSurface(surface);
 	SDL_FreeSurface(convertedSurface);
 
 	return texture;

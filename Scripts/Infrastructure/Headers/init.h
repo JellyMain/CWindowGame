@@ -3,4 +3,4 @@
 
 void Init(App *app);
 
-void Cleanup(App *app);
+void InitSDL2();

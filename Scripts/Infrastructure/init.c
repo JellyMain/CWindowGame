@@ -2,6 +2,7 @@
 #include <SDL_ttf.h>
 #include "../Infrastructure/Headers/init.h"
 #include "../Render/Headers/openGL.h"
+#include "../UI/Headers/ui.h"
 
 
 void InitSDL2()
@@ -33,5 +34,5 @@ void Init(App *app)
 	InitSDL2();
 	InitOpenGL(app);
 
-	// app->textAtlas = CreateTextAtlas("ByteBounce.ttf", 16);
+	app->textAtlas = CreateTextAtlas("ByteBounce.ttf", 16);
 }

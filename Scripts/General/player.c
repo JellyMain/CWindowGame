@@ -1,4 +1,6 @@
 ﻿#include "Headers/player.h"
+
+#include "../Infrastructure/Headers/stateMachine.h"
 #include "../Infrastructure/Headers/update.h"
 #include "../Render/Headers/draw.h"
 #include "../Input/Headers/input.h"
@@ -8,6 +10,7 @@
 
 #define MOVE_SPEED 5
 
+void UpdatePlayer(void *data, App *app, float deltaTime);
 
 bool IsPositionInBounds(App *app, GameEntity *entity, Vector2Int position)
 {
@@ -51,6 +54,9 @@ GameEntity *CreatePlayer(App *app, Vector2Int position, Vector2Float scale)
 	player->originalSize = playerSize;
 
 	ListAdd(app->allGameEntities, player);
+
+	Updatable *playerUpdatable = CreateUpdatable(player, UpdatePlayer);
+	AddUpdatable(app, playerUpdatable);
 
 	return player;
 }

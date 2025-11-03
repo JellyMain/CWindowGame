@@ -8,6 +8,24 @@
 #include "../UI/Headers/ui.h"
 
 
+void SetShaderUniform(GLuint shaderProgram, char *propertyName, UniformType uniformType, void *value)
+{
+	glUseProgram(shaderProgram);
+	GLint uniformLocation = glGetUniformLocation(shaderProgram, propertyName);
+
+	switch (uniformType)
+	{
+		case UNIFORM_FLOAT:
+			glUniform1f(uniformLocation, *(float *) value);
+			break;
+
+		case UNIFORM_MAT4F:
+			glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (float *) value);
+			break;
+	}
+}
+
+
 void RenderTexture(Renderer *renderer, Texture *texture, float x, float y, float width, float height)
 {
 	float verticesData[] = {
@@ -54,13 +72,13 @@ void RenderUIEntity(App *app, Vector2Int screenPosition, UIEntity *entity, float
 }
 
 
-void DrawGizmoRect(Renderer *renderer, Vector2Int position, int thickness)
+void DrawGizmoRect(Renderer *renderer, int x, int y, int width, int height)
 {
 	float verticesData[] = {
-		position.x, position.y, 0.0f, 0.0f,
-		position.x, position.y + thickness, 0.0f, 1.0f,
-		position.x + thickness, position.y + thickness, 1.0f, 1.0f,
-		position.x + thickness, position.y, 1.0f, 0.0f
+		x, y,
+		x, y + height,
+		x + width, y + height,
+		x + width, y,
 	};
 
 	glBindBuffer(GL_ARRAY_BUFFER, renderer->VBO);
@@ -69,31 +87,102 @@ void DrawGizmoRect(Renderer *renderer, Vector2Int position, int thickness)
 }
 
 
-void RenderGizmo(App *app, Window *window, GizmoEntity *gizmoEntity)
+void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Int position, Vector2Float scale, Renderer *renderer,
+                       float projectionMatrix[16])
 {
-	// SDL_SetRenderDrawColor(window->renderer, gizmoEntity->color.r, gizmoEntity->color.g, gizmoEntity->color.b,
-	//                        gizmoEntity->color.a);
-	//
-	// DrawThickRectBorder(window, gizmoEntity->connectedEntity->worldPosition, gizmoEntity->connectedEntity->size,
-	//                     gizmoEntity->thickness);
-	//
-	//
-	// char entityInfo[150];
-	// snprintf(entityInfo, sizeof(entityInfo), "x:%d,y:%d w:%d,h%d",
-	//          gizmoEntity->connectedEntity->worldPosition.x,
-	//          gizmoEntity->connectedEntity->worldPosition.y,
-	//          gizmoEntity->connectedEntity->size.x,
-	//          gizmoEntity->connectedEntity->size.y);
-	//
-	//
-	// DrawDynamicText(window, app->textAtlas, entityInfo, (Vector2Int){
-	// 	                gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->
-	// 	                connectedEntity->size.x
-	// 	                / 2,
-	// 	                gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->
-	// 	                connectedEntity->size.y
-	// 	                / 2 - 10
-	//                 }, (Vector2Float){1, 1});
+	int currentX = 0;
+
+	glUseProgram(renderer->defaultShaderProgram);
+	glUniformMatrix4fv(glGetUniformLocation(renderer->defaultShaderProgram, "projection"), 1, GL_FALSE,
+	                   projectionMatrix);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textAtlas->atlasTexture->textureId);
+
+	glBindVertexArray(renderer->entitiesVAO);
+
+	for (int i = 0; text[i] != '\0'; i++)
+	{
+		unsigned char character = (unsigned char) text[i];
+
+		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h > 0)
+		{
+			SDL_Rect charRect = textAtlas->characterRects[character];
+
+			float dstX = position.x + currentX;
+			float dstY = position.y;
+			float dstW = charRect.w * scale.x;
+			float dstH = charRect.h * scale.y;
+
+			float atlasWidth = textAtlas->atlasTexture->width;
+			float atlasHeight = textAtlas->atlasTexture->height;
+
+			float texLeft = charRect.x / atlasWidth;
+			float texRight = (charRect.x + charRect.w) / atlasWidth;
+			float texTop = charRect.y / atlasHeight;
+			float texBottom = (charRect.y + charRect.h) / atlasHeight;
+
+			float verticesData[] = {
+				dstX, dstY, texLeft, texTop,
+				dstX, dstY + dstH, texLeft, texBottom,
+				dstX + dstW, dstY + dstH, texRight, texBottom,
+				dstX + dstW, dstY, texRight, texTop
+			};
+
+			glBindBuffer(GL_ARRAY_BUFFER, renderer->VBO);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verticesData), verticesData);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+			currentX += charRect.w * scale.x;
+		}
+		else
+		{
+			currentX += 1;
+		}
+	}
+}
+
+
+void RenderHollowGizmoRect(App *app, Vector2Int position, Vector2Int size, int thickness)
+{
+	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y - size.y / 2, size.x, thickness);
+
+	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y + size.y / 2, size.x, thickness);
+
+	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y - size.y / 2, thickness,
+	              size.y);
+
+	DrawGizmoRect(app->renderer, position.x + size.x / 2 - thickness, position.y - size.y / 2 + thickness, thickness,
+	              size.y);
+}
+
+
+void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
+{
+	GLint projectionLocation = glGetUniformLocation(app->renderer->gizmosShaderProgram, "projection");
+	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projectionMatrix);
+	GLint uniformLocation = glGetUniformLocation(app->renderer->gizmosShaderProgram, "color");
+	glUniform4f(uniformLocation,
+	            gizmoEntity->color.r / 255.0f,
+	            gizmoEntity->color.g / 255.0f,
+	            gizmoEntity->color.b / 255.0f,
+	            gizmoEntity->color.a / 255.0f);
+
+
+	RenderHollowGizmoRect(app, gizmoEntity->connectedEntity->worldPosition, gizmoEntity->connectedEntity->size,
+	                      gizmoEntity->thickness);
+
+	char entityInfo[150];
+	snprintf(entityInfo, sizeof(entityInfo), "x:%d,y:%d w:%d,h%d",
+	         gizmoEntity->connectedEntity->worldPosition.x,
+	         gizmoEntity->connectedEntity->worldPosition.y,
+	         gizmoEntity->connectedEntity->size.x,
+	         gizmoEntity->connectedEntity->size.y);
+
+	RenderDynamicText(app->textAtlas, entityInfo, (Vector2Int){
+		                  gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->connectedEntity->size.x / 2,
+		                  gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->connectedEntity->size.y / 2 - 10
+	                  }, (Vector2Float){1, 1}, app->renderer, projectionMatrix);
 }
 
 
@@ -124,6 +213,8 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 		CalculateProjectionMatrix(projectionMatrix, window->size.x, window->size.y);
 
 		PrepareScene(window, app);
+
+		glBindVertexArray(app->renderer->entitiesVAO);
 
 		for (int j = 0; j < app->allGameEntities->size; j++)
 		{
@@ -161,15 +252,14 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 
 		if (app->showGizmos)
 		{
-			// SDL_SetRenderDrawBlendMode(window->renderer, SDL_BLENDMODE_BLEND);
-			//
-			// for (int k = 0; k < gizmoEntitiesDrawList->size; k++)
-			// {
-			// 	GizmoEntity *gizmoEntity = gizmoEntitiesDrawList->elements[k];
-			// 	BlitGizmo(app, window, gizmoEntity);
-			// }
-			//
-			// SDL_SetRenderDrawBlendMode(window->renderer, SDL_BLENDMODE_NONE);
+			glUseProgram(app->renderer->gizmosShaderProgram);
+			glBindVertexArray(app->renderer->gizmosVAO);
+
+			for (int k = 0; k < app->allGizmosEntities->size; k++)
+			{
+				GizmoEntity *gizmoEntity = ListGet(app->allGizmosEntities, k);
+				RenderGizmo(app, gizmoEntity, projectionMatrix);
+			}
 		}
 
 		SDL_GL_SwapWindow(window->sdlWindow);

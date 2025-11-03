@@ -12,67 +12,13 @@
 #include "../Render/Headers/textures.h"
 
 
-void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness,
-                 UIEntity *connectedEntity);
-
-
-void DrawDynamicText(Window *window, TextAtlas *textAtlas, char *text, Vector2Int position, Vector2Float scale)
-{
-	int currentX = 0;
-	SDL_Texture *atlasTexture = DictionaryGet(textAtlas->windowTexturesDictionary, window);
-
-	for (int i = 0; text[i] != '\0'; i++)
-	{
-		unsigned char character = (unsigned char) text[i];
-
-		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h >
-		    0)
-		{
-			SDL_Rect charRect = textAtlas->characterRects[character];
-			SDL_Rect dstRect = {
-				position.x + currentX, position.y, charRect.w * scale.x, charRect.h * scale.y
-			};
-
-			SDL_RenderCopy(window->renderer, atlasTexture, &charRect, &dstRect);
-			currentX += charRect.w * scale.x;
-		}
-		else
-		{
-			currentX += 1;
-		}
-	}
-}
-
-
-void DrawThickRectBorder(Window *window, Vector2Int position, Vector2Int size, int thickness)
-{
-	// SDL_Rect topRect = {position.x - size.x / 2, position.y - size.y / 2, size.x, thickness};
-	// SDL_RenderFillRect(window->renderer, &topRect);
-	//
-	// SDL_Rect bottomRect = {
-	// 	position.x - size.x / 2, position.y + size.y / 2, size.x, thickness
-	// };
-	// SDL_RenderFillRect(window->renderer, &bottomRect);
-	//
-	// SDL_Rect leftRect = {
-	// 	position.x - size.x / 2, position.y - size.y / 2 + thickness, thickness,
-	// 	size.y - 2 * thickness + 1
-	// };
-	// SDL_RenderFillRect(window->renderer, &leftRect);
-	//
-	// SDL_Rect rightRect = {
-	// 	position.x + size.x / 2 - thickness, position.y - size.y / 2 + thickness, thickness,
-	// 	size.y - 2 * thickness + 1
-	// };
-	// SDL_RenderFillRect(window->renderer, &rightRect);
-}
+void CreateGizmo(App *app, SDL_Color color, int thickness, UIEntity *connectedEntity);
 
 
 TextAtlas *CreateTextAtlas(char *fileName, int fontSize)
 {
 	TextAtlas *textAtlas = calloc(1, sizeof(TextAtlas));
 	memset(textAtlas->characterRects, 0, sizeof(textAtlas->characterRects));
-	textAtlas->windowTexturesDictionary = DictionaryCreate(HashWindow, WindowEquals);
 
 	char buffer[150];
 	snprintf(buffer, sizeof(buffer), "%s%s", "Assets/", fileName);
@@ -147,11 +93,10 @@ TextAtlas *CreateTextAtlas(char *fileName, int fontSize)
 		SDL_FreeSurface(characterSurface);
 	}
 
-	TTF_CloseFont(font);
-
 	textAtlas->atlasTexture = CreateTextureFromSurface(atlasSurface);
 
 	SDL_FreeSurface(atlasSurface);
+	TTF_CloseFont(font);
 
 	return textAtlas;
 }
@@ -209,6 +154,7 @@ UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Int
 	};
 
 	TTF_CloseFont(font);
+	SDL_FreeSurface(textSurface);
 
 	ListAdd(app->allUIEntities, textEntity);
 
@@ -216,15 +162,15 @@ UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Int
 }
 
 
-void CreateButton(Material *butttonMaterial, Vector2Int size, SDL_Color backgroundColor,
-                  char *text, Vector2Float textScale,
-                  SDL_Color textColor, App *app, Window *window, Vector2Int position,
-                  Vector2Float buttonScale, void *interactionData,
-                  void (*OnInteraction)(App *app, void *data),
-                  void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity),
-                  void (*OnHover)(App *app, UIEntity *uiEntity),
-                  void (*OnHoverExit)(App *app, UIEntity *uiEntity),
-                  UIEntity *parent)
+UIEntity *CreateButton(Material *buttonMaterial, Vector2Int size, SDL_Color backgroundColor,
+                       char *text, Vector2Float textScale,
+                       SDL_Color textColor, App *app, Window *window, Vector2Int position,
+                       Vector2Float buttonScale, void *interactionData,
+                       void (*OnInteraction)(App *app, void *data),
+                       void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity),
+                       void (*OnHover)(App *app, UIEntity *uiEntity),
+                       void (*OnHoverExit)(App *app, UIEntity *uiEntity),
+                       UIEntity *parent)
 {
 	UIEntity *buttonEntity = calloc(1, sizeof(UIEntity));
 	buttonEntity->entityScale = buttonScale;
@@ -254,14 +200,14 @@ void CreateButton(Material *butttonMaterial, Vector2Int size, SDL_Color backgrou
 	buttonEntity->lastFrameWorldPosition = position;
 
 
-	if (butttonMaterial == NULL)
+	if (buttonMaterial == NULL)
 	{
 		Texture *rectTexture = CreateRect(size, backgroundColor);
 		buttonEntity->material = CreateMaterial(NULL, NULL, rectTexture);
 	}
 	else
 	{
-		buttonEntity->material = butttonMaterial;
+		buttonEntity->material = buttonMaterial;
 	}
 
 	buttonEntity->originalSize = (Vector2Int){
@@ -276,17 +222,19 @@ void CreateButton(Material *butttonMaterial, Vector2Int size, SDL_Color backgrou
 		ListAdd(buttonEntity->childEntities, textEntity);
 	}
 
-	CreateGizmo(app, window, (SDL_Color){255, 0, 0, 255}, 1, buttonEntity);
+	CreateGizmo(app, (SDL_Color){255, 0, 0, 255}, 1, buttonEntity);
+
+	return buttonEntity;
 }
 
 
-void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness,
-                 UIEntity *connectedEntity)
+void CreateGizmo(App *app, SDL_Color color, int thickness, UIEntity *connectedEntity)
 {
-	// GizmoEntity *gizmoEntity = calloc(1, sizeof(GizmoEntity));
-	// gizmoEntity->connectedEntity = connectedEntity;
-	// gizmoEntity->color = color;
-	// gizmoEntity->thickness = thickness;
+	GizmoEntity *gizmoEntity = calloc(1, sizeof(GizmoEntity));
+	gizmoEntity->connectedEntity = connectedEntity;
+	gizmoEntity->color = color;
+	gizmoEntity->thickness = thickness;
+	ListAdd(app->allGizmosEntities, gizmoEntity);
 }
 
 

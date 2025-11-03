@@ -58,6 +58,8 @@ int main()
 	{
 		HandleGameStates(app);
 
+		app->time = SDL_GetTicks() / 1000.0f;
+
 		currentFrameTime = SDL_GetPerformanceCounter();
 		deltaTime = (currentFrameTime - lastFrameTime) / (float) SDL_GetPerformanceFrequency();
 		lastFrameTime = currentFrameTime;

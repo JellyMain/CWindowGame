@@ -1,9 +1,11 @@
 ﻿#include "Headers/menu.h"
 
 #include "../Infrastructure/Headers/stateMachine.h"
+#include "../Infrastructure/Headers/update.h"
 #include "Headers/structs.h"
 #include "../UI/Headers/ui.h"
 #include "../Infrastructure/Headers/window.h"
+#include "../Render/Headers/draw.h"
 #include "../Tween/Headers/tweener.h"
 #include "../Render/Headers/textures.h"
 
@@ -11,6 +13,7 @@
 void PlayButtonInteraction(App *app, void *data);
 void OnPlayButtonHover(App *app, UIEntity *uiEntity);
 void OnPlayButtonHoverExit(App *app, UIEntity *uiEntity);
+void UpdatePlayButton(void *data, App *app, float deltaTime);
 
 
 void CreateMainMenu(App *app)
@@ -27,10 +30,23 @@ void CreateMainMenu(App *app)
 	Material *material = CreateMaterial("waves.frag", NULL, playButtonTexture);
 	material->texture = playButtonTexture;
 
-	CreateButton(material, (Vector2Int){100, 50}, (SDL_Color){0, 0, 0}, "Play", (Vector2Float){0.3f, 0.3f},
-	             (SDL_Color){0, 0, 0}, app, menuWindow, menuWindow->windowCenterPoint,
-	             (Vector2Float){2, 2}, NULL, PlayButtonInteraction, NULL, OnPlayButtonHover, OnPlayButtonHoverExit,
-	             NULL);
+	UIEntity *playButton = CreateButton(material, (Vector2Int){100, 50}, (SDL_Color){0, 0, 0}, "Play",
+	                                    (Vector2Float){0.3f, 0.3f},
+	                                    (SDL_Color){0, 0, 0}, app, menuWindow, menuWindow->windowCenterPoint,
+	                                    (Vector2Float){2, 2}, NULL, PlayButtonInteraction, NULL, OnPlayButtonHover,
+	                                    OnPlayButtonHoverExit,
+	                                    NULL);
+
+	Updatable *playButtonUpdatable = CreateUpdatable(playButton, UpdatePlayButton);
+
+	AddUpdatable(app, playButtonUpdatable);
+}
+
+
+void UpdatePlayButton(void *data, App *app, float deltaTime)
+{
+	UIEntity *playButton = data;
+	SetShaderUniform(playButton->material->shaderProgram, "time", UNIFORM_FLOAT, &app->time);
 }
 
 

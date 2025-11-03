@@ -124,13 +124,9 @@ void CleanUpScene(App *app)
 	for (int i = 0; i < app->allWindows->size; i++)
 	{
 		Window *window = app->allWindows->elements[i];
-
-		// SDL_Texture *atlasTexture = DictionaryGet(app->textAtlas->windowTexturesDictionary, window);
-		// SDL_DestroyTexture(atlasTexture);
 		CleanUpWindow(window);
 	}
 
 	ListClear(app->allWindows);
-	// DictionaryClear(app->textAtlas->windowTexturesDictionary);
 	DictionaryClear(app->tweenTargetsDictionary);
 }

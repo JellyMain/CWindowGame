@@ -8,6 +8,9 @@
 #include "../Render/Headers/textures.h"
 
 
+void UpdateLevelTarget(void *data, App *app, float deltaTime);
+
+
 GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 {
 	GameEntity *levelTarget = calloc(1, sizeof(GameEntity));
@@ -23,6 +26,9 @@ GameEntity *CreateLevelTarget(App *app, Vector2Int position, Vector2Float scale)
 	levelTarget->scale = scale;
 
 	ListAdd(app->allGameEntities, levelTarget);
+
+	Updatable *levelTargetUpdatable = CreateUpdatable(levelTarget, UpdateLevelTarget);
+	AddUpdatable(app, levelTargetUpdatable);
 
 	return levelTarget;
 }

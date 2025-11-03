@@ -4,3 +4,5 @@
 void SetPendingState(App *app, GameState state);
 
 void EnterState(App *app, GameState state);
+
+void AddUpdatable(App *app, Updatable *updatable);

@@ -130,17 +130,17 @@ void InitOpenGL(App *app)
 }
 
 
-char *LoadShaderSource(const char *shaderName)
+char *LoadShaderSource(const char *shaderPath)
 {
 	char filePathBuffer[150];
-	snprintf(filePathBuffer, sizeof(filePathBuffer), "%s%s", "Shaders/", shaderName);
+	snprintf(filePathBuffer, sizeof(filePathBuffer), "%s%s", "Shaders/", shaderPath);
 
 	SDL_Log("Loading shader: %s", filePathBuffer);
 
 	FILE *file = fopen(filePathBuffer, "rb");
 	if (!file)
 	{
-		SDL_Log("Failed to open shader file: %s", shaderName);
+		SDL_Log("Failed to open shader file: %s", shaderPath);
 		return NULL;
 	}
 
@@ -151,7 +151,7 @@ char *LoadShaderSource(const char *shaderName)
 	char *buffer = malloc(fileSize + 1);
 	if (!buffer)
 	{
-		SDL_Log("Failed to allocate memory for shader: %s", shaderName);
+		SDL_Log("Failed to allocate memory for shader: %s", shaderPath);
 		fclose(file);
 		return NULL;
 	}
@@ -318,14 +318,15 @@ GLuint CreateShaderProgram(char *vertexShaderName, char *fragmentShaderName)
 Renderer *CreateRenderer()
 {
 	Renderer *renderer = calloc(1, sizeof(Renderer));
-	renderer->shaderProgram = CreateShaderProgram(NULL, NULL);
-	renderer->projectionLocation = glGetUniformLocation(renderer->shaderProgram, "projection");
+	renderer->defaultShaderProgram = CreateShaderProgram(NULL, NULL);
+	renderer->gizmosShaderProgram = CreateShaderProgram("Gizmos/gizmos.vert", "Gizmos/gizmos.frag");
 
-	glGenVertexArrays(1, &renderer->VAO);
+	glGenVertexArrays(1, &renderer->entitiesVAO);
+	glGenVertexArrays(1, &renderer->gizmosVAO);
 	glGenBuffers(1, &renderer->VBO);
 	glGenBuffers(1, &renderer->EBO);
 
-	glBindVertexArray(renderer->VAO);
+	glBindVertexArray(renderer->entitiesVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, renderer->VBO);
 	glBufferData(GL_ARRAY_BUFFER, 4 * 4 * sizeof(float), NULL, GL_DYNAMIC_DRAW);
@@ -339,6 +340,12 @@ Renderer *CreateRenderer()
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) (2 * sizeof(float)));
+
+	glBindVertexArray(renderer->gizmosVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, renderer->VBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->EBO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *) 0);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

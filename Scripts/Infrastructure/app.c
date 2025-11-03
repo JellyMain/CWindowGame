@@ -4,6 +4,7 @@
 #include "../Infrastructure/Headers/update.h"
 #include "../Render/Headers/draw.h"
 #include "../Services/Headers/levelService.h"
+#include "../UI/Headers/ui.h"
 
 
 App *CreateApp(int pixelsPerUnit,bool showGizmos)
@@ -24,6 +25,7 @@ App *CreateApp(int pixelsPerUnit,bool showGizmos)
 	app->allTweenSequences = ListCreate(0);
 	app->allWindows = ListCreate(0);
 	app->tweenTargetsDictionary = DictionaryCreate(HashPointer, PointerEquals);
+	app->time = 0;
 
 	return app;
 }

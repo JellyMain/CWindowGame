@@ -30,7 +30,6 @@ typedef struct
 {
 	SDL_Rect characterRects[256];
 	Texture *atlasTexture;
-	Dictionary *windowTexturesDictionary;
 } TextAtlas;
 
 
@@ -54,6 +53,7 @@ typedef struct
 	SDL_GLContext glContext;
 	struct Renderer *renderer;
 	SDL_Window *hiddenWindow;
+	float time;
 } App;
 
 
@@ -142,11 +142,12 @@ typedef enum
 
 typedef struct Renderer
 {
-	GLuint VAO;
+	GLuint entitiesVAO;
+	GLuint gizmosVAO;
 	GLuint VBO;
 	GLuint EBO;
-	GLuint shaderProgram;
-	GLuint projectionLocation;
+	GLuint defaultShaderProgram;
+	GLuint gizmosShaderProgram;
 } Renderer;
 
 
@@ -194,7 +195,7 @@ typedef struct Material
 {
 	Texture *texture;
 	GLuint shaderProgram;
-	GLuint projectionLocation;
+	GLint projectionLocation;
 } Material;
 
 
@@ -286,3 +287,10 @@ typedef struct LevelData
 	GameEntity *player;
 	GameEntity *levelTarget;
 } LevelData;
+
+
+typedef enum
+{
+	UNIFORM_FLOAT,
+	UNIFORM_MAT4F
+} UniformType;

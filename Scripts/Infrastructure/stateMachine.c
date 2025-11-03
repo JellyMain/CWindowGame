@@ -41,32 +41,13 @@ void SetPendingState(App *app, GameState state)
 }
 
 
-void FillUpdateLoop(App *app, GameState state)
-{
-	switch (state)
-	{
-		case MENU_GAME_STATE:
-			AddDefaultUpdatables(app);
-			break;
-		case GAMEPLAY_GAME_STATE:
-			AddDefaultUpdatables(app);
-			AddUpdatable(app, CreatePlayerUpdatable(app->levelData->player));
-			AddUpdatable(app, CreateLevelTargetUpdatable());
-			break;
-		case GAME_OVER_GAME_STATE:
-			AddDefaultUpdatables(app);
-			break;
-
-		default:
-			break;
-	}
-}
-
-
 void EnterState(App *app, GameState state)
 {
 	SDL_SetEventFilter(NULL, NULL);
 	SDL_GL_MakeCurrent(app->hiddenWindow, app->glContext);
+
+	CleanUpScene(app);
+	AddDefaultUpdatables(app);
 
 	switch (state)
 	{
@@ -74,11 +55,9 @@ void EnterState(App *app, GameState state)
 			CreateMainMenu(app);
 			break;
 		case GAMEPLAY_GAME_STATE:
-			CleanUpScene(app);
 			CreateLevel(app, 0);
 			break;
 		case GAME_OVER_GAME_STATE:
-			CleanUpScene(app);
 			CreateWinScreen(app);
 			break;
 		default:
@@ -86,6 +65,4 @@ void EnterState(App *app, GameState state)
 	}
 
 	app->gameState = state;
-
-	FillUpdateLoop(app, state);
 }

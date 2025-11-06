@@ -196,25 +196,35 @@ void CalculateProjectionMatrix(float projection[16], int windowWidth, int window
 }
 
 
-// void SetProjectionMatrix(Renderer *renderer, int windowWidth, int windowHeight)
-// {
-// 	float left = 0.0f;
-// 	float right = (float) windowWidth;
-// 	float bottom = (float) windowHeight;
-// 	float top = 0.0f;
-// 	float near = -1.0f;
-// 	float far = 1.0f;
-//
-// 	float projection[16] = {
-// 		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-// 		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-// 		0.0f, 0.0f, -2.0f / (far - near), 0.0f,
-// 		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0f
-// 	};
-//
-// 	glUseProgram(renderer->shaderProgram);
-// 	glUniformMatrix4fv(renderer->projectionLocation, 1, GL_FALSE, projection);
-// }
+void CreateWindowFBO(App *app, Window *window)
+{
+	SDL_GL_MakeCurrent(window->sdlWindow, app->glContext);
+
+	glGenFramebuffers(1, &window->FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, window->FBO);
+
+	glGenTextures(1, &window->FBOTexture);
+	glBindTexture(GL_TEXTURE_2D, window->FBOTexture);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, window->size.x, window->size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, window->FBOTexture, 0);
+
+	glGenRenderbuffers(1, &window->RBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, window->RBO);
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window->size.x, window->size.y);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, window->RBO);
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+}
 
 
 void InitRenderPipeline(App *app)
@@ -247,7 +257,7 @@ GLuint CreateShaderProgram(char *vertexShaderName, char *fragmentShaderName)
 
 	if (vertexShaderName == NULL)
 	{
-		vertexShaderSource = LoadShaderSource("default.vert");
+		vertexShaderSource = LoadShaderSource("Default/default.vert");
 	}
 	else
 	{
@@ -256,7 +266,7 @@ GLuint CreateShaderProgram(char *vertexShaderName, char *fragmentShaderName)
 
 	if (fragmentShaderName == NULL)
 	{
-		fragmentShaderSource = LoadShaderSource("default.frag");
+		fragmentShaderSource = LoadShaderSource("Default/default.frag");
 	}
 	else
 	{
@@ -321,10 +331,13 @@ Renderer *CreateRenderer()
 	Renderer *renderer = calloc(1, sizeof(Renderer));
 	renderer->defaultMaterial = CreateMaterial(NULL, NULL);
 	renderer->defaultGizmoMaterial = CreateMaterial("Gizmos/gizmos.frag", "Gizmos/gizmos.vert");
+	renderer->postProcessingMaterial = CreateMaterial("PostProcessing/post.frag", "PostProcessing/post.vert");
 
 	glGenVertexArrays(1, &renderer->entitiesVAO);
 	glGenVertexArrays(1, &renderer->gizmosVAO);
+	glGenVertexArrays(1, &renderer->postProcessingVAO);
 	glGenBuffers(1, &renderer->VBO);
+	glGenBuffers(1, &renderer->postProcessingVBO);
 	glGenBuffers(1, &renderer->EBO);
 
 	glBindVertexArray(renderer->entitiesVAO);
@@ -347,6 +360,22 @@ Renderer *CreateRenderer()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->EBO);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *) 0);
+
+	float quadData[] = {
+		-1.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 1.0f
+	};
+
+	glBindVertexArray(renderer->postProcessingVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, renderer->postProcessingVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadData), quadData, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->EBO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) (2 * sizeof(float)));
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

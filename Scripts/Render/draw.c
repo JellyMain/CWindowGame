@@ -212,7 +212,7 @@ void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
 
 	RenderDynamicText(app->textAtlas, entityInfo, (Vector2Float){
 		                  gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->connectedEntity->size.x / 2,
-		                  gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->connectedEntity->size.y / 2 - 10
+		                  gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->connectedEntity->size.y / 2 - 11
 	                  }, (Vector2Float){1, 1}, app->renderer, projectionMatrix);
 }
 
@@ -220,9 +220,10 @@ void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
 void PrepareScene(Window *window, App *app)
 {
 	SDL_GL_MakeCurrent(window->sdlWindow, app->glContext);
+	glBindFramebuffer(GL_FRAMEBUFFER, window->FBO);
 	glViewport(0, 0, window->size.x, window->size.y);
 	glClearColor(0.12f, 0.12f, 0.12f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 
@@ -230,6 +231,26 @@ Updatable *CreateRenderUpdatable()
 {
 	Updatable *updatable = CreateUpdatable(NULL, UpdateRenderer);
 	return updatable;
+}
+
+
+void ApplyPostProcessing(App *app, Window *window)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glViewport(0, 0, window->size.x, window->size.y);
+	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glUseProgram(app->renderer->postProcessingMaterial->shaderProgram);
+
+	glBindVertexArray(app->renderer->postProcessingVAO);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, window->FBOTexture);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 
@@ -290,6 +311,8 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 				RenderGizmo(app, gizmoEntity, projectionMatrix);
 			}
 		}
+
+		ApplyPostProcessing(app, window);
 
 		SDL_GL_SwapWindow(window->sdlWindow);
 	}

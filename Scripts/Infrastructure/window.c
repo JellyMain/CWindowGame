@@ -1,5 +1,6 @@
 ﻿#include "Headers/window.h"
 
+#include "../Render/Headers/openGL.h"
 #include "Headers/update.h"
 #include "../UI/Headers/ui.h"
 #include "../Utils/Headers/mathUtils.h"
@@ -73,6 +74,8 @@ Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int s
 	window->uiEntitiesDrawList = ListCreate(0);
 	window->gizmosEntitiesDrawList = ListCreate(0);
 
+	CreateWindowFBO(app, window);
+
 	ListAdd(app->allWindows, window);
 
 	SetFocusWindow(app, window);
@@ -85,13 +88,7 @@ void UpdateWindow(App *app, Window *window)
 {
 	ListClear(window->entitiesInWindowList);
 
-	for
-	(
-		int i = 0;
-		i < app->allGameEntities->size;
-		i
-		++
-	)
+	for (int i = 0; i < app->allGameEntities->size; i++)
 	{
 		GameEntity *entity = app->allGameEntities->elements[i];
 

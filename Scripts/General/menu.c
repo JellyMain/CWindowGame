@@ -26,9 +26,9 @@ void CreateMainMenu(App *app)
 	SDL_SetWindowPosition(menuWindow->sdlWindow, menuWindow->position.x - menuWindow->size.x / 2,
 	                      menuWindow->position.y - menuWindow->size.y / 2);
 
-	Texture *playButtonTexture = LoadTexture("ButtonSprite.png");
+	Texture *playButtonTexture = LoadTexture("NewButton.png");
 
-	Material *material = CreateMaterial("waves.frag", NULL);
+	Material *material = CreateMaterial("wobblyLine.frag", NULL);
 
 	UIEntity *playButton = CreateButton(menuWindow, playButtonTexture, material, (Vector2Float){100, 50},
 	                                    (SDL_Color){0, 0, 0},

@@ -16,3 +16,5 @@ GLuint CreateShaderProgram(char *vertexShaderName, char *fragmentShaderName);
 void SetProjectionMatrix(Renderer *renderer, int windowWidth, int windowHeight);
 
 void CalculateProjectionMatrix(float projection[16], int windowWidth, int windowHeight);
+
+void CreateWindowFBO(App *app, Window *window);

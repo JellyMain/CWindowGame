@@ -145,11 +145,14 @@ typedef enum
 typedef struct Renderer
 {
 	GLuint entitiesVAO;
+	GLuint postProcessingVAO;
+	GLuint postProcessingVBO;
 	GLuint gizmosVAO;
 	GLuint VBO;
 	GLuint EBO;
 	struct Material *defaultMaterial;
 	struct Material *defaultGizmoMaterial;
+	struct Material *postProcessingMaterial;
 } Renderer;
 
 
@@ -221,6 +224,9 @@ typedef struct Window
 	Vector2Float lowerRightPoint;
 	Vector2Float upperLeftPoint;
 	Vector2Float lowerLeftPoint;
+	GLuint FBO;
+	GLuint FBOTexture;
+	GLuint RBO;
 } Window;
 
 

@@ -1,12 +1,32 @@
 ﻿#include "Headers/window.h"
 
-#include "glad/glad.h"
 #include "Headers/update.h"
-#include "Headers/app.h"
-#include "Headers/init.h"
-#include "../Input/Headers/input.h"
 #include "../UI/Headers/ui.h"
 #include "../Utils/Headers/mathUtils.h"
+
+
+Window *GetWindowById(App *app, uint32_t id)
+{
+	for (int i = 0; i < app->allWindows->size; i++)
+	{
+		Window *window = ListGet(app->allWindows, i);
+
+		if (SDL_GetWindowID(window->sdlWindow) == id)
+		{
+			return window;
+		}
+	}
+
+	SDL_Log("Window with id %d not found", id);
+	return NULL;
+}
+
+
+void SetFocusWindow(App *app, Window *window)
+{
+	app->focusedWindow = window;
+	SDL_RaiseWindow(window->sdlWindow);
+}
 
 
 Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int size,
@@ -49,8 +69,13 @@ Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int s
 	window->windowType = windowType;
 	window->lastFrameSize = size;
 	window->entitiesInWindowList = ListCreate(0);
+	window->gameEntitiesDrawList = ListCreate(0);
+	window->uiEntitiesDrawList = ListCreate(0);
+	window->gizmosEntitiesDrawList = ListCreate(0);
 
 	ListAdd(app->allWindows, window);
+
+	SetFocusWindow(app, window);
 
 	return window;
 }
@@ -60,7 +85,13 @@ void UpdateWindow(App *app, Window *window)
 {
 	ListClear(window->entitiesInWindowList);
 
-	for (int i = 0; i < app->allGameEntities->size; i++)
+	for
+	(
+		int i = 0;
+		i < app->allGameEntities->size;
+		i
+		++
+	)
 	{
 		GameEntity *entity = app->allGameEntities->elements[i];
 

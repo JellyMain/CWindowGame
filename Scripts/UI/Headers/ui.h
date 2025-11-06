@@ -2,10 +2,12 @@
 #include "../../General/Headers/structs.h"
 
 
-UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Float position, Vector2Float scale,
+UIEntity *CreateStaticText(Window *window, App *app, char *text, SDL_Color textColor, Vector2Float position,
+                           Vector2Float scale,
                            UIEntity *parent);
 
-UIEntity *CreateButton(Texture *buttonTexture, Material *buttonMaterial, Vector2Float size, SDL_Color backgroundColor,
+UIEntity *CreateButton(Window *window, Texture *buttonTexture, Material *buttonMaterial, Vector2Float size,
+                       SDL_Color backgroundColor,
                        char *text, Vector2Float textScale,
                        SDL_Color textColor, App *app, Vector2Float position,
                        Vector2Float buttonScale, void *interactionData,

@@ -53,6 +53,8 @@ typedef struct
 	SDL_GLContext glContext;
 	struct Renderer *renderer;
 	SDL_Window *hiddenWindow;
+	struct Window *focusedWindow;
+	float deltaTime;
 	float time;
 } App;
 
@@ -189,7 +191,7 @@ typedef struct
 {
 	UIEntity *connectedEntity;
 	SDL_Color color;
-	int thickness;
+	float thickness;
 } GizmoEntity;
 
 
@@ -200,7 +202,7 @@ typedef struct Material
 } Material;
 
 
-typedef struct
+typedef struct Window
 {
 	SDL_Window *sdlWindow;
 	Vector2Int position;
@@ -211,6 +213,9 @@ typedef struct
 	WindowRenderType renderType;
 	WindowType windowType;
 	List *entitiesInWindowList;
+	List *gameEntitiesDrawList;
+	List *uiEntitiesDrawList;
+	List *gizmosEntitiesDrawList;
 	Vector2Float windowCenterPoint;
 	Vector2Float upperRightPoint;
 	Vector2Float lowerRightPoint;

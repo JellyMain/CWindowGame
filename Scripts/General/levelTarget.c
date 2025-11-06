@@ -6,6 +6,7 @@
 #include "../General/Headers/structs.h"
 #include "../Utils/Headers/mathUtils.h"
 #include "../Render/Headers/textures.h"
+#include "Headers/gameEntities.h"
 
 
 void UpdateLevelTarget(void *data, App *app, float deltaTime);
@@ -13,19 +14,10 @@ void UpdateLevelTarget(void *data, App *app, float deltaTime);
 
 GameEntity *CreateLevelTarget(App *app, Vector2Float position, Vector2Float scale)
 {
-	GameEntity *levelTarget = calloc(1, sizeof(GameEntity));
-
-
 	Texture *texture = LoadTexture("LevelTarget.png");
-	levelTarget->texture = texture;
-	levelTarget->material = CreateMaterial(NULL, NULL);
-	levelTarget->originalSize.x = levelTarget->texture->width;
-	levelTarget->originalSize.y = levelTarget->texture->height;
+	Material *material = CreateMaterial(NULL, NULL);
 
-	levelTarget->worldPosition = position;
-	levelTarget->scale = scale;
-
-	ListAdd(app->allGameEntities, levelTarget);
+	GameEntity *levelTarget = CreateGameEntity(app, texture, material, position, scale);
 
 	Updatable *levelTargetUpdatable = CreateUpdatable(levelTarget, UpdateLevelTarget);
 	AddUpdatable(app, levelTargetUpdatable);
@@ -50,11 +42,4 @@ void UpdateLevelTarget(void *data, App *app, float deltaTime)
 			SetPendingState(app, GAME_OVER_GAME_STATE);
 		}
 	}
-}
-
-
-Updatable *CreateLevelTargetUpdatable()
-{
-	Updatable *updatable = CreateUpdatable(NULL, UpdateLevelTarget);
-	return updatable;
 }

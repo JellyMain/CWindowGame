@@ -32,12 +32,12 @@ void CreateWinScreen(App *app)
 	};
 
 
-	CreateStaticText(app, "You Win!!!!!!!!!", (SDL_Color){255, 255, 255}, youWinTextPosition,
+	CreateStaticText(winWindow, app, "You Win!!!!!!!!!", (SDL_Color){255, 255, 255}, youWinTextPosition,
 	                 (Vector2Float){0.3f, 0.3f},
 	                 NULL);
 
 
-	CreateButton(NULL, NULL, (Vector2Float){75, 30}, (SDL_Color){255, 255, 255, 255}, "Continue",
+	CreateButton(winWindow, NULL, NULL, (Vector2Float){75, 30}, (SDL_Color){255, 255, 255, 255}, "Continue",
 	             (Vector2Float){0.3f, 0.3f},
 	             (SDL_Color){0, 0, 0}, app, continueTextPosition, (Vector2Float){1, 1},NULL, OnButtonClicked,
 	             OnButtonClickedAnimation, NULL, NULL, NULL);

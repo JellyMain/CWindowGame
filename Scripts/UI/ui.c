@@ -12,7 +12,7 @@
 #include "../Render/Headers/textures.h"
 
 
-void CreateGizmo(App *app, SDL_Color color, int thickness, UIEntity *connectedEntity);
+void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness, UIEntity *connectedEntity);
 
 
 TextAtlas *CreateTextAtlas(char *fileName, int fontSize)
@@ -102,7 +102,8 @@ TextAtlas *CreateTextAtlas(char *fileName, int fontSize)
 }
 
 
-UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Float position, Vector2Float scale,
+UIEntity *CreateStaticText(Window *window, App *app, char *text, SDL_Color textColor, Vector2Float position,
+                           Vector2Float scale,
                            UIEntity *parent)
 {
 	UIEntity *textEntity = calloc(1, sizeof(UIEntity));
@@ -158,12 +159,14 @@ UIEntity *CreateStaticText(App *app, char *text, SDL_Color textColor, Vector2Flo
 	SDL_FreeSurface(textSurface);
 
 	ListAdd(app->allUIEntities, textEntity);
+	AddUIEntityToDrawList(window, textEntity);
 
 	return textEntity;
 }
 
 
-UIEntity *CreateButton(Texture *buttonTexture, Material *buttonMaterial, Vector2Float size, SDL_Color backgroundColor,
+UIEntity *CreateButton(Window *window, Texture *buttonTexture, Material *buttonMaterial, Vector2Float size,
+                       SDL_Color backgroundColor,
                        char *text, Vector2Float textScale,
                        SDL_Color textColor, App *app, Vector2Float position,
                        Vector2Float buttonScale, void *interactionData,
@@ -220,26 +223,29 @@ UIEntity *CreateButton(Texture *buttonTexture, Material *buttonMaterial, Vector2
 	buttonEntity->originalSize.y = buttonEntity->texture->height;
 
 	ListAdd(app->allUIEntities, buttonEntity);
+	AddUIEntityToDrawList(window, buttonEntity);
+
 
 	if (text != NULL && strlen(text) > 0)
 	{
-		UIEntity *textEntity = CreateStaticText(app, text, textColor, position, textScale, buttonEntity);
+		UIEntity *textEntity = CreateStaticText(window, app, text, textColor, position, textScale, buttonEntity);
 		ListAdd(buttonEntity->childEntities, textEntity);
 	}
 
-	CreateGizmo(app, (SDL_Color){255, 0, 0, 255}, 1, buttonEntity);
+	CreateGizmo(app, window, (SDL_Color){255, 0, 0, 255}, 1, buttonEntity);
 
 	return buttonEntity;
 }
 
 
-void CreateGizmo(App *app, SDL_Color color, int thickness, UIEntity *connectedEntity)
+void CreateGizmo(App *app, Window *window, SDL_Color color, int thickness, UIEntity *connectedEntity)
 {
 	GizmoEntity *gizmoEntity = calloc(1, sizeof(GizmoEntity));
 	gizmoEntity->connectedEntity = connectedEntity;
 	gizmoEntity->color = color;
 	gizmoEntity->thickness = thickness;
 	ListAdd(app->allGizmosEntities, gizmoEntity);
+	ListAdd(window->gizmosEntitiesDrawList, gizmoEntity);
 }
 
 
@@ -295,62 +301,70 @@ void UpdateChildrenPosition(UIEntity *uiEntity)
 }
 
 
-void HandleInteractions(App *app, UIEntity *uiEntity)
+void HandleInteractions(App *app)
 {
-	switch (uiEntity->uiType)
+	if (app->focusedWindow == NULL)
+		return;
+
+	for (int i = 0; i < app->focusedWindow->uiEntitiesDrawList->size; i++)
 	{
-		case BUTTON:
+		UIEntity *uiEntity = ListGet(app->focusedWindow->uiEntitiesDrawList, i);
+
+		switch (uiEntity->uiType)
 		{
-			Vector2Float mousePosition = GetMousePosition();
-
-			Vector2Float boundsMin = {
-				uiEntity->worldPosition.x - uiEntity->size.x / 2,
-				uiEntity->worldPosition.y - uiEntity->size.y / 2
-			};
-			Vector2Float boundsMax = {
-				uiEntity->worldPosition.x + uiEntity->size.x / 2,
-				uiEntity->worldPosition.y + uiEntity->size.y / 2
-			};
-
-			if (IsPointInBounds(mousePosition, boundsMin, boundsMax))
+			case BUTTON:
 			{
-				if (!uiEntity->isHovered)
-				{
-					uiEntity->isHovered = true;
+				Vector2Float mousePosition = GetMousePosition();
 
-					if (uiEntity->OnHover != NULL)
+				Vector2Float boundsMin = {
+					uiEntity->worldPosition.x - uiEntity->size.x / 2,
+					uiEntity->worldPosition.y - uiEntity->size.y / 2
+				};
+				Vector2Float boundsMax = {
+					uiEntity->worldPosition.x + uiEntity->size.x / 2,
+					uiEntity->worldPosition.y + uiEntity->size.y / 2
+				};
+
+				if (IsPointInBounds(mousePosition, boundsMin, boundsMax))
+				{
+					if (!uiEntity->isHovered)
 					{
-						uiEntity->OnHover(app, uiEntity);
+						uiEntity->isHovered = true;
+
+						if (uiEntity->OnHover != NULL)
+						{
+							uiEntity->OnHover(app, uiEntity);
+						}
+					}
+
+					if (IsLeftMouseButtonClicked())
+					{
+						if (uiEntity->OnInteraction != NULL)
+						{
+							uiEntity->OnInteraction(app, uiEntity->interactionData);
+						}
+						if (uiEntity->OnInteractionAnimation != NULL)
+						{
+							uiEntity->OnInteractionAnimation(app, uiEntity);
+						}
 					}
 				}
-
-				if (IsLeftMouseButtonClicked())
+				else
 				{
-					if (uiEntity->OnInteraction != NULL)
+					if (uiEntity->isHovered && uiEntity->OnHoverExit != NULL)
 					{
-						uiEntity->OnInteraction(app, uiEntity->interactionData);
+						uiEntity->OnHoverExit(app, uiEntity);
 					}
-					if (uiEntity->OnInteractionAnimation != NULL)
-					{
-						uiEntity->OnInteractionAnimation(app, uiEntity);
-					}
+					uiEntity->isHovered = false;
 				}
+
+				break;
 			}
-			else
-			{
-				if (uiEntity->isHovered && uiEntity->OnHoverExit != NULL)
-				{
-					uiEntity->OnHoverExit(app, uiEntity);
-				}
-				uiEntity->isHovered = false;
-			}
 
-			break;
+
+			default:
+				break;
 		}
-
-
-		default:
-			break;
 	}
 }
 
@@ -363,8 +377,9 @@ void UpdateUIElements(void *data, App *app, float deltaTime)
 
 		UpdateChildrenScale(uiEntity);
 		UpdateChildrenPosition(uiEntity);
-		HandleInteractions(app, uiEntity);
 	}
+
+	HandleInteractions(app);
 }
 
 

@@ -15,3 +15,11 @@ void RenderHollowGizmoRect(App *app, Vector2Float position, Vector2Float size, f
 
 void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, Vector2Float scale, Renderer *renderer,
                        float projectionMatrix[16]);
+
+void AddGameEntityToDrawList(Window *window, GameEntity *entity);
+
+void AddUIEntityToDrawList(Window *window, UIEntity *entity);
+
+void AddGameEntityToAllDrawLists(App *app, GameEntity *entity);
+
+void AddUIEntityToAllDrawLists(App *app, UIEntity *entity);

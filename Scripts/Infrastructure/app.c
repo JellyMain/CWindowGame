@@ -25,6 +25,7 @@ App *CreateApp(int pixelsPerUnit,bool showGizmos)
 	app->allTweenSequences = ListCreate(0);
 	app->allWindows = ListCreate(0);
 	app->tweenTargetsDictionary = DictionaryCreate(HashPointer, PointerEquals);
+	app->focusedWindow = NULL;
 	app->time = 0;
 
 	return app;

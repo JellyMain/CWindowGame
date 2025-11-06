@@ -58,6 +58,8 @@ add_executable(WindowGame Scripts/main.c
         Scripts/Render/Headers/openGL.h
         Scripts/Render/textures.c
         Scripts/Render/Headers/textures.h
+        Scripts/General/gameEntities.c
+        Scripts/General/Headers/gameEntities.h
 )
 
 

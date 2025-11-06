@@ -2,6 +2,7 @@
 #include "../Input/Headers/input.h"
 #include "../General/Headers/structs.h"
 #include "../Infrastructure/Headers/update.h"
+#include "../Infrastructure/Headers/window.h"
 
 void ProcessInput(void *data, App *app, float deltaTime);
 
@@ -56,6 +57,20 @@ void ProcessInput(void *data, App *app, float deltaTime)
 				exit(0);
 				break;
 			}
+
+			case SDL_WINDOWEVENT:
+				switch (event.window.event)
+				{
+					case SDL_WINDOWEVENT_ENTER:
+						Window *window = GetWindowById(app, event.window.windowID);
+						SetFocusWindow(app, window);
+						break;
+
+					default:
+						break;
+				}
+				break;
+
 
 			case SDL_MOUSEBUTTONDOWN:
 			{

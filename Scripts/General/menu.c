@@ -30,7 +30,8 @@ void CreateMainMenu(App *app)
 
 	Material *material = CreateMaterial("waves.frag", NULL);
 
-	UIEntity *playButton = CreateButton(playButtonTexture, material, (Vector2Float){100, 50}, (SDL_Color){0, 0, 0},
+	UIEntity *playButton = CreateButton(menuWindow, playButtonTexture, material, (Vector2Float){100, 50},
+	                                    (SDL_Color){0, 0, 0},
 	                                    "Play",
 	                                    (Vector2Float){0.3f, 0.3f},
 	                                    (SDL_Color){0, 0, 0}, app, menuWindow->windowCenterPoint,

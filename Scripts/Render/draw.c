@@ -26,6 +26,38 @@ void SetShaderUniform(GLuint shaderProgram, char *propertyName, UniformType unif
 }
 
 
+void AddGameEntityToDrawList(Window *window, GameEntity *entity)
+{
+	ListAdd(window->gameEntitiesDrawList, entity);
+}
+
+
+void AddUIEntityToDrawList(Window *window, UIEntity *entity)
+{
+	ListAdd(window->uiEntitiesDrawList, entity);
+}
+
+
+void AddGameEntityToAllDrawLists(App *app, GameEntity *entity)
+{
+	for (int i = 0; i < app->allWindows->size; i++)
+	{
+		Window *window = app->allWindows->elements[i];
+		AddGameEntityToDrawList(window, entity);
+	}
+}
+
+
+void AddUIEntityToAllDrawLists(App *app, UIEntity *entity)
+{
+	for (int i = 0; i < app->allWindows->size; i++)
+	{
+		Window *window = app->allWindows->elements[i];
+		AddUIEntityToDrawList(window, entity);
+	}
+}
+
+
 void RenderTexture(Renderer *renderer, Texture *texture, float x, float y, float width, float height)
 {
 	float verticesData[] = {
@@ -205,7 +237,7 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 {
 	for (int i = 0; i < app->allWindows->size; i++)
 	{
-		Window *window = app->allWindows->elements[i];
+		Window *window = ListGet(app->allWindows, i);
 
 		float projectionMatrix[16];
 
@@ -215,9 +247,9 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 
 		glBindVertexArray(app->renderer->entitiesVAO);
 
-		for (int j = 0; j < app->allGameEntities->size; j++)
+		for (int j = 0; j < window->gameEntitiesDrawList->size; j++)
 		{
-			GameEntity *entity = app->allGameEntities->elements[j];
+			GameEntity *entity = ListGet(window->gameEntitiesDrawList, j);
 
 			Vector2Float screenPos;
 
@@ -240,10 +272,9 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 			RenderGameEntity(app, screenPos, entity, projectionMatrix);
 		}
 
-
-		for (int j = 0; j < app->allUIEntities->size; j++)
+		for (int j = 0; j < window->uiEntitiesDrawList->size; j++)
 		{
-			UIEntity *entity = app->allUIEntities->elements[j];
+			UIEntity *entity = ListGet(window->uiEntitiesDrawList, j);
 			Vector2Float screenPos = entity->worldPosition;
 			RenderUIEntity(app, screenPos, entity, projectionMatrix);
 		}
@@ -253,9 +284,9 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 		{
 			glBindVertexArray(app->renderer->gizmosVAO);
 
-			for (int k = 0; k < app->allGizmosEntities->size; k++)
+			for (int k = 0; k < window->gizmosEntitiesDrawList->size; k++)
 			{
-				GizmoEntity *gizmoEntity = ListGet(app->allGizmosEntities, k);
+				GizmoEntity *gizmoEntity = ListGet(window->gizmosEntitiesDrawList, k);
 				RenderGizmo(app, gizmoEntity, projectionMatrix);
 			}
 		}

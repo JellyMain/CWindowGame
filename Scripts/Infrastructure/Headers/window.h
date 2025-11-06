@@ -2,6 +2,10 @@
 #include "../../General/Headers/structs.h"
 
 
+Window *GetWindowById(App *app, uint32_t id);
+
+void SetFocusWindow(App *app, Window *window);
+
 Window *CreateGameWindowWithRenderer(App *app, Vector2Int position, Vector2Int size,
                                      WindowRenderType renderType,
                                      WindowType windowType,

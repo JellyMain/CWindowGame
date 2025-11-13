@@ -29,6 +29,8 @@ Dictionary *DictionaryCreate(unsigned int (*hashFunction)(void *key), bool (*key
 
 void *DictionaryGet(Dictionary *dict, void *key);
 
+KeyValuePair *DictionaryGetPair(Dictionary *dict, int index);
+
 bool DictionaryAdd(Dictionary *dict, void *key, void *value);
 
 unsigned int HashInt(void *key);
@@ -38,6 +40,10 @@ bool IntEquals(void *key1, void *key2);
 unsigned int HashPointer(void *key);
 
 bool PointerEquals(void *key1, void *key2);
+
+unsigned int HashString(void *key);
+
+bool StringEquals(void *key1, void *key2);
 
 bool DictionaryHasKey(Dictionary *dict, void *key);
 

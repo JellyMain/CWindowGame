@@ -6,6 +6,7 @@
 #include "../Infrastructure/Headers/update.h"
 #include "../Utils/Headers/viewPortUtils.h"
 #include "../UI/Headers/ui.h"
+#include "Headers/textures.h"
 
 
 void SetShaderUniform(GLuint shaderProgram, char *propertyName, UniformType uniformType, void *value)
@@ -22,6 +23,26 @@ void SetShaderUniform(GLuint shaderProgram, char *propertyName, UniformType unif
 		case UNIFORM_MAT4F:
 			glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (float *) value);
 			break;
+	}
+}
+
+
+void AddPostProcessingEffect(App *app, char *effectName)
+{
+	if (strcmp(effectName, "vignette") == 0)
+	{
+		Material *vignetteMaterial = CreateMaterial("PostProcessing/Vignette.frag", "PostProcessing/post.vert");
+		DictionaryAdd(app->renderer->postProcessingEffects, effectName, vignetteMaterial);
+	}
+	else if (strcmp(effectName, "wobble") == 0)
+	{
+		Material *wobbleMaterial = CreateMaterial("PostProcessing/wobble.frag", "PostProcessing/post.vert");
+		AddUniformToMaterial(wobbleMaterial, "time", UNIFORM_FLOAT, &app->time);
+		DictionaryAdd(app->renderer->postProcessingEffects, effectName, wobbleMaterial);
+	}
+	else
+	{
+		printf("Unknown post processing effect");
 	}
 }
 
@@ -85,7 +106,9 @@ void RenderGameEntity(App *app, Vector2Float screenPosition, GameEntity *entity,
 	float y = screenPosition.y - entity->size.y / 2.0f;
 
 	glUseProgram(entity->material->shaderProgram);
-	glUniformMatrix4fv(entity->material->projectionLocation, 1, GL_FALSE, projectionMatrix);
+	UniformTypeValuePair *typeValuePair = DictionaryGet(entity->material->materialUniforms, "projection");
+	typeValuePair->uniformValue = projectionMatrix;
+	UpdateMaterialUniforms(entity->material);
 	RenderTexture(app->renderer, entity->texture, x, y, entity->size.x, entity->size.y);
 }
 
@@ -95,11 +118,14 @@ void RenderUIEntity(App *app, Vector2Float screenPosition, UIEntity *entity, flo
 	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->scale.x * entity->parentScale.x;
 	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->scale.y * entity->parentScale.y;
 
+
 	float x = screenPosition.x - entity->size.x / 2.0f;
 	float y = screenPosition.y - entity->size.y / 2.0f;
 
 	glUseProgram(entity->material->shaderProgram);
-	glUniformMatrix4fv(entity->material->projectionLocation, 1, GL_FALSE, projectionMatrix);
+	UniformTypeValuePair *typeValuePair = DictionaryGet(entity->material->materialUniforms, "projection");
+	typeValuePair->uniformValue = projectionMatrix;
+	UpdateMaterialUniforms(entity->material);
 	RenderTexture(app->renderer, entity->texture, x, y, entity->size.x, entity->size.y);
 }
 
@@ -125,8 +151,9 @@ void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, 
 	float currentX = 0;
 
 	glUseProgram(renderer->defaultMaterial->shaderProgram);
-	glUniformMatrix4fv(renderer->defaultMaterial->projectionLocation, 1, GL_FALSE, projectionMatrix);
-
+	UniformTypeValuePair *typeValuePair = DictionaryGet(renderer->defaultMaterial->materialUniforms, "projection");
+	typeValuePair->uniformValue = projectionMatrix;
+	UpdateMaterialUniforms(renderer->defaultMaterial);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textAtlas->atlasTexture->textureId);
 
@@ -188,10 +215,23 @@ void RenderHollowGizmoRect(App *app, Vector2Float position, Vector2Float size, f
 }
 
 
+void RenderDebugInfo(App *app, float projectionMatrix[16])
+{
+	char fpsText[30];
+	snprintf(fpsText, sizeof(fpsText), "FPS:%.1f", app->debugData.fps);
+
+	RenderDynamicText(app->textAtlas, fpsText, (Vector2Float){10, 10}, (Vector2Float){1, 1}, app->renderer,
+	                  projectionMatrix);
+}
+
+
 void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
 {
 	glUseProgram(app->renderer->defaultGizmoMaterial->shaderProgram);
-	glUniformMatrix4fv(app->renderer->defaultGizmoMaterial->projectionLocation, 1, GL_FALSE, projectionMatrix);
+	UniformTypeValuePair *typeValuePair = DictionaryGet(app->renderer->defaultGizmoMaterial->materialUniforms,
+	                                                    "projection");
+	typeValuePair->uniformValue = projectionMatrix;
+	UpdateMaterialUniforms(app->renderer->defaultGizmoMaterial);
 	GLint colorLocation = glGetUniformLocation(app->renderer->defaultGizmoMaterial->shaderProgram, "color");
 	glUniform4f(colorLocation,
 	            gizmoEntity->color.r / 255.0f,
@@ -236,21 +276,65 @@ Updatable *CreateRenderUpdatable()
 
 void ApplyPostProcessing(App *app, Window *window)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if (app->renderer->postProcessingEffects->totalEntries == 0)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
 
-	glViewport(0, 0, window->size.x, window->size.y);
-	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+		glUseProgram(app->renderer->defaultPostProcessingMaterial->shaderProgram);
 
-	glClear(GL_COLOR_BUFFER_BIT);
+		glBindVertexArray(app->renderer->postProcessingVAO);
 
-	glUseProgram(app->renderer->postProcessingMaterial->shaderProgram);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, window->FBOTexture);
 
-	glBindVertexArray(app->renderer->postProcessingVAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+	else
+	{
+		for (int i = 0; i < app->renderer->postProcessingEffects->allPairs->size; i++)
+		{
+			if (i == app->renderer->postProcessingEffects->allPairs->size - 1)
+			{
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+			}
+			else
+			{
+				glBindFramebuffer(GL_FRAMEBUFFER, window->FBO);
+			}
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, window->FBOTexture);
 
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			KeyValuePair *pair = DictionaryGetPair(app->renderer->postProcessingEffects, i);
+			Material *material = pair->value;
+
+			UpdateMaterialUniforms(material);
+
+			glUseProgram(material->shaderProgram);
+
+			glBindVertexArray(app->renderer->postProcessingVAO);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, window->FBOTexture);
+
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		}
+	}
+}
+
+
+void UpdateMaterialUniforms(Material *material)
+{
+	for (int i = 0; i < material->materialUniforms->allPairs->size; i++)
+	{
+		KeyValuePair *pair = DictionaryGetPair(material->materialUniforms, i);
+		char *uniformName = pair->key;
+		UniformTypeValuePair *typeValuePair = pair->value;
+
+		SetShaderUniform(material->shaderProgram, uniformName, typeValuePair->uniformType, typeValuePair->uniformValue);
+	}
 }
 
 
@@ -301,7 +385,7 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 		}
 
 
-		if (app->showGizmos)
+		if (app->debugMode)
 		{
 			glBindVertexArray(app->renderer->gizmosVAO);
 
@@ -310,6 +394,10 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 				GizmoEntity *gizmoEntity = ListGet(window->gizmosEntitiesDrawList, k);
 				RenderGizmo(app, gizmoEntity, projectionMatrix);
 			}
+
+			// glBindVertexArray(app->renderer->entitiesVAO);
+
+			RenderDebugInfo(app, projectionMatrix);
 		}
 
 		ApplyPostProcessing(app, window);

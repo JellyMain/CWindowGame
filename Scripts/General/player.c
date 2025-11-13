@@ -9,7 +9,7 @@
 #include "../Render/Headers/textures.h"
 #include "Headers/gameEntities.h"
 
-#define MOVE_SPEED 5
+#define MOVE_SPEED 200
 
 void UpdatePlayer(void *data, App *app, float deltaTime);
 
@@ -52,7 +52,7 @@ GameEntity *CreatePlayer(App *app, Vector2Float position, Vector2Float scale)
 }
 
 
-void MovePlayer(App *app, GameEntity *player)
+void MovePlayer(App *app, GameEntity *player, float deltaTime)
 {
 	Vector2Float direction = GetMoveDirection();
 
@@ -62,7 +62,8 @@ void MovePlayer(App *app, GameEntity *player)
 	}
 
 	Vector2Float nextFramePosition = {
-		player->worldPosition.x + direction.x * MOVE_SPEED, player->worldPosition.y + direction.y * MOVE_SPEED
+		player->worldPosition.x + direction.x * MOVE_SPEED * deltaTime,
+		player->worldPosition.y + direction.y * MOVE_SPEED * deltaTime
 	};
 
 	if (IsPositionInBounds(app, player, nextFramePosition))
@@ -75,5 +76,5 @@ void MovePlayer(App *app, GameEntity *player)
 void UpdatePlayer(void *data, App *app, float deltaTime)
 {
 	GameEntity *player = data;
-	MovePlayer(app, player);
+	MovePlayer(app, player, deltaTime);
 }

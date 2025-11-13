@@ -35,6 +35,13 @@ typedef struct
 
 typedef struct
 {
+	float fps;
+	int drawCalls;
+} DebugData;
+
+
+typedef struct
+{
 	struct LevelData *levelData;
 	struct UpdateSystem *updateSystem;
 	GameState pendingGameState;
@@ -49,13 +56,14 @@ typedef struct
 	Dictionary *tweenTargetsDictionary;
 	TextAtlas *textAtlas;
 	bool hasWon;
-	bool showGizmos;
+	bool debugMode;
 	SDL_GLContext glContext;
 	struct Renderer *renderer;
 	SDL_Window *hiddenWindow;
 	struct Window *focusedWindow;
 	float deltaTime;
 	float time;
+	DebugData debugData;
 } App;
 
 
@@ -117,6 +125,7 @@ typedef enum
 	LINEAR,
 } TweenEasingType;
 
+
 typedef enum
 {
 	TEXT,
@@ -152,7 +161,8 @@ typedef struct Renderer
 	GLuint EBO;
 	struct Material *defaultMaterial;
 	struct Material *defaultGizmoMaterial;
-	struct Material *postProcessingMaterial;
+	struct Material *defaultPostProcessingMaterial;
+	Dictionary *postProcessingEffects;
 } Renderer;
 
 
@@ -201,7 +211,7 @@ typedef struct
 typedef struct Material
 {
 	GLuint shaderProgram;
-	GLint projectionLocation;
+	Dictionary *materialUniforms;
 } Material;
 
 
@@ -306,3 +316,10 @@ typedef enum
 	UNIFORM_FLOAT,
 	UNIFORM_MAT4F
 } UniformType;
+
+
+typedef struct
+{
+	UniformType uniformType;
+	void *uniformValue;
+} UniformTypeValuePair;

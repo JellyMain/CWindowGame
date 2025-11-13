@@ -7,7 +7,7 @@
 #include "../UI/Headers/ui.h"
 
 
-App *CreateApp(int pixelsPerUnit,bool showGizmos)
+App *CreateApp(int pixelsPerUnit, bool debugMode)
 {
 	App *app = calloc(1, sizeof(App));
 
@@ -17,7 +17,7 @@ App *CreateApp(int pixelsPerUnit,bool showGizmos)
 	app->gameState = MENU_GAME_STATE;
 	app->pixelsPerUnit = pixelsPerUnit;
 	app->hasWon = false;
-	app->showGizmos = showGizmos;
+	app->debugMode = debugMode;
 	app->allGizmosEntities = ListCreate(0);
 	app->allUIEntities = ListCreate(0);
 	app->allGameEntities = ListCreate(0);
@@ -27,6 +27,8 @@ App *CreateApp(int pixelsPerUnit,bool showGizmos)
 	app->tweenTargetsDictionary = DictionaryCreate(HashPointer, PointerEquals);
 	app->focusedWindow = NULL;
 	app->time = 0;
+	app->debugData.fps = 0;
+	app->debugData.drawCalls = 0;
 
 	return app;
 }

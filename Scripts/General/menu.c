@@ -28,7 +28,7 @@ void CreateMainMenu(App *app)
 
 	Texture *playButtonTexture = LoadTexture("NewButton.png");
 
-	Material *material = CreateMaterial("wobblyLine.frag", NULL);
+	Material *material = CreateMaterial(NULL, NULL);
 
 	UIEntity *playButton = CreateButton(menuWindow, playButtonTexture, material, (Vector2Float){100, 50},
 	                                    (SDL_Color){0, 0, 0},

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define DEFAULT_BUCKETS_NUMBER 101
 #define MAX_LOAD_FACTOR 0.75
@@ -312,6 +313,18 @@ void *DictionaryGet(Dictionary *dict, void *key)
 }
 
 
+KeyValuePair *DictionaryGetPair(Dictionary *dict, int index)
+{
+	if (dict == NULL)
+	{
+		fprintf(stderr, "Dictionary is NULL\n");
+		return NULL;
+	}
+
+	return ListGet(dict->allPairs, index);
+}
+
+
 void DictionaryRemove(Dictionary *dict, void *key)
 {
 	if (dict == NULL)
@@ -407,4 +420,25 @@ unsigned int HashPointer(void *key)
 bool PointerEquals(void *key1, void *key2)
 {
 	return (uintptr_t) key1 == (uintptr_t) key2;
+}
+
+
+unsigned int HashString(void *key)
+{
+	unsigned long hash = 5381;
+	int c;
+	char *str = key;
+
+	while ((c = *str++))
+	{
+		hash = (hash << 5) + hash + c;
+	}
+
+	return (unsigned int) hash;
+}
+
+
+bool StringEquals(void *key1, void *key2)
+{
+	return strcmp(key1, key2) == 0;
 }

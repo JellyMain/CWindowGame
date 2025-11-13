@@ -1,11 +1,12 @@
 #version 430 core
 
 out vec4 FragColor;
-in vec2 TexCoord;
-uniform sampler2D ourTexture;
+in vec2 TexCoords;
+
+uniform sampler2D screenTexture;
 
 uniform float time;
-const vec2 resolution = vec2(500, 600); // e.g., (1920.0, 1080.0)
+const vec2 resolution = vec2(1000, 1000); // e.g., (1920.0, 1080.0)
 const float scale = 2;      // e.g., 4.0
 
 void main()
@@ -46,9 +47,9 @@ void main()
 
 
     // --- 4. Sample Texture with Wobbled Coordinates ---
-    vec2 wobbled_texcoord = TexCoord + normalized_offset;
+    vec2 wobbled_texcoord = TexCoords + normalized_offset;
 
 
     // --- 5. Output Final Color ---
-    FragColor = texture(ourTexture, wobbled_texcoord);
+    FragColor = texture(screenTexture, wobbled_texcoord);
 }

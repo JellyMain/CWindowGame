@@ -331,7 +331,8 @@ Renderer *CreateRenderer()
 	Renderer *renderer = calloc(1, sizeof(Renderer));
 	renderer->defaultMaterial = CreateMaterial(NULL, NULL);
 	renderer->defaultGizmoMaterial = CreateMaterial("Gizmos/gizmos.frag", "Gizmos/gizmos.vert");
-	renderer->postProcessingMaterial = CreateMaterial("PostProcessing/post.frag", "PostProcessing/post.vert");
+	renderer->defaultPostProcessingMaterial = CreateMaterial("PostProcessing/post.frag", "PostProcessing/post.vert");
+	renderer->postProcessingEffects = DictionaryCreate(HashString, StringEquals);
 
 	glGenVertexArrays(1, &renderer->entitiesVAO);
 	glGenVertexArrays(1, &renderer->gizmosVAO);

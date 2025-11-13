@@ -48,11 +48,16 @@ int main()
 
 	g_app = app;
 
+	AddPostProcessingEffect(app, "vignette");
+	AddPostProcessingEffect(app, "wobble");
+
 	SetPendingState(app, MENU_GAME_STATE);
 
 	Uint64 lastFrameTime = SDL_GetPerformanceCounter();
 	Uint64 currentFrameTime = 0;
 	float deltaTime = 0.0f;
+	float countedFrames = 0;
+	float fpsTimer = 0.0f;
 
 	while (1)
 	{
@@ -64,13 +69,24 @@ int main()
 		deltaTime = (currentFrameTime - lastFrameTime) / (float) SDL_GetPerformanceFrequency();
 		lastFrameTime = currentFrameTime;
 
+		fpsTimer += deltaTime;
+		countedFrames++;
+
+		if (fpsTimer >= 1.0f)
+		{
+			app->debugData.fps = countedFrames / fpsTimer;
+			countedFrames = 0;
+			fpsTimer = 0.0f;
+		}
+
 		for (int i = 0; i < app->updateSystem->updatables->size; i++)
 		{
 			Updatable *updatable = app->updateSystem->updatables->elements[i];
 			updatable->Update(updatable->data, app, deltaTime);
 		}
 
-		SDL_Delay(16);
+
+		// SDL_Delay(16);
 	}
 
 	return 0;

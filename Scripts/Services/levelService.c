@@ -37,6 +37,22 @@ LevelData *CreateLevelData()
 }
 
 
+void CleanUpMaterial(Material *material)
+{
+	for (int i = 0; i < material->materialUniforms->allPairs->size; i++)
+	{
+		KeyValuePair *pair = DictionaryGetPair(material->materialUniforms, i);
+		UniformTypeValuePair *typeValuePair = pair->value;
+		free(typeValuePair);
+	}
+
+	DictionaryClear(material->materialUniforms);
+	DictionaryDestroy(material->materialUniforms);
+	glDeleteProgram(material->shaderProgram);
+	free(material);
+}
+
+
 void CleanUpWindow(Window *window)
 {
 	if (window == NULL)
@@ -64,7 +80,7 @@ void CleanUpGameEntity(GameEntity *entity)
 		free(entity->texture);
 	}
 
-	glDeleteProgram(entity->material->shaderProgram);
+	CleanUpMaterial(entity->material);
 
 	free(entity);
 }
@@ -85,7 +101,7 @@ void CleanUpUIEntity(UIEntity *entity)
 		free(entity->texture);
 	}
 
-	glDeleteProgram(entity->material->shaderProgram);
+	CleanUpMaterial(entity->material);
 
 	free(entity);
 }
@@ -98,7 +114,6 @@ void CleanUpScene(App *app)
 		Updatable *updatable = app->updateSystem->updatables->elements[i];
 		DestroyUpdatable(updatable);
 	}
-
 
 	for (int i = 0; i < app->allGizmosEntities->size; i++)
 	{

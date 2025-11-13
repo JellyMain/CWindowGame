@@ -8,27 +8,6 @@
 
 #include <time.h>
 
-// Helper function for string hashing
-static unsigned int HashString(void *key)
-{
-	char *str = (char *) key;
-	unsigned int hash = 5381;
-	int c;
-
-	while ((c = *str++))
-	{
-		hash = ((hash << 5) + hash) + c;
-	}
-
-	return hash;
-}
-
-// Helper function for string comparison
-static bool StringEquals(void *key1, void *key2)
-{
-	return strcmp((char *) key1, (char *) key2) == 0;
-}
-
 // Test basic dictionary operations
 static void TestBasicOperations()
 {
@@ -80,6 +59,7 @@ static void TestBasicOperations()
 	printf("Basic operations test PASSED!\n\n");
 }
 
+
 // Test edge cases and error handling
 static void TestEdgeCases()
 {
@@ -120,6 +100,7 @@ static void TestEdgeCases()
 	DictionaryDestroy(dict);
 	printf("Edge cases test PASSED!\n\n");
 }
+
 
 // Test with string keys
 static void TestStringKeys()
@@ -174,6 +155,7 @@ static void TestStringKeys()
 	DictionaryDestroy(stringDict);
 	printf("String keys test PASSED!\n\n");
 }
+
 
 // Test with larger dataset
 static void TestLargeDataset()
@@ -243,6 +225,7 @@ static void TestLargeDataset()
 	printf("Large dataset test PASSED!\n\n");
 }
 
+
 // Test duplicate key handling
 static void TestDuplicateKeys()
 {
@@ -279,6 +262,7 @@ static void TestDuplicateKeys()
 	DictionaryDestroy(dict);
 	printf("Duplicate keys test PASSED!\n\n");
 }
+
 
 // Public function to run all dictionary tests
 void TestDictionary(void)

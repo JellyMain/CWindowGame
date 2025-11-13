@@ -2,6 +2,7 @@
 #include <SDL_image.h>
 #include <SDL_surface.h>
 #include "glad/glad.h"
+#include "Headers/draw.h"
 #include "Headers/openGL.h"
 
 
@@ -64,11 +65,20 @@ Material *CreateMaterial(char *fragShaderName, char *vertShaderName)
 {
 	Material *material = calloc(1, sizeof(Material));
 
-
 	material->shaderProgram = CreateShaderProgram(vertShaderName, fragShaderName);
 	glUseProgram(material->shaderProgram);
-	material->projectionLocation = glGetUniformLocation(material->shaderProgram, "projection");
+	material->materialUniforms = DictionaryCreate(HashString, StringEquals);
+	AddUniformToMaterial(material, "projection", UNIFORM_MAT4F, NULL);
 	return material;
+}
+
+
+void AddUniformToMaterial(Material *material, char *uniformName, UniformType uniformType, void *value)
+{
+	UniformTypeValuePair *uniformTypeValuePair = calloc(1, sizeof(UniformTypeValuePair));
+	uniformTypeValuePair->uniformType = uniformType;
+	uniformTypeValuePair->uniformValue = value;
+	DictionaryAdd(material->materialUniforms, uniformName, uniformTypeValuePair);
 }
 
 

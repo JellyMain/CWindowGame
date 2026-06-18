@@ -1,10 +1,10 @@
-﻿#include "../Services/Headers/levelService.h"
+﻿#include "Services/Headers/levelService.h"
 
-#include "../General/Headers/levelTarget.h"
-#include "../General/Headers/player.h"
-#include "../General/Headers/structs.h"
-#include "../Infrastructure/Headers/update.h"
-#include "../Infrastructure/Headers/window.h"
+#include "General/Headers/levelTarget.h"
+#include "General/Headers/player.h"
+#include "General/Headers/structs.h"
+#include "Infrastructure/Headers/update.h"
+#include "Infrastructure/Headers/window.h"
 
 
 void CreateLevel(App *app, int level)
@@ -23,7 +23,8 @@ void CreateLevel(App *app, int level)
 	                             "WindowC");
 
 
-	app->levelData->levelTarget = CreateLevelTarget(app, (Vector2Float){500, 500}, (Vector2Float){1, 1});
+	app->levelData->levelTarget = CreateLevelTarget(app, (Vector2Float){500, 500},
+	                                                (Vector2Float){1, 1});
 	app->levelData->player = CreatePlayer(app, (Vector2Float){300, 300}, (Vector2Float){1, 1});
 }
 
@@ -99,6 +100,16 @@ void CleanUpUIEntity(UIEntity *entity)
 	{
 		glDeleteTextures(1, &entity->texture->textureId);
 		free(entity->texture);
+	}
+
+	if (entity->uiData != NULL)
+	{
+		free(entity->uiData);
+	}
+
+	if (entity->uiInteraction != NULL)
+	{
+		free(entity->uiInteraction);
 	}
 
 	CleanUpMaterial(entity->material);

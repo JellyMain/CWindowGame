@@ -1,6 +1,6 @@
 ﻿#include "Headers/gameEntities.h"
 
-#include "../Render/Headers/draw.h"
+#include "Render/Headers/draw.h"
 #include "Headers/structs.h"
 
 

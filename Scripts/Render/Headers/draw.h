@@ -9,13 +9,15 @@ void UpdateRenderer(void *data, App *app, float deltaTime);
 
 void UpdateMaterialUniforms(Material *material);
 
-void SetShaderUniform(GLuint shaderProgram, char *propertyName, UniformType uniformType, void *value);
+void SetShaderUniform(GLuint shaderProgram, char *propertyName, UniformType uniformType,
+                      void *value);
 
 void DrawGizmoRect(Renderer *renderer, float x, float y, float width, float height);
 
 void RenderHollowGizmoRect(App *app, Vector2Float position, Vector2Float size, float thickness);
 
-void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, Vector2Float scale, Renderer *renderer,
+void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, Vector2Float scale,
+                       DynamicTextHorizontalAlignment horizontalAlignment, Renderer *renderer,
                        float projectionMatrix[16]);
 
 void AddPostProcessingEffect(App *app, char *effectName);

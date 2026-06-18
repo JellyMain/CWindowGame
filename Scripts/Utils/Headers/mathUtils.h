@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../../General/Headers/structs.h"
+#include "General/Headers/structs.h"
 #define PI 3.14159265359
 
 float ClampFloat(float value, float min, float max);

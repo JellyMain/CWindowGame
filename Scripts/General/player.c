@@ -1,12 +1,11 @@
 ﻿#include "Headers/player.h"
 
-#include "../Infrastructure/Headers/stateMachine.h"
-#include "../Infrastructure/Headers/update.h"
-#include "../Render/Headers/draw.h"
-#include "../Input/Headers/input.h"
+#include "Infrastructure/Headers/stateMachine.h"
+#include "Infrastructure/Headers/update.h"
+#include "Input/Headers/input.h"
 #include "Headers/structs.h"
-#include "../Utils/Headers/mathUtils.h"
-#include "../Render/Headers/textures.h"
+#include "Utils/Headers/mathUtils.h"
+#include "Render/Headers/textures.h"
 #include "Headers/gameEntities.h"
 
 #define MOVE_SPEED 200

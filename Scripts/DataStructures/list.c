@@ -3,6 +3,54 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+ListMetaData *GetListMetaData(void *list)
+{
+	return (ListMetaData *) list - 1;
+}
+
+
+void *CheckAndIncreaseListCapacity(void *list)
+{
+	ListMetaData *metaData = GetListMetaData(list);
+
+	void *dataPtr = list;
+
+	if (metaData->size >= metaData->capacity)
+	{
+		int newCapacity = metaData->capacity * GROWTH_FACTOR;
+		ListMetaData *newMetaData = realloc(metaData, sizeof(ListMetaData) + metaData->elementSize * newCapacity);
+		dataPtr = newMetaData + 1;
+		newMetaData->capacity = newCapacity;
+	}
+
+	return dataPtr;
+}
+
+
+void *NewListCreate(size_t elementSize, char *elementsTypeName, int capacity)
+{
+	void *dataPtr = 0;
+
+	ListMetaData *listMetaData = calloc(1, sizeof(ListMetaData) + elementSize * capacity);
+
+	if (listMetaData == NULL)
+	{
+		fprintf(stderr, "Failed to allocate memory for list\n");
+		return NULL;
+	}
+
+	dataPtr = listMetaData + 1;
+
+	listMetaData->capacity = capacity == 0 ? DEFAULT_CAPACITY : capacity;
+	listMetaData->size = 0;
+	listMetaData->elementSize = elementSize;
+	listMetaData->elementsTypeName = elementsTypeName;
+
+	return dataPtr;
+}
+
+
 List *ListCreate(int capacity)
 {
 	if (capacity <= 0)

@@ -1,15 +1,16 @@
 ﻿#include <SDL_image.h>
-#include "../Render/Headers/draw.h"
-#include "../General/Headers/structs.h"
-#include "../DataStructures/Headers/dictionary.h"
-#include "../Render/Headers/openGL.h"
-#include "../Infrastructure/Headers/update.h"
-#include "../Utils/Headers/viewPortUtils.h"
-#include "../UI/Headers/ui.h"
+#include "Render/Headers/draw.h"
+#include "General/Headers/structs.h"
+#include "DataStructures/Headers/dictionary.h"
+#include "Render/Headers/openGL.h"
+#include "Infrastructure/Headers/update.h"
+#include "Utils/Headers/viewPortUtils.h"
+#include "UI/Headers/ui.h"
 #include "Headers/textures.h"
 
 
-void SetShaderUniform(GLuint shaderProgram, char *propertyName, UniformType uniformType, void *value)
+void SetShaderUniform(GLuint shaderProgram, char *propertyName, UniformType uniformType,
+                      void *value)
 {
 	glUseProgram(shaderProgram);
 	GLint uniformLocation = glGetUniformLocation(shaderProgram, propertyName);
@@ -31,12 +32,14 @@ void AddPostProcessingEffect(App *app, char *effectName)
 {
 	if (strcmp(effectName, "vignette") == 0)
 	{
-		Material *vignetteMaterial = CreateMaterial("PostProcessing/Vignette.frag", "PostProcessing/post.vert");
+		Material *vignetteMaterial = CreateMaterial("PostProcessing/Vignette.frag",
+		                                            "PostProcessing/post.vert");
 		DictionaryAdd(app->renderer->postProcessingEffects, effectName, vignetteMaterial);
 	}
 	else if (strcmp(effectName, "wobble") == 0)
 	{
-		Material *wobbleMaterial = CreateMaterial("PostProcessing/wobble.frag", "PostProcessing/post.vert");
+		Material *wobbleMaterial = CreateMaterial("PostProcessing/wobble.frag",
+		                                          "PostProcessing/post.vert");
 		AddUniformToMaterial(wobbleMaterial, "time", UNIFORM_FLOAT, &app->time);
 		DictionaryAdd(app->renderer->postProcessingEffects, effectName, wobbleMaterial);
 	}
@@ -79,7 +82,8 @@ void AddUIEntityToAllDrawLists(App *app, UIEntity *entity)
 }
 
 
-void RenderTexture(Renderer *renderer, Texture *texture, float x, float y, float width, float height)
+void RenderTexture(Renderer *renderer, Texture *texture, float x, float y, float width,
+                   float height)
 {
 	float verticesData[] = {
 		x, y, 0.0f, 0.0f,
@@ -97,7 +101,8 @@ void RenderTexture(Renderer *renderer, Texture *texture, float x, float y, float
 }
 
 
-void RenderGameEntity(App *app, Vector2Float screenPosition, GameEntity *entity, float projectionMatrix[16])
+void RenderGameEntity(App *app, Vector2Float screenPosition, GameEntity *entity,
+                      float projectionMatrix[16])
 {
 	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->scale.x;
 	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->scale.y;
@@ -106,24 +111,29 @@ void RenderGameEntity(App *app, Vector2Float screenPosition, GameEntity *entity,
 	float y = screenPosition.y - entity->size.y / 2.0f;
 
 	glUseProgram(entity->material->shaderProgram);
-	UniformTypeValuePair *typeValuePair = DictionaryGet(entity->material->materialUniforms, "projection");
+	UniformTypeValuePair *typeValuePair = DictionaryGet(entity->material->materialUniforms,
+	                                                    "projection");
 	typeValuePair->uniformValue = projectionMatrix;
 	UpdateMaterialUniforms(entity->material);
 	RenderTexture(app->renderer, entity->texture, x, y, entity->size.x, entity->size.y);
 }
 
 
-void RenderUIEntity(App *app, Vector2Float screenPosition, UIEntity *entity, float projectionMatrix[16])
+void RenderUIEntity(App *app, Vector2Float screenPosition, UIEntity *entity,
+                    float projectionMatrix[16])
 {
-	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->scale.x * entity->parentScale.x;
-	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->scale.y * entity->parentScale.y;
+	entity->size.x = entity->originalSize.x * app->pixelsPerUnit * entity->scale.x * entity->
+	                 parentScale.x;
+	entity->size.y = entity->originalSize.y * app->pixelsPerUnit * entity->scale.y * entity->
+	                 parentScale.y;
 
 
 	float x = screenPosition.x - entity->size.x / 2.0f;
 	float y = screenPosition.y - entity->size.y / 2.0f;
 
 	glUseProgram(entity->material->shaderProgram);
-	UniformTypeValuePair *typeValuePair = DictionaryGet(entity->material->materialUniforms, "projection");
+	UniformTypeValuePair *typeValuePair = DictionaryGet(entity->material->materialUniforms,
+	                                                    "projection");
 	typeValuePair->uniformValue = projectionMatrix;
 	UpdateMaterialUniforms(entity->material);
 	RenderTexture(app->renderer, entity->texture, x, y, entity->size.x, entity->size.y);
@@ -145,13 +155,54 @@ void DrawGizmoRect(Renderer *renderer, float x, float y, float width, float heig
 }
 
 
-void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, Vector2Float scale, Renderer *renderer,
+void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, Vector2Float scale,
+                       DynamicTextHorizontalAlignment horizontalAlignment,
+                       Renderer *renderer,
                        float projectionMatrix[16])
 {
+	float totalWidth = 0;
+	float maxHeight = 0;
+
+	for (int i = 0; text[i] != '\0'; i++)
+	{
+		unsigned char character = (unsigned char) text[i];
+		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h >
+		    0)
+		{
+			SDL_Rect charRect = textAtlas->characterRects[character];
+			totalWidth += charRect.w * scale.x;
+
+			float charHeight = charRect.h * scale.y;
+			if (charHeight > maxHeight)
+			{
+				maxHeight = charHeight;
+			}
+		}
+		else
+		{
+			totalWidth += 1;
+		}
+	}
+
+	float startX;
+
+	if (horizontalAlignment == HORIZONTAL_NOT_CENTERED)
+	{
+		startX = roundf(position.x);
+	}
+	else if (horizontalAlignment == HORIZONTAL_CENTERED)
+	{
+		startX = roundf(position.x - totalWidth / 2.0f);
+	}
+
+	float startY = roundf(position.y - maxHeight / 2.0f);
+
+
 	float currentX = 0;
 
 	glUseProgram(renderer->defaultMaterial->shaderProgram);
-	UniformTypeValuePair *typeValuePair = DictionaryGet(renderer->defaultMaterial->materialUniforms, "projection");
+	UniformTypeValuePair *typeValuePair = DictionaryGet(renderer->defaultMaterial->materialUniforms,
+	                                                    "projection");
 	typeValuePair->uniformValue = projectionMatrix;
 	UpdateMaterialUniforms(renderer->defaultMaterial);
 	glActiveTexture(GL_TEXTURE0);
@@ -163,14 +214,15 @@ void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, 
 	{
 		unsigned char character = (unsigned char) text[i];
 
-		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h > 0)
+		if (textAtlas->characterRects[character].w > 0 && textAtlas->characterRects[character].h >
+		    0)
 		{
 			SDL_Rect charRect = textAtlas->characterRects[character];
 
-			float dstX = position.x + currentX;
-			float dstY = position.y;
 			float dstW = charRect.w * scale.x;
 			float dstH = charRect.h * scale.y;
+			float dstY = startY;
+			float dstX = startX + currentX;
 
 			float atlasWidth = textAtlas->atlasTexture->width;
 			float atlasHeight = textAtlas->atlasTexture->height;
@@ -203,14 +255,17 @@ void RenderDynamicText(TextAtlas *textAtlas, char *text, Vector2Float position, 
 
 void RenderHollowGizmoRect(App *app, Vector2Float position, Vector2Float size, float thickness)
 {
-	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y - size.y / 2, size.x, thickness);
+	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y - size.y / 2, size.x,
+	              thickness);
 
-	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y + size.y / 2, size.x, thickness);
+	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y + size.y / 2, size.x,
+	              thickness);
 
 	DrawGizmoRect(app->renderer, position.x - size.x / 2, position.y - size.y / 2, thickness,
 	              size.y);
 
-	DrawGizmoRect(app->renderer, position.x + size.x / 2 - thickness, position.y - size.y / 2 + thickness, thickness,
+	DrawGizmoRect(app->renderer, position.x + size.x / 2 - thickness,
+	              position.y - size.y / 2 + thickness, thickness,
 	              size.y);
 }
 
@@ -220,7 +275,9 @@ void RenderDebugInfo(App *app, float projectionMatrix[16])
 	char fpsText[30];
 	snprintf(fpsText, sizeof(fpsText), "FPS:%.1f", app->debugData.fps);
 
-	RenderDynamicText(app->textAtlas, fpsText, (Vector2Float){10, 10}, (Vector2Float){1, 1}, app->renderer,
+	RenderDynamicText(app->textAtlas, fpsText, (Vector2Float){10, 10}, (Vector2Float){1, 1},
+	                  HORIZONTAL_NOT_CENTERED,
+	                  app->renderer,
 	                  projectionMatrix);
 }
 
@@ -228,11 +285,13 @@ void RenderDebugInfo(App *app, float projectionMatrix[16])
 void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
 {
 	glUseProgram(app->renderer->defaultGizmoMaterial->shaderProgram);
-	UniformTypeValuePair *typeValuePair = DictionaryGet(app->renderer->defaultGizmoMaterial->materialUniforms,
-	                                                    "projection");
+	UniformTypeValuePair *typeValuePair = DictionaryGet(
+		app->renderer->defaultGizmoMaterial->materialUniforms,
+		"projection");
 	typeValuePair->uniformValue = projectionMatrix;
 	UpdateMaterialUniforms(app->renderer->defaultGizmoMaterial);
-	GLint colorLocation = glGetUniformLocation(app->renderer->defaultGizmoMaterial->shaderProgram, "color");
+	GLint colorLocation = glGetUniformLocation(app->renderer->defaultGizmoMaterial->shaderProgram,
+	                                           "color");
 	glUniform4f(colorLocation,
 	            gizmoEntity->color.r / 255.0f,
 	            gizmoEntity->color.g / 255.0f,
@@ -240,7 +299,8 @@ void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
 	            gizmoEntity->color.a / 255.0f);
 
 
-	RenderHollowGizmoRect(app, gizmoEntity->connectedEntity->worldPosition, gizmoEntity->connectedEntity->size,
+	RenderHollowGizmoRect(app, gizmoEntity->connectedEntity->worldPosition,
+	                      gizmoEntity->connectedEntity->size,
 	                      gizmoEntity->thickness);
 
 	char entityInfo[150];
@@ -251,9 +311,14 @@ void RenderGizmo(App *app, GizmoEntity *gizmoEntity, float projectionMatrix[16])
 	         gizmoEntity->connectedEntity->size.y);
 
 	RenderDynamicText(app->textAtlas, entityInfo, (Vector2Float){
-		                  gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->connectedEntity->size.x / 2,
-		                  gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->connectedEntity->size.y / 2 - 11
-	                  }, (Vector2Float){1, 1}, app->renderer, projectionMatrix);
+		                  gizmoEntity->connectedEntity->worldPosition.x - gizmoEntity->
+		                  connectedEntity->size.x / 2,
+		                  gizmoEntity->connectedEntity->worldPosition.y - gizmoEntity->
+		                  connectedEntity->size.y / 2 - 11
+	                  }, (Vector2Float){1, 1}, HORIZONTAL_NOT_CENTERED, app->renderer,
+	                  projectionMatrix);
+
+	glBindVertexArray(app->renderer->gizmosVAO);
 }
 
 
@@ -333,7 +398,8 @@ void UpdateMaterialUniforms(Material *material)
 		char *uniformName = pair->key;
 		UniformTypeValuePair *typeValuePair = pair->value;
 
-		SetShaderUniform(material->shaderProgram, uniformName, typeValuePair->uniformType, typeValuePair->uniformValue);
+		SetShaderUniform(material->shaderProgram, uniformName, typeValuePair->uniformType,
+		                 typeValuePair->uniformValue);
 	}
 }
 
@@ -380,8 +446,24 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 		for (int j = 0; j < window->uiEntitiesDrawList->size; j++)
 		{
 			UIEntity *entity = ListGet(window->uiEntitiesDrawList, j);
-			Vector2Float screenPos = entity->worldPosition;
-			RenderUIEntity(app, screenPos, entity, projectionMatrix);
+
+			if (entity->uiType == DYNAMIC_TEXT)
+			{
+				DynamicTextData *dynamicTextData = entity->uiData->dynamicTextData;
+				Vector2Float renderScale = {
+					app->pixelsPerUnit * entity->scale.x * entity->parentScale.x,
+					app->pixelsPerUnit * entity->scale.y * entity->parentScale.y
+				};
+
+				RenderDynamicText(app->textAtlas, dynamicTextData->text, entity->worldPosition,
+				                  renderScale, HORIZONTAL_CENTERED, app->renderer,
+				                  projectionMatrix);
+			}
+			else
+			{
+				Vector2Float screenPos = entity->worldPosition;
+				RenderUIEntity(app, screenPos, entity, projectionMatrix);
+			}
 		}
 
 
@@ -394,8 +476,6 @@ void UpdateRenderer(void *data, App *app, float deltaTime)
 				GizmoEntity *gizmoEntity = ListGet(window->gizmosEntitiesDrawList, k);
 				RenderGizmo(app, gizmoEntity, projectionMatrix);
 			}
-
-			// glBindVertexArray(app->renderer->entitiesVAO);
 
 			RenderDebugInfo(app, projectionMatrix);
 		}

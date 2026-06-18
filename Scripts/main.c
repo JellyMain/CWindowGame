@@ -1,12 +1,15 @@
 ﻿#include <SDL_events.h>
 #include <SDL_timer.h>
 #include <time.h>
+
+#include "../CCerealLib/meta_data/metaData.h"
 #include "Infrastructure/Headers/stateMachine.h"
 #include "Render/Headers/draw.h"
 #include "Infrastructure/Headers/init.h"
 #include "General/Headers/structs.h"
 #include "Infrastructure/Headers/app.h"
 #include "Infrastructure/Headers/window.h"
+#include "DataStructures/Headers/list.h"
 
 
 static App *g_app = NULL;
@@ -48,8 +51,8 @@ int main()
 
 	g_app = app;
 
-	AddPostProcessingEffect(app, "vignette");
-	AddPostProcessingEffect(app, "wobble");
+	// AddPostProcessingEffect(app, "vignette");
+	// AddPostProcessingEffect(app, "wobble");
 
 	SetPendingState(app, MENU_GAME_STATE);
 
@@ -58,6 +61,7 @@ int main()
 	float deltaTime = 0.0f;
 	float countedFrames = 0;
 	float fpsTimer = 0.0f;
+
 
 	while (1)
 	{
@@ -84,9 +88,6 @@ int main()
 			Updatable *updatable = app->updateSystem->updatables->elements[i];
 			updatable->Update(updatable->data, app, deltaTime);
 		}
-
-
-		// SDL_Delay(16);
 	}
 
 	return 0;

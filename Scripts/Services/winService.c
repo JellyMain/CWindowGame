@@ -1,9 +1,9 @@
-﻿#include "../Services/Headers/winService.h"
+﻿#include "Services/Headers/winService.h"
 #include <SDL_ttf.h>
 
-#include "../UI/Headers/ui.h"
-#include "../Infrastructure/Headers/window.h"
-#include "../Tween/Headers/tweener.h"
+#include "UI/Headers/ui.h"
+#include "Infrastructure/Headers/window.h"
+#include "Tween/Headers/tweener.h"
 
 void OnButtonClicked(App *app, void *data);
 
@@ -12,7 +12,8 @@ void OnButtonClickedAnimation(App *app, UIEntity *uiEntity);
 
 void CreateWinScreen(App *app)
 {
-	Window *winWindow = CreateGameWindowWithRenderer(app, (Vector2Int){600, 600}, (Vector2Int){600, 600},
+	Window *winWindow = CreateGameWindowWithRenderer(app, (Vector2Int){600, 600},
+	                                                 (Vector2Int){600, 600},
 	                                                 WINDOW_SCREEN_SPACE, FIXED_SIZE, "WinWindow"
 	);
 
@@ -32,15 +33,20 @@ void CreateWinScreen(App *app)
 	};
 
 
-	CreateStaticText(winWindow, app, "You Win!!!!!!!!!", (SDL_Color){255, 255, 255}, youWinTextPosition,
+	CreateStaticText(winWindow, app, "You Win!!!!!!!!!", (SDL_Color){255, 255, 255},
+	                 youWinTextPosition,
 	                 (Vector2Float){0.3f, 0.3f},
 	                 NULL);
 
 
-	CreateButton(winWindow, NULL, NULL, (Vector2Float){75, 30}, (SDL_Color){255, 255, 255, 255}, "Continue",
-	             (Vector2Float){0.3f, 0.3f},
-	             (SDL_Color){0, 0, 0}, app, continueTextPosition, (Vector2Float){1, 1},NULL, OnButtonClicked,
-	             OnButtonClickedAnimation, NULL, NULL, NULL);
+	UIInteraction *continueButtonInteraction = CreateUIInteraction(
+		NULL, OnButtonClicked, OnButtonClickedAnimation);
+
+	CreateButton(winWindow, NULL, NULL, (Vector2Float){75, 30}, (SDL_Color){255, 255, 255, 255},
+	             "Continue",
+	             (Vector2Float){0.2f, 0.2f},
+	             (SDL_Color){0, 0, 0}, app, continueTextPosition, (Vector2Float){1, 1},
+	             continueButtonInteraction, NULL, NULL, NULL);
 }
 
 

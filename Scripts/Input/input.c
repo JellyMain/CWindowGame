@@ -1,12 +1,14 @@
 ﻿#include <SDL_events.h>
-#include "../Input/Headers/input.h"
-#include "../General/Headers/structs.h"
-#include "../Infrastructure/Headers/update.h"
-#include "../Infrastructure/Headers/window.h"
+#include "Input/Headers/input.h"
+#include "General/Headers/structs.h"
+#include "Infrastructure/Headers/update.h"
+#include "Infrastructure/Headers/window.h"
 
 void ProcessInput(void *data, App *app, float deltaTime);
 
 static bool isLeftMouseButtonClicked = false;
+static KeyboardKey pressedKey = SDLK_UNKNOWN;
+static bool hasKeyPressed = false;
 
 
 Vector2Float GetMoveDirection()
@@ -46,6 +48,8 @@ Updatable *CreateInputUpdatable()
 void ProcessInput(void *data, App *app, float deltaTime)
 {
 	isLeftMouseButtonClicked = false;
+	pressedKey = SDLK_UNKNOWN;
+	hasKeyPressed = false;
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
@@ -59,6 +63,7 @@ void ProcessInput(void *data, App *app, float deltaTime)
 			}
 
 			case SDL_WINDOWEVENT:
+			{
 				switch (event.window.event)
 				{
 					case SDL_WINDOWEVENT_ENTER:
@@ -70,17 +75,26 @@ void ProcessInput(void *data, App *app, float deltaTime)
 						break;
 				}
 				break;
+			}
 
 
 			case SDL_MOUSEBUTTONDOWN:
 			{
 				if (event.button.button == SDL_BUTTON_LEFT)
 				{
+					printf("Left mouse button clicked\n");
 					isLeftMouseButtonClicked = true;
 				}
 				break;
 			}
 
+
+			case SDL_KEYDOWN:
+			{
+				pressedKey = event.key.keysym.sym;
+				hasKeyPressed = true;
+				break;
+			}
 
 			default:
 				break;
@@ -92,6 +106,12 @@ void ProcessInput(void *data, App *app, float deltaTime)
 bool IsLeftMouseButtonClicked()
 {
 	return isLeftMouseButtonClicked;
+}
+
+
+KeyboardKey GetKeyPressed()
+{
+	return pressedKey;
 }
 
 

@@ -1,7 +1,7 @@
 ﻿#include <SDL_timer.h>
 #include "Headers/tweener.h"
-#include "../Utils/Headers/mathUtils.h"
-#include "../Infrastructure/Headers/update.h"
+#include "Utils/Headers/mathUtils.h"
+#include "Infrastructure/Headers/update.h"
 
 float EaseLinear(float t);
 

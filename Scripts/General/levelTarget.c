@@ -1,11 +1,11 @@
 ﻿#include "Headers/levelTarget.h"
 
-#include "../Infrastructure/Headers/update.h"
-#include "../Render/Headers/draw.h"
-#include "../Infrastructure/Headers/stateMachine.h"
-#include "../General/Headers/structs.h"
-#include "../Utils/Headers/mathUtils.h"
-#include "../Render/Headers/textures.h"
+#include "Infrastructure/Headers/update.h"
+#include "Render/Headers/draw.h"
+#include "Infrastructure/Headers/stateMachine.h"
+#include "General/Headers/structs.h"
+#include "Utils/Headers/mathUtils.h"
+#include "Render/Headers/textures.h"
 #include "Headers/gameEntities.h"
 
 

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "Headers/openGL.h"
 #include "glad/glad.h"
-#include "../General/Headers/structs.h"
+#include "General/Headers/structs.h"
 #include "Headers/textures.h"
 
 #define OpenGLCall(x) GLClearAllErrors(); x; GLCheckErrorStatus(__LINE__);

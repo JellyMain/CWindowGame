@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../../General/Headers/structs.h"
+#include "General/Headers/structs.h"
 
 
 App *CreateApp(int pixelsPerUnit, bool debugMode);

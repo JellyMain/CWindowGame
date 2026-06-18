@@ -11,6 +11,7 @@
 #include "../Infrastructure/Headers/window.h"
 #include "../Services/Headers/winService.h"
 #include "../Tween/Headers/tweener.h"
+#include "General/Headers/levelEditor.h"
 
 
 void AddUpdatable(App *app, Updatable *updatable)
@@ -19,10 +20,30 @@ void AddUpdatable(App *app, Updatable *updatable)
 }
 
 
+bool HasUpdatable(App *app, Updatable *updatable)
+{
+	for (int i = 0; i < app->updateSystem->updatables->size; i++)
+	{
+		if (app->updateSystem->updatables->elements[i] == updatable)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+void RemoveUpdatable(App *app, Updatable *updatable)
+{
+	ListRemove(app->updateSystem->updatables, updatable);
+}
+
+
 void AddDefaultUpdatables(App *app)
 {
-	AddUpdatable(app, CreateRenderUpdatable());
 	AddUpdatable(app, CreateInputUpdatable());
+	AddUpdatable(app, CreateRenderUpdatable());
 	AddUpdatable(app, CreateWindowsUpdatable());
 	AddUpdatable(app, CreateTweenersUpdatable());
 	AddUpdatable(app, CreateUIUpdatable());
@@ -59,6 +80,10 @@ void EnterState(App *app, GameState state)
 			break;
 		case GAME_OVER_GAME_STATE:
 			CreateWinScreen(app);
+			break;
+
+		case LEVEL_EDITOR_GAME_STATE:
+			CreateLevelEditor(app);
 			break;
 		default:
 			break;

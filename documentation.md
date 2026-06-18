@@ -4,16 +4,7 @@
 
 To create a tween first you need to create a tween data:
 
-```c 
-TweenData tweenData = {
-		.vector2FloatTween = {
-			.fromValue = {1.5f, 1.5f},
-			.endValue = {1, 1}
-		}
-	};
-```
-
-Tween data is a union, so you can choose which type of tween you want to create.After that you can specify "from" and "
+sf tween you want to create.After that you can specify "from" and "
 end" values for that tween.
 
 After that you can create a tween with the following function:

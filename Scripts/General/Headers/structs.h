@@ -1,8 +1,9 @@
 ﻿#pragma once
 #include <SDL.h>
-#include "../../DataStructures/Headers/list.h"
-#include "../../DataStructures/Headers/dictionary.h"
+#include "DataStructures/Headers/list.h"
+#include "DataStructures/Headers/dictionary.h"
 #include "glad/glad.h"
+#include "../CCerealLib/include/serializer.h"
 #define VECTOR2_FLOAT_ONE (Vector2Float){1.0f, 1.0f}
 #define VECTOR2_INT_ONE (Vector2Int){1, 1}
 #define VECTOR2_FLOAT_ZERO (Vector2Float){0.0f, 0.0f}
@@ -14,7 +15,8 @@ typedef enum
 	NONE_GAME_STATE,
 	GAMEPLAY_GAME_STATE,
 	MENU_GAME_STATE,
-	GAME_OVER_GAME_STATE
+	GAME_OVER_GAME_STATE,
+	LEVEL_EDITOR_GAME_STATE
 } GameState;
 
 
@@ -24,6 +26,8 @@ typedef struct
 	int width;
 	int height;
 } Texture;
+
+typedef SDL_Keycode KeyboardKey;
 
 
 typedef struct
@@ -42,8 +46,15 @@ typedef struct
 
 typedef struct
 {
+	List *levelEditorWindows;
+} LevelEditorData;
+
+
+typedef struct
+{
 	struct LevelData *levelData;
 	struct UpdateSystem *updateSystem;
+	LevelEditorData *levelEditorData;
 	GameState pendingGameState;
 	GameState gameState;
 	int pixelsPerUnit;
@@ -74,11 +85,18 @@ typedef struct
 } Vector2Int;
 
 
-typedef struct
+typedef struct SERIALIZABLE
 {
 	float x;
 	float y;
 } Vector2Float;
+
+
+typedef enum
+{
+	HORIZONTAL_CENTERED,
+	HORIZONTAL_NOT_CENTERED,
+} DynamicTextHorizontalAlignment;
 
 
 typedef enum
@@ -132,7 +150,9 @@ typedef enum
 	BUTTON,
 	IMAGE,
 	SLIDER,
-	GIZMO
+	GIZMO,
+	INPUT_FIELD,
+	DYNAMIC_TEXT
 } UIType;
 
 
@@ -177,27 +197,55 @@ typedef struct GameEntity
 } GameEntity;
 
 
+typedef struct
+{
+	char *text;
+	int maxLength;
+	struct Updatable *readKeyboardInputUpdatable;
+} InputFieldData;
+
+
+typedef struct
+{
+	char *text;
+	Vector2Float textScale;
+} DynamicTextData;
+
+
+typedef union
+{
+	InputFieldData *inputFieldData;
+	DynamicTextData *dynamicTextData;
+} UIData;
+
+
 typedef struct UIEntity
 {
 	Vector2Float worldPosition;
 	Vector2Float scale;
 	Vector2Float parentScale;
-	Vector2Float lastFrameParentScale;
 	Vector2Float lastFrameWorldPosition;
 	Vector2Float originalSize;
 	Vector2Float size;
 	struct Material *material;
 	Texture *texture;
 	UIType uiType;
+	UIData *uiData;
 	struct UIEntity *parentEntity;
 	List *childEntities;
 	bool isHovered;
-	void *interactionData;
+	struct UIInteraction *uiInteraction;
 	void (*OnHover)(App *app, struct UIEntity *uiEntity);
-	void (*OnInteraction)(App *app, void *interactionData);
-	void (*OnInteractionAnimation)(App *app, struct UIEntity *uiEntity);
 	void (*OnHoverExit)(App *app, struct UIEntity *uiEntity);
 } UIEntity;
+
+
+typedef struct UIInteraction
+{
+	void *data;
+	void (*OnInteraction)(App *app, void *data);
+	void (*OnInteractionAnimation)(App *app, UIEntity *uiEntity);
+} UIInteraction;
 
 
 typedef struct
@@ -291,7 +339,7 @@ typedef struct
 } TweenSequence;
 
 
-typedef struct
+typedef struct Updatable
 {
 	void *data;
 	void (*Update)(void *self, App *app, float deltaTime);
@@ -323,3 +371,9 @@ typedef struct
 	UniformType uniformType;
 	void *uniformValue;
 } UniformTypeValuePair;
+
+
+typedef struct SERIALIZABLE
+{
+	float randomNumber;
+} PlayerData;

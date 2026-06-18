@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../../General/Headers/structs.h"
+#include "General/Headers/structs.h"
 
 
 Window *GetWindowById(App *app, uint32_t id);

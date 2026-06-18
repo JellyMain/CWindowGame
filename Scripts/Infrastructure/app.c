@@ -1,10 +1,11 @@
 ﻿#include <stdbool.h>
-#include "../Infrastructure/Headers/app.h"
+#include "Infrastructure/Headers/app.h"
 
-#include "../Infrastructure/Headers/update.h"
-#include "../Render/Headers/draw.h"
-#include "../Services/Headers/levelService.h"
-#include "../UI/Headers/ui.h"
+#include "General/Headers/levelEditor.h"
+#include "Infrastructure/Headers/update.h"
+#include "Render/Headers/draw.h"
+#include "Services/Headers/levelService.h"
+#include "UI/Headers/ui.h"
 
 
 App *CreateApp(int pixelsPerUnit, bool debugMode)
@@ -13,6 +14,7 @@ App *CreateApp(int pixelsPerUnit, bool debugMode)
 
 	app->updateSystem = CreateUpdateSystem();
 	app->levelData = CreateLevelData();
+	app->levelEditorData = CreateLevelEditorData();
 	app->pendingGameState = NONE_GAME_STATE;
 	app->gameState = MENU_GAME_STATE;
 	app->pixelsPerUnit = pixelsPerUnit;
